@@ -10,6 +10,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -42,11 +43,21 @@ function filesIn(dir: string, prefix = ""): string[] {
   });
 }
 
-/** Throws if any HTML page in `dir` breaks the web standards for `status` (see check.ts). */
-function checkPages(dir: string, label: string, statusOf: (page: string) => Status): void {
+/**
+ * Throws if `dir` lacks any of the `required` pages, or if any HTML page in it breaks the web
+ * standards for its status (see check.ts).
+ */
+function checkPages(
+  dir: string,
+  label: string,
+  required: string[],
+  statusOf: (page: string) => Status,
+): void {
   if (!existsSync(dir)) throw new Error(`${label} not found (run pnpm build first)`);
+  for (const page of required) {
+    if (!existsSync(join(dir, page))) throw new Error(`${label}/${page} not found`);
+  }
   const pages = filesIn(dir).filter((f) => f.endsWith(".html"));
-  if (pages.length === 0) throw new Error(`${label}: no HTML pages`);
   const problems = pages.flatMap((page) =>
     checkBuiltPage({ status: statusOf(page) }, readFileSync(join(dir, page), "utf8")).map(
       (problem) => `${label}/${page}: ${problem}`,
@@ -55,45 +66,60 @@ function checkPages(dir: string, label: string, statusOf: (page: string) => Stat
   if (problems.length > 0) throw new Error(problems.join("\n"));
 }
 
+/**
+ * The site's own pages. 404.html matters: without it, Cloudflare Pages would answer every unknown
+ * path with the home page.
+ */
+const SITE_PAGES = ["index.html", "labs/index.html", "404.html"];
+
 /** Builds outDir from the built site and apps. Returns the published URL paths, for logging. */
 export function assembleSite(options: AssembleOptions): string[] {
   const { root, apps, outDir, origin, today } = options;
   const siteDist = join(root, "site", "dist");
   const toPublish = publications(apps, today);
 
-  // 1. Check every input before touching outDir. The home page is public, so it is checked like
-  //    a live page. Other site pages (the Labs index, 404) are checked like Labs: noindex, no
-  //    analytics. App pages are checked against their own status.
-  checkPages(siteDist, "site/dist", (page) => (page === "index.html" ? "live" : "labs"));
-  if (!existsSync(join(siteDist, "index.html"))) throw new Error("site/dist has no index.html");
+  // 1. Check every input first. The home page is public, so it is checked like a live page.
+  //    Other site pages (the Labs index, 404) are checked like Labs: noindex, no analytics.
+  //    App pages are checked against their own status.
+  checkPages(siteDist, "site/dist", SITE_PAGES, (page) =>
+    page === "index.html" ? "live" : "labs",
+  );
   for (const { kind, meta } of toPublish) {
     if (kind === "app")
       checkPages(
         join(root, "apps", meta.slug, "dist"),
         `apps/${meta.slug}/dist`,
+        ["index.html"],
         () => meta.status,
       );
   }
 
-  // 2. Start from an empty folder, so nothing from an earlier build survives.
-  rmSync(outDir, { recursive: true, force: true });
-  cpSync(siteDist, outDir, { recursive: true });
-
+  // 2. Assemble into an empty staging folder, and replace outDir only once everything is written.
+  //    Nothing from an earlier build survives, and a failure never leaves a half-built outDir.
+  const staging = `${outDir}.staging`;
+  rmSync(staging, { recursive: true, force: true });
   const published = ["/"];
-  for (const { kind, meta, path } of toPublish) {
-    const target = join(outDir, path);
-    if (existsSync(target)) throw new Error(`${path} is already taken by a site file`);
-    if (kind === "tombstone") {
-      mkdirSync(target, { recursive: true });
-      writeFileSync(join(target, "index.html"), renderTombstone(meta));
-    } else {
-      cpSync(join(root, "apps", meta.slug, "dist"), target, { recursive: true });
+  try {
+    cpSync(siteDist, staging, { recursive: true });
+    for (const { kind, meta, path } of toPublish) {
+      const target = join(staging, path);
+      if (existsSync(target)) throw new Error(`${path} is already taken by a site file`);
+      if (kind === "tombstone") {
+        mkdirSync(target, { recursive: true });
+        writeFileSync(join(target, "index.html"), renderTombstone(meta));
+      } else {
+        cpSync(join(root, "apps", meta.slug, "dist"), target, { recursive: true });
+      }
+      published.push(path);
     }
-    published.push(path);
+    writeFileSync(join(staging, "sitemap.xml"), renderSitemap(apps, origin));
+    writeFileSync(join(staging, "robots.txt"), renderRobots(origin));
+    writeFileSync(join(staging, "_headers"), renderHeaders());
+  } catch (error) {
+    rmSync(staging, { recursive: true, force: true });
+    throw error;
   }
-
-  writeFileSync(join(outDir, "sitemap.xml"), renderSitemap(apps, origin));
-  writeFileSync(join(outDir, "robots.txt"), renderRobots(origin));
-  writeFileSync(join(outDir, "_headers"), renderHeaders());
+  rmSync(outDir, { recursive: true, force: true });
+  renameSync(staging, outDir);
   return published;
 }

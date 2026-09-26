@@ -155,7 +155,21 @@ describe("assembleSite", () => {
     expect(existsSync(join(outDir, "previous.txt"))).toBe(true);
   });
 
-  it("fails if a published app was not built", () => {
+  it("fails if a published app or a site page was not built", () => {
     expect(() => assemble([app("unbuilt", "labs")])).toThrow("apps/unbuilt/dist not found");
+    write("apps/no-entry/dist/about.html", HIDDEN_PAGE);
+    expect(() => assemble([app("no-entry", "labs")])).toThrow("apps/no-entry/dist/index.html");
+    rmSync(join(root, "site/dist/404.html"));
+    expect(() => assemble([])).toThrow("site/dist/404.html not found");
+  });
+
+  it("leaves the previous output alone if assembly fails part-way", () => {
+    write("dist/previous.txt", "");
+    // A site folder that collides with an app's path is only found while copying.
+    write("site/dist/clash/file.txt", "");
+    write("apps/clash/dist/index.html", PUBLIC_PAGE);
+    expect(() => assemble([app("clash", "live")])).toThrow("/clash/ is already taken");
+    expect(readdirSync(outDir)).toEqual(["previous.txt"]);
+    expect(existsSync(`${outDir}.staging`)).toBe(false);
   });
 });
