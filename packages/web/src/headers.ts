@@ -35,10 +35,12 @@ export const PERMISSIONS_POLICY = [
 ].join(", ");
 
 /**
- * Cloudflare-hosted hostnames that are not the production domain: pages.dev and workers.dev
- * aliases and every preview. They must never be indexed. The custom domain never matches these.
+ * Hostnames that are not the production domain: branch previews on the preview domain set in the
+ * Cloudflare dashboard (<branch>.hundred.dev.ajustinjames.com), and pages.dev and workers.dev
+ * aliases. They must never be indexed. The production domain never matches these.
  */
 export const PREVIEW_URL_PATTERNS = [
+  "https://:preview.hundred.dev.ajustinjames.com/*",
   "https://:project.pages.dev/*",
   "https://:version.:project.pages.dev/*",
   "https://:worker.:subdomain.workers.dev/*",

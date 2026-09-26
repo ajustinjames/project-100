@@ -153,6 +153,9 @@ describe("renderHeaders", () => {
   it("marks Labs and Cloudflare preview hosts noindex, never the custom domain", () => {
     expect(headers).toContain("/labs/*\n  X-Robots-Tag: noindex");
     expect(headers).toContain("https://:version.:project.pages.dev/*\n  X-Robots-Tag: noindex");
+    expect(headers).toContain(
+      "https://:preview.hundred.dev.ajustinjames.com/*\n  X-Robots-Tag: noindex",
+    );
     expect(headers).not.toContain("hundred.ajustinjames.com");
     expect(headers).not.toMatch(/^\/\*\n(?: {2}.*\n)* {2}X-Robots-Tag/);
   });
