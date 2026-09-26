@@ -7,5 +7,8 @@
     "directory": "./dist",
     // Unknown paths get dist/404.html with status 404 (not the home page).
     "not_found_handling": "404-page"
-  }
+  },
+  // Branch builds run `wrangler preview`, which requires this block. It is empty because
+  // previews use the same top-level settings (assets, _headers) and there are no bindings.
+  "previews": {}
 }

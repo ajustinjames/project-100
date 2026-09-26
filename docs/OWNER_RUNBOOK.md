@@ -22,7 +22,7 @@ One-time setup the project owner does by hand. Agents: you don't need this file 
    - Production branch: `main`
    - Root directory: `/` (the repository root). Any other value fails with "root directory not found" before the build starts.
    - Build command: `pnpm build:site`
-   - Deploy command: leave the default (`npx wrangler deploy`), and the default non-production deploy command, so branches get preview URLs. The output folder (`dist`) comes from the committed `wrangler.jsonc`.
+   - Deploy command: leave the default (`npx wrangler deploy`), and the default non-production deploy command (`npx wrangler preview`), so branches get preview URLs. The output folder (`dist`) comes from the committed `wrangler.jsonc`.
    - No other settings. Node comes from `.node-version` and pnpm from `packageManager` in `package.json`. If the build image doesn't pick those up, set the `NODE_VERSION` build variable to match `.node-version`.
    - Enable preview deployments for non-production branches.
 3. **Attach the domain.** In the project, open the custom domains settings and add `hundred.ajustinjames.com`. Cloudflare creates the DNS record and certificate automatically. Don't create a `hundred` DNS record by hand first; it will conflict.
