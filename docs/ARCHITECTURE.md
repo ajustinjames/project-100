@@ -128,6 +128,6 @@ A shared package is `packages/<name>/` with `package.json` named `@project-100/<
 These wait for a real need. See [CLOUDFLARE.md](CLOUDFLARE.md) for the planned shape.
 
 - The public directory, home page, and Labs index
-- Site assembly (combining app `dist/` folders into one deploy) and deployment workflow
-- Wrangler configuration and any Cloudflare resources
+- Site assembly (`pnpm build:site`, which combines app `dist/` folders into one output folder) and connecting Cloudflare's Git integration
+- Any Cloudflare resources beyond static hosting
 - Shared storage, testing, or accessibility helpers

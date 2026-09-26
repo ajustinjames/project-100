@@ -15,13 +15,18 @@ One-time setup the project owner does by hand. Agents: you don't need this file 
 
 ## Cloudflare domain and deploy
 
-`ajustinjames.com` is already a Cloudflare zone, so the subdomain needs no DNS work outside Cloudflare. Do this when the first app is ready to deploy, not before:
+`ajustinjames.com` is already a Cloudflare zone, so the subdomain needs no DNS work outside Cloudflare. Do this when the first app is ready to deploy, not before. It is the same dashboard Git integration as `ajustinjames-v2`.
 
-1. **Confirm the account.** The Worker must live in the same Cloudflare account as the `ajustinjames.com` zone.
-2. **Create the Worker on first deploy** (`wrangler deploy` from the deploy workflow, or once by hand).
-3. **Attach the domain.** In the Worker, open *Settings → Domains & Routes → Add → Custom Domain* and enter `hundred.ajustinjames.com`. Cloudflare creates the DNS record and certificate automatically. Don't create a `hundred` DNS record by hand first; it will conflict.
-4. **Create a deploy API token scoped to the `project-100` Worker only** (a per-Worker [Workers permission](https://developers.cloudflare.com/workers/authorization/workers/), not account-wide *Workers Scripts: Edit*). An account-wide Workers token could modify any other Worker in the account, including one serving a personal site. Because the domain is attached in the dashboard, the token needs no zone permissions. On the first deploy, check that `wrangler deploy` leaves the custom domain in place.
-5. **Store the credentials** as GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-6. **Set up Web Analytics.** Under *Web Analytics → Add a site*, enter `hundred.ajustinjames.com`, choose the JS snippet (not automatic injection), and store its token as `P100_CF_ANALYTICS_TOKEN`.
+1. **Connect the repository.** Under *Workers & Pages → Create → Import a repository*, choose `ajustinjames/project-100`. Use the same Cloudflare account as the `ajustinjames.com` zone.
+2. **Set the build.**
+   - Production branch: `main`
+   - Build command: `pnpm build:site`
+   - Output directory: the folder `build:site` writes (recorded in [CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration) when the script is written)
+   - Enable preview deployments for non-production branches.
+3. **Attach the domain.** In the project, open the custom domains settings and add `hundred.ajustinjames.com`. Cloudflare creates the DNS record and certificate automatically. Don't create a `hundred` DNS record by hand first; it will conflict.
+4. **Set up Web Analytics.** Under *Web Analytics → Add a site*, enter `hundred.ajustinjames.com` and choose the JS snippet (not automatic injection). Add its token as the build variable `P100_CF_ANALYTICS_TOKEN` for **production only**, so previews get no beacon.
+5. **Check previews aren't indexed:** open a preview URL and look for `X-Robots-Tag: noindex` in the response headers. See [CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration) for what to do if it's missing.
+
+No API tokens are created, and nothing is stored in GitHub.
 
 The first deploy also needs a minimal home page at `/`, because every app footer links there.
