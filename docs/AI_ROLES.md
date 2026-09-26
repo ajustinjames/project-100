@@ -30,7 +30,7 @@ Current as of 2026-09-26. Roles stay model-neutral; only this table changes when
 
 ### Launching another model
 
-Always launch the model **and effort** from the table above. Never rely on defaults: `~/.codex/config.toml` is per-machine (it may say `low`), and wrappers such as the Claude Code Codex plugin leave both unset unless told. A review at the wrong model or effort doesn't count as the required review.
+Always launch the model **and effort** from the table above. Never rely on defaults: `~/.codex/config.toml` is per-machine (it may say `low`), and wrappers such as the Claude Code Codex plugin leave both unset unless told. A review at the wrong model or effort doesn't count as the required review, unless the owner asked for that effort for that run.
 
 Use `codex exec` directly. It accepts every effort level, and its log header prints the model and effort it actually ran, which is your evidence:
 

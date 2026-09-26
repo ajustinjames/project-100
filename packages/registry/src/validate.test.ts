@@ -124,7 +124,8 @@ describe("validateEntry", () => {
   });
 
   it("rejects reserved slugs", () => {
-    expect(validateEntry(labsEntry({ slug: "labs" })).join()).toContain("reserved");
+    for (const slug of ["labs", "cdn-cgi", "index", "404"])
+      expect(validateEntry(labsEntry({ slug })).join(), slug).toContain("reserved");
   });
 
   it("never allows Labs to be monetized", () => {
