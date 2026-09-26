@@ -1,6 +1,6 @@
 # Cloudflare Conventions
 
-Project 100 runs on the free Cloudflare plan. **Nothing is provisioned yet.** The site build (`pnpm build:site`) exists; connecting it to Cloudflare is owner setup ([OWNER_RUNBOOK.md](OWNER_RUNBOOK.md#cloudflare-domain-and-deploy)). This document defines the conventions deployment follows.
+Project 100 runs on the free Cloudflare plan. The only resource is the Workers Builds project `project-100`, connected to this repository, which builds with `pnpm build:site`. The custom domain and Web Analytics are owner setup ([OWNER_RUNBOOK.md](OWNER_RUNBOOK.md#cloudflare-domain-and-deploy)). This document defines the conventions deployment follows.
 
 Check current free-plan limits in the Cloudflare docs before relying on them. At the time of writing, one account on the free Workers plan allows a limited number of Worker scripts (100), and static asset requests are free. That limit is why apps do **not** each get their own Worker by default.
 
