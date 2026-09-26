@@ -1,0 +1,11 @@
+// Cloudflare deploy config: a static site, no Worker code. Cloudflare's Git integration builds
+// with `pnpm build:site` and deploys dist/. See docs/CLOUDFLARE.md. Owner-gated (docs/AI_ROLES.md).
+{
+  "name": "project-100",
+  "compatibility_date": "2026-09-26",
+  "assets": {
+    "directory": "./dist",
+    // Unknown paths get dist/404.html with status 404 (not the home page).
+    "not_found_handling": "404-page"
+  }
+}

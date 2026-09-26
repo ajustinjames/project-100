@@ -8,7 +8,7 @@ Check current free-plan limits in the Cloudflare docs before relying on them. At
 
 **One site, one deployment, path-based routing.**
 
-A single static Cloudflare project named `project-100`, with no server code, serves everything from **`hundred.ajustinjames.com`**:
+A single static Cloudflare Worker named `project-100` (static assets only, no server code) serves everything from **`hundred.ajustinjames.com`**:
 
 | Path | Content | Indexed |
 |---|---|---|
@@ -33,15 +33,18 @@ Cloudflare builds and deploys straight from this GitHub repository (dashboard Gi
   | Setting | Value |
   |---|---|
   | Build command | `pnpm build:site` |
-  | Output directory | `dist` |
+  | Deploy command | `npx wrangler deploy` (the default) |
+  | Non-production branch deploy command | the default (`npx wrangler versions upload`), which creates preview URLs |
   | Production branch | `main` |
+
+  The output folder, `dist`, is set in the committed [`wrangler.jsonc`](../wrangler.jsonc), not the dashboard.
 
 The build is one root script, `pnpm build:site`:
 
 1. `pnpm build` builds every workspace package: each app to `apps/<slug>/dist/` (the Vite plugin sets the base path from `app.json`), and the site's own pages to `site/dist/` (the `project100Site()` plugin fills in the counter and app lists from the registry).
 2. `scripts/assemble-site.ts` validates the registry and assembles a fresh `dist/`: `site/dist/` at the root, then each published app's `dist/` at its path (`publications()`), then `sitemap.xml`, `robots.txt`, and `_headers` from `@project-100/web`. Before writing anything, it checks every page it will publish with the same checks as `pnpm p100 check-builds`, and fails if an app or a site page (`index.html`, `labs/index.html`, `404.html`) is missing. It writes to `dist.staging/` and replaces `dist/` only when everything succeeded, so nothing stale survives and a failed build never leaves a partial `dist/`. `pnpm verify` runs it, so CI exercises the assembly on every PR.
 
-No `wrangler.jsonc` is committed: a dashboard Git project (like `ajustinjames-v2`) needs only the build command and output directory. If the Cloudflare project type turns out to need one (a name and an assets directory), it is a static file committed to the repo in an owner-merged PR, not something agents run.
+The project is a Workers Builds project, so the root [`wrangler.jsonc`](../wrangler.jsonc) is required. Without it, `wrangler deploy` tries to detect the app automatically and fails at a pnpm workspace root. It is minimal and static: the Worker name, a compatibility date, `assets.directory: "./dist"`, and `not_found_handling: "404-page"` (unknown paths get `404.html` with status 404). It has no Worker code and no bindings. Changing it is owner-gated ([AI_ROLES.md](AI_ROLES.md#merging)). To check it locally without credentials, run `pnpm build:site`, then `npx wrangler deploy --dry-run` or `npx wrangler dev` (which applies `_headers` and 404 handling the way Cloudflare does).
 
 Preview URLs must not be indexed. `_headers` sends `X-Robots-Tag: noindex` for every Cloudflare-hosted hostname (`*.pages.dev`, `*.<project>.pages.dev`, and `*.*.workers.dev`), which covers every preview and the project's default hostname, whether or not Cloudflare adds the header itself. The custom domain never matches these rules, so production is never noindexed by mistake. Confirm it on the first preview ([OWNER_RUNBOOK.md](OWNER_RUNBOOK.md#cloudflare-domain-and-deploy)).
 
