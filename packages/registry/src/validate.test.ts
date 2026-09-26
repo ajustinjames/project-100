@@ -133,10 +133,20 @@ describe("validateEntry", () => {
     );
   });
 
-  it("requires approval for personal data", () => {
+  it("requires approval for personal data before an app enters apps/", () => {
     expect(validateEntry(labsEntry({ privacy: "personal-data" })).join()).toContain(
       '"personal-data" approval',
     );
+    const candidate = labsEntry({
+      status: "candidate",
+      id: null,
+      design: { system: null },
+      privacy: "personal-data",
+    });
+    candidate.location = "candidates";
+    candidate.dir = "candidates/tide-table";
+    candidate.packageJson = null;
+    expect(validateEntry(candidate)).toEqual([]);
   });
 
   it("keeps app.json in sync with package.json", () => {

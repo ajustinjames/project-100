@@ -223,7 +223,8 @@ export function validateEntry(entry: RegistryEntry): string[] {
 
   if (meta.monetization.eligible && meta.status !== "live")
     fail("only live apps may be monetization-eligible (never Labs)");
-  if (meta.privacy === "personal-data" && !has("personal-data"))
+  // Candidates may declare personal data while the owner decides; nothing reaches apps/ without approval.
+  if (meta.privacy === "personal-data" && entry.location === "apps" && !has("personal-data"))
     fail('privacy "personal-data" needs a "personal-data" approval from the project owner');
 
   // 3. app.json must agree with package.json, so the registry stays truthful.

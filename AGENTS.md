@@ -7,7 +7,7 @@ Project 100 aims to have 100 useful web apps live at the same time, conceived, b
 ## Read before working
 
 - Always: [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md) and [docs/AI_ROLES.md](docs/AI_ROLES.md) (decision rights and escalation).
-- Ideas or candidates: [docs/APP_ACCEPTANCE.md](docs/APP_ACCEPTANCE.md).
+- Ideas, candidates, or promotion to Labs: [docs/APP_ACCEPTANCE.md](docs/APP_ACCEPTANCE.md) (the step-by-step idea-to-Labs workflow).
 - Status changes: [docs/LIFECYCLE.md](docs/LIFECYCLE.md).
 - Code: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), plus [DEPENDENCIES](docs/DEPENDENCIES.md), [PRIVACY_AND_DATA](docs/PRIVACY_AND_DATA.md), and [DESIGN_AND_ASSETS](docs/DESIGN_AND_ASSETS.md) as relevant.
 - Deployment or Cloudflare: [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md).

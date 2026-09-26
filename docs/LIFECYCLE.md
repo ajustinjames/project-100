@@ -25,9 +25,9 @@ candidate ──▶ labs ──▶ live ──▶ archived
 
 | From → To | Who decides | Required | How |
 |---|---|---|---|
-| (idea) → `candidate` | AI | Passed the [screen](APP_ACCEPTANCE.md#gate-1-screen-before-anything-is-recorded); no TODOs | `pnpm p100 candidate <slug> "<Name>"` |
+| (idea) → `candidate` | AI | Passed the [screen and research](APP_ACCEPTANCE.md#gate-1-screen-before-anything-is-recorded); [critiqued](APP_ACCEPTANCE.md#5-adversarial-critique) before its PR merges; no TODOs | `pnpm p100 candidate <slug> "<Name>"`, then a candidate PR ([steps 4–6](APP_ACCEPTANCE.md#gate-2-candidate-proposal)) |
 | `candidate` → `rejected` | AI or owner | `rejection: { date, reason }` | edit `app.json` |
-| `candidate` → `labs` | AI, unless an [escalation](AI_ROLES.md#escalation) applies | Needed approvals recorded | `pnpm p100 promote <slug>` |
+| `candidate` → `labs` | AI, unless an [escalation](AI_ROLES.md#escalation) applies | Selected after critique; needed approvals recorded | `pnpm p100 promote <slug>` ([steps 7–8](APP_ACCEPTANCE.md#gate-3-entering-labs)) |
 | `labs` → `rejected` | AI | `rejection`, completed `RETRO.md` | see [below](#discarding-a-labs-prototype) |
 | `labs` → `live` | **Owner** | Launch packet, `launch` approval, `dates.launched` | see [Launching](#launching) |
 | `live` → `archived` | **Owner** | `archive` approval, `dates.archived`, completed `RETRO.md` | see [Archiving](#archiving) |
