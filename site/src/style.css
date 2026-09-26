@@ -1,0 +1,100 @@
+/* ajj-design tokens first, then site styles. Shared by every site page. */
+@import "@ajustinjames/hardline-tokens/css";
+
+body {
+  margin: 0;
+  background: var(--hl-alias-surface-bg-alt);
+  color: var(--hl-alias-text-main);
+  font-family: var(--hl-alias-font-ui);
+  line-height: 1.5;
+}
+
+main,
+.p100-footer {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: var(--hl-alias-space-8) var(--hl-alias-space-4);
+}
+
+h1 {
+  margin: 0 0 var(--hl-alias-space-3);
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  margin: var(--hl-alias-space-8) 0 var(--hl-alias-space-3);
+  font-family: var(--hl-alias-font-technical);
+  font-size: var(--hl-alias-font-size-label);
+  letter-spacing: var(--hl-alias-tracking-wide);
+  text-transform: uppercase;
+  color: var(--hl-alias-text-muted);
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-color: var(--hl-global-color-accent);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--hl-global-color-accent);
+  outline-offset: 2px;
+}
+
+.p100-counter {
+  display: inline-block;
+  margin: var(--hl-alias-space-4) 0 0;
+  padding: var(--hl-alias-space-2) var(--hl-alias-space-3);
+  background: var(--hl-alias-surface-bg);
+  border: var(--hl-alias-surface-border-width) solid var(--hl-alias-surface-border);
+  box-shadow: var(--hl-alias-shadow-2);
+  font-family: var(--hl-alias-font-technical);
+}
+
+.p100-counter strong {
+  color: var(--hl-global-color-accent);
+  font-size: 1.5em;
+}
+
+.p100-apps {
+  display: grid;
+  gap: var(--hl-alias-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.p100-apps li {
+  padding: var(--hl-alias-space-4);
+  background: var(--hl-alias-surface-bg);
+  border: var(--hl-alias-surface-border-width) solid var(--hl-alias-surface-border);
+  box-shadow: var(--hl-alias-shadow-1);
+}
+
+.p100-apps a {
+  font-weight: var(--hl-alias-font-weight-bold);
+  font-size: 1.125rem;
+}
+
+.p100-apps p {
+  margin: var(--hl-alias-space-1) 0 0;
+  color: var(--hl-alias-text-muted);
+}
+
+.p100-empty {
+  padding: var(--hl-alias-space-4);
+  border: var(--hl-alias-surface-border-width) dashed var(--hl-alias-surface-border);
+  color: var(--hl-alias-text-muted);
+}
+
+.p100-footer {
+  padding-top: 0;
+  color: var(--hl-alias-text-muted);
+  font-size: 0.8rem;
+}

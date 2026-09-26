@@ -31,6 +31,7 @@ pnpm install
 pnpm verify                         # run before every PR (same as CI)
 pnpm fix                            # auto-format and fix lint
 pnpm test                           # vitest
+pnpm build:site                     # build all apps and assemble the deployable site into dist/
 pnpm p100 validate | status | list
 pnpm p100 check-changes origin/main  # history + owner-gated check CI runs on PRs
 pnpm p100 candidate <slug> "<Name>"

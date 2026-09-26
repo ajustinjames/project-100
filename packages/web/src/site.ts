@@ -16,9 +16,12 @@ export const REPOSITORY_URL = "https://github.com/ajustinjames/project-100";
 export const ANALYTICS_TOKEN_ENV = "P100_CF_ANALYTICS_TOKEN";
 
 /**
- * The URL path an app is served from. Live apps live at /<slug>/.
- * Everything else (Labs, and archived builds that are not deployed) is under /labs/<slug>/.
+ * The URL path an app is served from. Live apps live at /<slug>/. Archived apps keep that path,
+ * so users can still reach their data during the archive grace period (see publish.ts).
+ * Everything else (Labs) is under /labs/<slug>/.
  */
 export function appPath(meta: Pick<AppMeta, "slug" | "status">): string {
-  return meta.status === "live" ? `/${meta.slug}/` : `/labs/${meta.slug}/`;
+  return meta.status === "live" || meta.status === "archived"
+    ? `/${meta.slug}/`
+    : `/labs/${meta.slug}/`;
 }

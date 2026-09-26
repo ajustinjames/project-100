@@ -34,8 +34,8 @@ Record each third-party runtime dependency and its reason in the app's `APP.md`.
 | `@biomejs/biome` | root (dev) | Lint and format in one tool, instead of ESLint + Prettier + plugins. |
 | `vitest` | root (dev) | Fast tests that understand TypeScript natively and share Vite's config model. |
 | `@types/node` | root (dev) | Types for scripts. Version tracks the Node major in `.node-version`. |
-| `vite` | apps and `@project-100/web` (dev) | Builds static apps with minimal configuration. |
-| `@ajustinjames/<system>-tokens`, `@ajustinjames/<system>-components` | apps | `ajj-design`, required. It brings in `lit`. |
+| `vite` | apps, `site/`, and `@project-100/web` (dev) | Builds static apps with minimal configuration. |
+| `@ajustinjames/<system>-tokens`, `@ajustinjames/<system>-components` | apps (`site/` uses only `hardline-tokens`) | `ajj-design`, required. It brings in `lit`. |
 
 Nothing else is installed. Add DOM test environments, icon libraries, fonts, or frameworks when an app actually needs them.
 

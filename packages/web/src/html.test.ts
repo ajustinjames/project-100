@@ -41,6 +41,13 @@ describe("renderHead", () => {
     expect(head).toContain('content="Costs $&amp; $1"');
   });
 
+  it("marks archived apps noindex at their public path", () => {
+    const head = renderHead({ ...app, status: "archived" }, options);
+    expect(head).toContain("<title>Tide &lt;Table&gt; (Archived)</title>");
+    expect(head).toContain("noindex, nofollow");
+    expect(head).not.toContain("beacon");
+  });
+
   it("omits analytics without a token or when the app opts out", () => {
     const live = { ...app, status: "live" as const };
     expect(renderHead(live, { ...options, analyticsToken: null })).not.toContain("beacon");
@@ -48,12 +55,23 @@ describe("renderHead", () => {
   });
 });
 
+const dataMeta = {
+  privacy: "local-only" as const,
+  dates: { created: "2026-09-01", launched: "2026-10-01", archived: "2026-12-01" },
+};
+
 describe("renderFooter", () => {
   it("always discloses AI involvement and flags Labs", () => {
-    const labs = renderFooter({ status: "labs" }, null);
+    const labs = renderFooter({ ...dataMeta, status: "labs" }, null);
     expect(labs).toContain(AI_DISCLOSURE);
     expect(labs).toContain("Labs prototype");
-    expect(renderFooter({ status: "live" }, null)).not.toContain("Labs");
+    expect(renderFooter({ ...dataMeta, status: "live" }, null)).not.toContain("Labs");
+  });
+
+  it("tells people when an archived app with local data goes away", () => {
+    const archived = { ...dataMeta, status: "archived" as const };
+    expect(renderFooter(archived, null)).toContain("archived. It stays online until 2027-03-01");
+    expect(renderFooter({ ...archived, privacy: "none" }, null)).not.toContain("stays online");
   });
 });
 
@@ -72,6 +90,12 @@ describe("checkBuiltPage", () => {
     expect(problems).toContain("noindex");
     expect(problems).toContain("footer");
     expect(problems).toContain("analytics");
+  });
+
+  it("flags a live page that is still marked noindex (a stale Labs build)", () => {
+    expect(checkBuiltPage({ status: "live" }, good).join()).toContain(
+      "live page is marked noindex",
+    );
   });
 });
 

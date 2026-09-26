@@ -33,6 +33,19 @@ importers:
         specifier: ^8.3.1
         version: 8.3.1(@types/node@24.13.6)
 
+  site:
+    dependencies:
+      '@ajustinjames/hardline-tokens':
+        specifier: ^0.1.0
+        version: 0.1.0
+    devDependencies:
+      '@project-100/web':
+        specifier: workspace:*
+        version: link:../packages/web
+      vite:
+        specifier: ^8.3.1
+        version: 8.3.1(@types/node@24.13.6)
+
   templates/app:
     dependencies:
       '@ajustinjames/hardline-components':
