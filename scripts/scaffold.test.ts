@@ -99,6 +99,17 @@ describe("scaffolding", () => {
     expect(existsSync(join(root, ".p100.lock"))).toBe(false);
   });
 
+  it("refuses to promote a personal-data candidate without the owner's approval", () => {
+    const dir = createCandidate(options, "tide-table", "Tide Table");
+    fillIn(dir);
+    const file = join(dir, "app.json");
+    const meta = JSON.parse(readFileSync(file, "utf8"));
+    writeFileSync(file, JSON.stringify({ ...meta, privacy: "personal-data" }));
+    expect(validateRegistry(loadRegistry(root).entries)).toEqual([]);
+    expect(() => promoteCandidate(options, "tide-table")).toThrow('"personal-data" approval');
+    expect(readdirSync(join(root, "apps"))).toEqual([]);
+  });
+
   it("rejects slugs the validator would reject", () => {
     expect(() => createCandidate(options, "labs", "Labs")).toThrow("reserved");
     expect(() => createCandidate(options, "a".repeat(41), "Long")).toThrow("40 characters");
