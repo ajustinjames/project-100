@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    # labeled/unlabeled re-run the owner gate when the owner-approved label changes.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Lint + format, typecheck, tests, registry validation, builds, and built-page checks.
+      - name: Verify
+        run: pnpm verify
+
+      # Lifecycle history and owner-gated changes (docs/AI_ROLES.md#merging).
+      - name: Check changes against base
+        if: github.event_name == 'pull_request'
+        env:
+          P100_OWNER_APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'owner-approved') }}
+        run: pnpm p100 check-changes origin/${{ github.base_ref }}

@@ -1,0 +1,19 @@
+{
+  "name": "@project-100/web",
+  "private": true,
+  "type": "module",
+  "description": "Project-wide web standards for Project 100 apps: head metadata, robots, analytics beacon, AI disclosure footer, sitemap, and the Vite plugin that applies them.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./vite": "./src/vite.ts"
+  },
+  "dependencies": {
+    "@project-100/registry": "workspace:*"
+  },
+  "peerDependencies": {
+    "vite": "^8.0.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.1"
+  }
+}

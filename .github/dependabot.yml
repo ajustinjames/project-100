@@ -1,0 +1,30 @@
+version: 2
+
+# All dependency updates arrive as pull requests and must pass CI before merge.
+# Nothing is auto-merged. See docs/DEPENDENCIES.md.
+updates:
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/packages/*"
+      - "/apps/*"
+      - "/templates/app"
+    schedule:
+      interval: "weekly"
+    # Wait a week after a release before proposing it (supply-chain safety).
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      npm-dependencies:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "app-template",
+  "name": "App Template",
+  "status": "labs",
+  "description": "One sentence describing what App Template does for the person using it.",
+  "problem": "The problem App Template solves, in plain language.",
+  "category": "uncategorized",
+  "dates": {
+    "created": "2026-01-01",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": "hardline"
+  },
+  "dependencies": [],
+  "sharedPackages": [
+    "@project-100/web"
+  ],
+  "privacy": "none",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
