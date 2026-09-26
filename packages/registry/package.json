@@ -1,0 +1,9 @@
+{
+  "name": "@project-100/registry",
+  "private": true,
+  "type": "module",
+  "description": "Application metadata (app.json) schema, loading, and validation for Project 100.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
