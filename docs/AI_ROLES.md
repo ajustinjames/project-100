@@ -21,12 +21,33 @@ Any agent (Claude Code, Codex, or another) may take any role. One session may ho
 
 Current as of 2026-09-26. Roles stay model-neutral; only this table changes when models change.
 
-| Model | Roles | Responsibilities |
-|---|---|---|
-| **Opus 5.5** | Originator, Builder (design), final Reviewer, Steward | Selects ideas; frames the product; sets UX/UI direction and architecture; writes the implementation brief; does the final product, UI, and architecture review; decides which findings matter; escalates to the owner only when needed; recommends archives and writes retrospectives. |
-| **Luna 6 Max** | Builder (implementation) | Implements, iterates, writes tests, refactors. |
-| **Sol 6** | Critic, Reviewer, Maintainer | Critiques candidates adversarially before selection; does economical independent review of every build PR; maintains live apps; runs regression and dependency passes. |
-| **Astra** | Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
+| Model | Model ID and effort | Roles | Responsibilities |
+|---|---|---|---|
+| **Opus 5.5** | Claude Code, `claude-opus-5-5` | Originator, Builder (design), final Reviewer, Steward | Selects ideas; frames the product; sets UX/UI direction and architecture; writes the implementation brief; does the final product, UI, and architecture review; decides which findings matter; escalates to the owner only when needed; recommends archives and writes retrospectives. |
+| **Luna 6 Max** | Codex, `gpt-6-luna`, effort `max` | Builder (implementation) | Implements, iterates, writes tests, refactors. |
+| **Sol 6** | Codex, `gpt-6-sol`, effort `high` | Critic, Reviewer, Maintainer | Critiques candidates adversarially before selection; does economical independent review of every build PR; maintains live apps; runs regression and dependency passes. |
+| **Astra** | Codex, `gpt-6-astra`, effort `xhigh` | Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
+
+### Launching another model
+
+Always launch the model **and effort** from the table above. Never rely on defaults: `~/.codex/config.toml` is per-machine (it may say `low`), and wrappers such as the Claude Code Codex plugin leave both unset unless told. A review at the wrong model or effort doesn't count as the required review, unless the owner asked for that effort for that run.
+
+Use `codex exec` directly. It accepts every effort level, and its log header prints the model and effort it actually ran, which is your evidence:
+
+```bash
+# Read-only review or critique (Sol or Astra). Swap the model and effort per the table.
+codex exec -m gpt-6-astra -c model_reasoning_effort='"xhigh"' -s read-only --ephemeral \
+  -o /tmp/review.md "<prompt: what to review, the base ref, the docs to read, the output format>" < /dev/null
+
+# Implementation (Luna) on its own branch or worktree.
+codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<build brief>" < /dev/null
+```
+
+- `-s read-only` for reviews, critiques, and arbitration. The reviewer reports findings; the author fixes them.
+- `< /dev/null` keeps `codex exec` from waiting on stdin when run from another agent.
+- **From Claude Code's Codex plugin** (the `codex:codex-rescue` agent or `codex-companion.mjs`): only its `task` mode takes `--model` and `--effort`, and it accepts efforts only up to `xhigh`, so use `codex exec` for `max`. The plugin's `review` and `adversarial-review` modes take no `--effort`, so don't use them for required reviews. When delegating through the `codex:codex-rescue` agent, put `--model <id> --effort <level>` in the request, because it adds them only when asked.
+- Start the review or critique comment with the role, model ID, and effort, e.g. `Review by Adversarial Reviewer (gpt-6-astra, effort xhigh)`, copied from the log header rather than assumed.
+- If a model in the table is unavailable, stop and tell the owner rather than silently substituting another. Update this table when models change.
 
 **Build flow:**
 

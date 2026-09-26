@@ -74,9 +74,15 @@ export interface AppMeta {
   rejection: { date: string; reason: string } | null;
 }
 
-/** Slugs that would collide with site-level paths. */
+/**
+ * Slugs that would collide with site-level paths: the site's own pages, Cloudflare's /cdn-cgi/
+ * namespace, and paths the static-asset router maps elsewhere (/index → /, /404 → 404.html).
+ */
 export const RESERVED_SLUGS = [
   "labs",
+  "cdn-cgi",
+  "index",
+  "404",
   "assets",
   "api",
   "about",

@@ -8,8 +8,10 @@ The repository is designed to stay understandable to a much weaker model years f
 apps/<slug>/            One directory per app that has reached Labs (labs, live, archived, discarded)
 candidates/<slug>/      Recorded candidates and rejected candidates (app.json + PROPOSAL.md)
 packages/registry/      @project-100/registry: app.json schema, loading, validation
-packages/web/           @project-100/web: head tags, disclosure footer, sitemap/robots, Vite plugin
+packages/web/           @project-100/web: head tags, disclosure footer, sitemap/robots/_headers, publication rules, Vite plugins
+site/                   The site's own pages: home page and directory, hidden Labs index, 404
 scripts/p100.ts         The `pnpm p100` CLI (validate, status, list, candidate, promote)
+scripts/assemble-site.ts  Assembles site/ and every published app into dist/ (`pnpm build:site`)
 templates/app/          Starting point for new apps (built in CI so it cannot rot)
 templates/candidate/    PROPOSAL.md template
 docs/                   Canonical policy and conventions
@@ -26,7 +28,7 @@ docs/                   Canonical policy and conventions
 | **Vitest** | Tests for scripts, packages, and apps from the root: `pnpm test`. |
 | **Vite** | Builds each app to static files. |
 
-Root commands: `pnpm check`, `pnpm fix`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm verify` (everything CI runs).
+Root commands: `pnpm check`, `pnpm fix`, `pnpm typecheck`, `pnpm test`, `pnpm build` (every workspace package), `pnpm build:site` (build, then assemble the deployable site into `dist/`), and `pnpm verify` (everything CI runs, including `build:site`).
 
 `erasableSyntaxOnly` means no `enum`, `namespace`, or constructor parameter properties. Use `as const` arrays and union types instead (see `packages/registry/src/schema.ts`).
 
@@ -85,7 +87,7 @@ Derived values are not stored: the URL path comes from `status` + `slug`, and th
 
 ## Registry
 
-There is no separate registry file. The registry is the set of all `apps/*/app.json` and `candidates/*/app.json` files, loaded by `loadRegistry()` in `@project-100/registry`. The same loader will power the public directory, the counter, sitemaps, and audits once those exist.
+There is no separate registry file. The registry is the set of all `apps/*/app.json` and `candidates/*/app.json` files, loaded by `loadRegistry()` in `@project-100/registry`. The same loader powers the public directory and counter (`site/`), and the site assembly, sitemap, and headers (`pnpm build:site`). Nothing lists apps by hand. Both refuse to run on an invalid registry.
 
 CI runs three registry checks:
 
@@ -98,8 +100,10 @@ CI runs three registry checks:
 Project-wide web standards that every app must follow, so they live in one place instead of 100:
 
 - `project100()` Vite plugin: sets `base` to `/<slug>/` (live) or `/labs/<slug>/` (everything else), injects head tags, and replaces `<!-- p100:footer -->` with the disclosure footer. The build fails if the placeholder is missing or the page hard-codes a `<title>`. In multi-page apps, each page gets its own canonical URL but shares the app's title and description. Add per-page metadata when an app needs it.
-- `renderHead`, `renderFooter`, `renderSitemap`, and `renderRobots`: pure functions, unit-tested.
-- `site.ts`: site constants, including `SITE_ORIGIN` (`https://hundred.ajustinjames.com`).
+- `project100Site()` Vite plugin: the same for the site's own pages in `site/`, driven by the whole registry. It fills in the counter and the live and Labs app lists (see [site/README.md](../site/README.md)).
+- `headTags`/`pageHeadTags`, `renderFooter`/`renderSiteFooter`, `renderSitemap`, `renderRobots`, `renderHeaders` (`_headers`), `renderAppList`, `renderCounter`, and `renderTombstone`: pure functions, unit-tested.
+- `publish.ts`: `publications()`, the one rule for what the assembled site publishes and where, by status (see [CLOUDFLARE.md](CLOUDFLARE.md#deployment-model)).
+- `site.ts`: site constants, including `SITE_ORIGIN` (`https://hundred.ajustinjames.com`), and `appPath()`.
 
 ## SEO
 
@@ -128,7 +132,6 @@ A shared package is `packages/<name>/` with `package.json` named `@project-100/<
 
 These wait for a real need. See [CLOUDFLARE.md](CLOUDFLARE.md) for the planned shape.
 
-- The public directory, home page, and Labs index
-- Site assembly (`pnpm build:site`, which combines app `dist/` folders into one output folder) and connecting Cloudflare's Git integration
+- Connecting Cloudflare's Git integration and the domain (owner setup: [OWNER_RUNBOOK.md](OWNER_RUNBOOK.md#cloudflare-domain-and-deploy))
 - Any Cloudflare resources beyond static hosting
 - Shared storage, testing, or accessibility helpers

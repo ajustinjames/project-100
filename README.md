@@ -21,8 +21,9 @@ idea → screen (most ideas die here) → candidate → Labs (hidden prototype) 
 ```
 apps/          Applications (Labs, live, archived), one directory each
 candidates/    Proposed and rejected ideas
-packages/      Shared packages: registry (app metadata), web (SEO, disclosure, analytics)
-scripts/       The `pnpm p100` CLI
+packages/      Shared packages: registry (app metadata), web (SEO, disclosure, analytics, site assembly rules)
+site/          The home page and directory, the hidden Labs index, and 404
+scripts/       The `pnpm p100` CLI and site assembly
 templates/     App and proposal templates
 docs/          Policy and conventions
 ```
@@ -34,6 +35,7 @@ Requires Node 24+ and pnpm.
 ```bash
 pnpm install
 pnpm verify          # lint, typecheck, test, validate registry, build: same as CI
+pnpm build:site      # build everything and assemble the deployable site into dist/
 pnpm p100 status     # Project 100 counter
 pnpm p100 list       # every registered candidate and app
 pnpm p100 candidate <slug> "<Name>"   # record a screened idea

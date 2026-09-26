@@ -47,7 +47,7 @@ Labs apps:
 
 - are served from `/labs/<slug>/`, never from the public paths
 - get `noindex, nofollow` and a visible "experimental" footer line (both added automatically by `@project-100/web` for any non-live status)
-- are not listed in the public directory or sitemap, and are not linked from normal navigation. They are reachable only through a deliberate mechanism such as a hidden Labs index opened by a key sequence (see [CLOUDFLARE.md](CLOUDFLARE.md#labs))
+- are not listed in the public directory or sitemap, and are not linked from normal navigation. They are listed on the hidden Labs index (`/labs/`), which opens when someone types `labs` on the home page (see [CLOUDFLARE.md](CLOUDFLARE.md#labs))
 - are never monetized (`monetization.eligible` must be `false`)
 - get no analytics beacon
 
@@ -97,7 +97,7 @@ Process:
 1. Open an "Archive recommendation" issue with evidence.
 2. Draft `RETRO.md` (see the template sections) in a PR.
 3. After owner approval: set `status: "archived"`, `dates.archived`, and add the `archive` approval.
-4. Remove the app from the directory and sitemap (automatic, driven by status). If the app keeps user data locally, keep serving it with an "archived" notice and a working export for a grace period (default 90 days) before replacing it with a tombstone page linking to the retrospective.
+4. Remove the app from the directory and sitemap (automatic, driven by status). If the app keeps user data locally, keep serving it with an "archived" notice and a working export for a grace period (default 90 days) before replacing it with a tombstone page linking to the retrospective. `pnpm build:site` does this automatically for any archived app whose `privacy` is not `none`: it stays at `/<slug>/` (noindex, no analytics) until 90 days after `dates.archived`, and its footer shows the archived notice and removal date. Then a tombstone replaces it. The app's code and build must keep working until then, and keeping the export working is the app's job. Archived apps with `privacy: "none"` are simply removed.
 5. Decide whether any of its code should move to, or stay in, a shared package.
 
 Security or privacy emergencies can take an app offline immediately. Formal archiving follows.

@@ -11,5 +11,8 @@ export function checkBuiltPage(meta: Pick<AppMeta, "status">, html: string): str
   if (!isLive && !/<meta name="robots" content="noindex, nofollow">/i.test(html))
     problems.push("non-live page is missing noindex, nofollow");
   if (!isLive && html.includes("cloudflareinsights")) problems.push("non-live page has analytics");
+  // A live page marked noindex is usually a stale build from before launch.
+  if (isLive && /<meta name="robots" content="[^"]*noindex/i.test(html))
+    problems.push("live page is marked noindex (rebuild it?)");
   return problems;
 }

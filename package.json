@@ -13,7 +13,8 @@
     "typecheck": "tsc -p . && pnpm -r --if-present typecheck",
     "test": "vitest run",
     "build": "pnpm -r --if-present build",
-    "verify": "biome ci . && pnpm typecheck && pnpm test && pnpm p100 validate && pnpm build && pnpm p100 check-builds"
+    "build:site": "pnpm build && node scripts/assemble-site.ts",
+    "verify": "biome ci . && pnpm typecheck && pnpm test && pnpm p100 validate && pnpm build:site && pnpm p100 check-builds"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

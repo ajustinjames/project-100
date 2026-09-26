@@ -1,0 +1,19 @@
+// Cloudflare deploy config: a static site, no Worker code. Cloudflare's Git integration builds
+// with `pnpm build:site` and deploys dist/. See docs/CLOUDFLARE.md. Owner-gated (docs/AI_ROLES.md).
+{
+  "name": "project-100",
+  "compatibility_date": "2026-09-26",
+  // Production is served only at hundred.ajustinjames.com. No workers.dev aliases and no version
+  // URLs: they would serve production builds, including the analytics beacon, on other hosts.
+  // Branch previews (`wrangler preview`) use the preview domain instead.
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    // Unknown paths get dist/404.html with status 404 (not the home page).
+    "not_found_handling": "404-page"
+  },
+  // Branch builds run `wrangler preview`, which requires this block. It is empty because
+  // previews use the same top-level settings (assets, _headers) and there are no bindings.
+  "previews": {}
+}

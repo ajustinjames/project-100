@@ -20,13 +20,17 @@ One-time setup the project owner does by hand. Agents: you don't need this file 
 1. **Connect the repository.** Under *Workers & Pages → Create → Import a repository*, choose `ajustinjames/project-100`. Use the same Cloudflare account as the `ajustinjames.com` zone.
 2. **Set the build.**
    - Production branch: `main`
+   - Root directory: `/` (the repository root). Any other value fails with "root directory not found" before the build starts.
    - Build command: `pnpm build:site`
-   - Output directory: the folder `build:site` writes (recorded in [CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration) when the script is written)
+   - Deploy command: leave the default (`npx wrangler deploy`), and the default non-production deploy command (`npx wrangler preview`), so branches get preview URLs. The output folder (`dist`) comes from the committed `wrangler.jsonc`.
+   - No other settings. Node comes from `.node-version` and pnpm from `packageManager` in `package.json`. If the build image doesn't pick those up, set the `NODE_VERSION` build variable to match `.node-version`.
    - Enable preview deployments for non-production branches.
 3. **Attach the domain.** In the project, open the custom domains settings and add `hundred.ajustinjames.com`. Cloudflare creates the DNS record and certificate automatically. Don't create a `hundred` DNS record by hand first; it will conflict.
 4. **Set up Web Analytics.** Under *Web Analytics → Add a site*, enter `hundred.ajustinjames.com` and choose the JS snippet (not automatic injection). Add its token as the build variable `P100_CF_ANALYTICS_TOKEN` for **production only**, so previews get no beacon.
-5. **Check previews aren't indexed:** open a preview URL and look for `X-Robots-Tag: noindex` in the response headers. See [CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration) for what to do if it's missing.
+5. **Check the first preview** (these need a real Cloudflare deployment; nothing local can confirm them):
+   - Its response headers include `X-Robots-Tag: noindex` on every path, including `/`, and the `Content-Security-Policy` from `_headers`. The rules match Cloudflare hostnames by pattern ([CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration)); if a preview hostname doesn't match, tell an agent which hostname Cloudflare used.
+   - `/labs/` also sends `X-Robots-Tag: noindex`, and an unknown path returns the 404 page with status 404.
+   - The page source has no Cloudflare Web Analytics beacon.
+6. **Check production** on `hundred.ajustinjames.com` after the first deploy from `main`: there is **no** `X-Robots-Tag` on `/`, `/sitemap.xml` and `/robots.txt` load, the home page source includes the beacon (if step 4 is done), and the browser console shows no Content-Security-Policy errors other than the blocked Cloudflare "JavaScript detections" inline script (`window.__CF$cv$params`). The zone injects it, and the CSP blocks it on purpose until you decide: turn off Bot Fight Mode or JavaScript detections for the zone, or accept the blocked script. Record the decision in [CLOUDFLARE.md](CLOUDFLARE.md#security-headers) and remove this exception once it's resolved.
 
-No API tokens are created, and nothing is stored in GitHub.
-
-The first deploy also needs a minimal home page at `/`, because every app footer links there.
+No API tokens are created, and nothing is stored in GitHub. The home page at `/` (which every app footer links to) is part of the build, so the first deploy can happen before any app is live.
