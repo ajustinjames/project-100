@@ -43,7 +43,7 @@ pnpm --filter @project-100/app-<slug> dev
 
 - Branch from `main` and open a PR. Never push to `main`. Merge your own PR once CI passes, **except** the owner-merged changes listed in [docs/AI_ROLES.md](docs/AI_ROLES.md#merging).
 - Keep each PR to one app or one concern, and fill in the PR template.
-- Model responsibilities and required reviews: [docs/AI_ROLES.md](docs/AI_ROLES.md#model-assignments).
+- Model responsibilities and required reviews: [docs/AI_ROLES.md](docs/AI_ROLES.md#model-assignments). When you launch another model (for example Codex for a review), always pass the model ID **and** effort from that table ([how](docs/AI_ROLES.md#launching-another-model)). Never rely on defaults.
 - Report results honestly. Never weaken tests or checks to get green.
 - If you are stuck or in disagreement, follow docs/AI_ROLES.md.
 - If a doc is wrong or missing something, fix the doc in the same PR.

@@ -98,7 +98,7 @@ The Critic's job is to argue against the candidate and try to kill it:
 - Test "what this does better": would this audience actually switch?
 - Look for missed escalations, especially anything near a [sensitive subject](PROJECT_CHARTER.md#sensitive-subjects), personal data, or an external API. Look for scope that is too big to maintain, or that needs ongoing human work.
 
-Post the critique as a single PR comment. All agents use the owner's GitHub account, so begin it with `Critique by <role> (<model>)`. Give each finding a severity:
+Post the critique as a single PR comment. All agents use the owner's GitHub account, so begin it with `Critique by <role> (<model ID>, effort <level>)`, launched as described in [Launching another model](AI_ROLES.md#launching-another-model). Give each finding a severity:
 
 | Severity | Meaning |
 |---|---|
