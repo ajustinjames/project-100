@@ -116,7 +116,7 @@ The Originator decides which findings matter. In the Critique section of `PROPOS
 - **Reject** if any Critical finding stands, or any High finding can't be answered with evidence. Set `status` to `"rejected"` and `rejection` to `{ "date": "YYYY-MM-DD", "reason": "<one sentence>" }`, write the reason under Decision, and merge the PR. The rejected candidate stays in the registry, so the idea isn't proposed again without a [revival](LIFECYCLE.md#revival).
 - **Select** otherwise. Under Decision, write why it deserves Labs and which findings shaped it. Merge the PR with status `candidate`.
 
-If the revisions change the proposal materially, the Critic checks it again. Allow at most two critique-and-revise rounds, then decide or follow [When stuck](AI_ROLES.md#when-stuck). If the Originator dismisses a Critical or High finding and the Critic still objects, it is a [disagreement](AI_ROLES.md#disagreements-between-agents). Don't promote until it is resolved.
+If the revisions change the proposal materially, the Critic checks it again. Any dismissal of a Critical or High finding must also go back to the Critic, even if the proposal is unchanged. The Critic explicitly records whether they accept each dismissal in a PR comment; silence is not acceptance. Link that response in `PROPOSAL.md`. If the Critic still objects, follow [Disagreements](AI_ROLES.md#disagreements-between-agents) and link the resolved outcome. Don't promote until every such dismissal has the Critic's explicit acceptance or a resolved disagreement outcome that permits advancing. Allow at most two critique-and-revise rounds, then decide or follow [When stuck](AI_ROLES.md#when-stuck); reaching the limit does not waive this requirement.
 
 ## Gate 3: Entering Labs
 
@@ -137,6 +137,7 @@ Promotion is the Originator's decision, and its reason is recorded ([decision ri
 
 - the candidate is on `main` with status `candidate`, and its Decision section selects it
 - the Critique section responds to every finding
+- every dismissed Critical or High finding links to the Critic's explicit acceptance or a resolved disagreement outcome that permits advancing
 - every escalation listed in `PROPOSAL.md` has a matching approval in `app.json`
 - the owner hasn't vetoed it
 

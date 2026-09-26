@@ -18,7 +18,7 @@ At most 100 apps may be `live` at once. Archive one to free a slot.
 candidate ──▶ labs ──▶ live ──▶ archived
     │           │                   │
     ▼           ▼                   ▼
- rejected    rejected        (revival: new candidate)
+ rejected    rejected        (revival: same app in Labs)
 ```
 
 ## Transitions
@@ -104,8 +104,15 @@ Security or privacy emergencies can take an app offline immediately. Formal arch
 
 ## Revival
 
-An archived or rejected idea can come back through the normal review process:
+An archived or rejected idea can come back through the normal review process. Keep its slug. Open a PR that updates `PROPOSAL.md` with what changed and why the idea deserves another try, preserving the earlier rejection reason and decision links. It gets the same [critique and selection](APP_ACCEPTANCE.md#5-adversarial-critique) as a new candidate, including resolution of dismissed Critical or High findings.
 
-1. Open a PR that updates `PROPOSAL.md` with what changed and why the idea deserves another try. It gets the same critique as a new candidate.
-2. Move the entry back to `labs`, keeping its slug and id. Clear `dates.archived` and `rejection`, and note the revival in `APP.md`.
-3. Going live again needs a **new** `launch` approval dated after the last `archive` approval (enforced by `pnpm p100 validate`). Earlier approvals stay in the list as history.
+**Rejected before Labs** (`candidates/<slug>/`, `id: null`):
+
+1. If selected again, set `status: "candidate"` and clear `rejection` to `null` in the revival PR. Keep the entry in `candidates/` with `id: null`, record the new dated decision in `PROPOSAL.md`, and merge after critique and selection. If rejected again, keep status `rejected` and record the new reason.
+2. Obtain and record any required [owner approvals](APP_ACCEPTANCE.md#7-owner-approval-only-if-an-escalation-applies).
+3. Follow the normal [promotion steps](APP_ACCEPTANCE.md#8-promote) from `main`: `pnpm p100 promote <slug>` creates the app scaffold and assigns its first id. Record the revival and promotion reason in `APP.md`.
+
+**Previously reached Labs** (`apps/<slug>/`, with a permanent id):
+
+1. After selection and any required owner approvals, restore any removed app code and configuration, set `status: "labs"`, and keep the existing slug and id. Clear `dates.archived` and `rejection` to `null`, and note the revival in `APP.md`. Keep earlier approvals as history. Run `pnpm verify` before merging the revival PR.
+2. Going live again follows the normal launch process and needs a **new** `launch` approval. For an archived app, it must be dated after the last `archive` approval (enforced by `pnpm p100 validate`).
