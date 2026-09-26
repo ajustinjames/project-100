@@ -20,6 +20,7 @@ One-time setup the project owner does by hand. Agents: you don't need this file 
 1. **Connect the repository.** Under *Workers & Pages → Create → Import a repository*, choose `ajustinjames/project-100`. Use the same Cloudflare account as the `ajustinjames.com` zone.
 2. **Set the build.**
    - Production branch: `main`
+   - Root directory: `/` (the repository root). Any other value fails with "root directory not found" before the build starts.
    - Build command: `pnpm build:site`
    - Deploy command: leave the default (`npx wrangler deploy`), and the default non-production deploy command, so branches get preview URLs. The output folder (`dist`) comes from the committed `wrangler.jsonc`.
    - No other settings. Node comes from `.node-version` and pnpm from `packageManager` in `package.json`. If the build image doesn't pick those up, set the `NODE_VERSION` build variable to match `.node-version`.

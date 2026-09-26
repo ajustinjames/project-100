@@ -32,6 +32,7 @@ Cloudflare builds and deploys straight from this GitHub repository (dashboard Gi
 
   | Setting | Value |
   |---|---|
+  | Root directory | `/` (the repository root, where `wrangler.jsonc` and `pnpm-workspace.yaml` are) |
   | Build command | `pnpm build:site` |
   | Deploy command | `npx wrangler deploy` (the default) |
   | Non-production branch deploy command | the default (`npx wrangler versions upload`), which creates preview URLs |
