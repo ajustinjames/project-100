@@ -4,6 +4,7 @@
 import {
   ANALYTICS_MODES,
   APPROVAL_KINDS,
+  APPROVAL_REF_PREFIX,
   type AppMeta,
   type ApprovalKind,
   LIVE_TARGET,
@@ -17,7 +18,9 @@ import {
 export interface PackageJson {
   name?: string;
   private?: boolean;
+  scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
 }
 
@@ -55,6 +58,26 @@ const KNOWN_FIELDS = [
   "rejection",
 ];
 
+/** Returns why a slug is not allowed, or null if it is fine. Shared with the scaffolding CLI. */
+export function slugProblem(slug: string): string | null {
+  if (!SLUG.test(slug)) return `slug "${slug}" must be lowercase kebab-case`;
+  if (slug.length > 40) return `slug "${slug}" is longer than 40 characters`;
+  if (RESERVED_SLUGS.includes(slug)) return `slug "${slug}" is reserved`;
+  return null;
+}
+
+/** True if RETRO.md has real content: no incomplete marker, and prose beyond headings and comments. */
+export function isRetroComplete(retro: string | null): boolean {
+  if (retro === null || retro.includes(RETRO_INCOMPLETE_MARKER)) return false;
+  const prose = retro
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .split("\n")
+    .filter((line) => !line.trim().startsWith("#"))
+    .join("")
+    .replace(/\s+/g, "");
+  return prose.length >= 100;
+}
+
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const isText = (v: unknown): v is string => typeof v === "string" && v.trim().length > 0;
@@ -82,8 +105,8 @@ export function validateEntry(entry: RegistryEntry): string[] {
   if (raw.schemaVersion !== SCHEMA_VERSION) fail(`schemaVersion must be ${SCHEMA_VERSION}`);
   if (!(raw.id === null || (Number.isInteger(raw.id) && (raw.id as number) >= 1)))
     fail("id must be a positive integer or null");
-  if (!(typeof raw.slug === "string" && SLUG.test(raw.slug) && raw.slug.length <= 40))
-    fail("slug must be lowercase kebab-case, at most 40 characters");
+  if (typeof raw.slug !== "string") fail("slug must be a string");
+  else if (slugProblem(raw.slug)) fail(slugProblem(raw.slug) as string);
   for (const field of ["name", "description", "problem"]) {
     if (!isText(raw[field])) fail(`${field} must be a non-empty string`);
     else if ((raw[field] as string).includes("TODO")) fail(`${field} still contains TODO`);
@@ -123,10 +146,11 @@ export function validateEntry(entry: RegistryEntry): string[] {
         !isObject(approval) ||
         !oneOf(APPROVAL_KINDS, approval.kind) ||
         !isDate(approval.date) ||
-        !isText(approval.ref)
+        typeof approval.ref !== "string" ||
+        !approval.ref.startsWith(APPROVAL_REF_PREFIX)
       )
         fail(
-          `each approval must be { kind: ${APPROVAL_KINDS.join("|")}, date: YYYY-MM-DD, ref: "<link to owner approval>" }`,
+          `each approval must be { kind: ${APPROVAL_KINDS.join("|")}, date: YYYY-MM-DD, ref: "${APPROVAL_REF_PREFIX}..." }`,
         );
     }
   }
@@ -143,10 +167,15 @@ export function validateEntry(entry: RegistryEntry): string[] {
   // 2. Lifecycle rules.
   const meta = raw as unknown as AppMeta;
   const has = (kind: ApprovalKind) => meta.approvals.some((a) => a.kind === kind);
+  const latest = (kind: ApprovalKind) =>
+    meta.approvals
+      .filter((a) => a.kind === kind)
+      .map((a) => a.date)
+      .sort()
+      .pop() ?? null;
   const dirName = entry.dir.split("/").pop();
 
   if (dirName !== meta.slug) fail(`directory name "${dirName}" must equal slug "${meta.slug}"`);
-  if (RESERVED_SLUGS.includes(meta.slug)) fail(`slug "${meta.slug}" is reserved`);
 
   if (entry.location === "candidates") {
     if (meta.status !== "candidate" && meta.status !== "rejected")
@@ -160,6 +189,8 @@ export function validateEntry(entry: RegistryEntry): string[] {
 
   if (meta.status === "rejected" && meta.rejection === null)
     fail("rejected entries need a rejection { date, reason }");
+  if (meta.status === "rejected" && entry.location === "apps" && !isRetroComplete(entry.retro))
+    fail("discarded Labs apps need a completed RETRO.md (see docs/LIFECYCLE.md)");
   if (meta.status !== "rejected" && meta.rejection !== null)
     fail('rejection must be null unless status is "rejected"');
 
@@ -167,11 +198,17 @@ export function validateEntry(entry: RegistryEntry): string[] {
     if (meta.dates.launched === null) fail(`${meta.status} apps need dates.launched`);
     if (!has("launch")) fail(`${meta.status} apps need a "launch" approval from the project owner`);
   }
+  const lastArchive = latest("archive");
+  const lastLaunch = latest("launch");
+  if (meta.status === "live" && lastArchive !== null && (lastLaunch ?? "") <= lastArchive)
+    fail('a revived app needs a new "launch" approval dated after its last archive approval');
   if (meta.status === "archived") {
     if (meta.dates.archived === null) fail("archived apps need dates.archived");
     if (!has("archive")) fail('archived apps need an "archive" approval from the project owner');
-    if (entry.retro === null || entry.retro.includes(RETRO_INCOMPLETE_MARKER))
-      fail(`archived apps need a completed RETRO.md (remove ${RETRO_INCOMPLETE_MARKER} when done)`);
+    if (!isRetroComplete(entry.retro))
+      fail(
+        `archived apps need a completed RETRO.md (real content, and ${RETRO_INCOMPLETE_MARKER} removed)`,
+      );
   } else if (meta.dates.archived !== null) {
     fail('dates.archived must be null unless status is "archived"');
   }
@@ -194,18 +231,32 @@ export function validateEntry(entry: RegistryEntry): string[] {
     fail(`${meta.status} apps need a package.json`);
   if (entry.packageJson !== null) {
     const pkg = entry.packageJson;
-    const runtime = Object.keys(pkg.dependencies ?? {});
+    const runtime = [
+      ...Object.keys(pkg.dependencies ?? {}),
+      ...Object.keys(pkg.optionalDependencies ?? {}),
+    ];
     const all = [...runtime, ...Object.keys(pkg.devDependencies ?? {})];
+    const designPackages = [
+      `@ajustinjames/${meta.design.system}-tokens`,
+      `@ajustinjames/${meta.design.system}-components`,
+    ];
     const expectedName = `@project-100/app-${meta.slug}`;
     if (pkg.name !== expectedName) fail(`package.json name must be "${expectedName}"`);
     if (pkg.private !== true) fail('package.json must set "private": true');
-    if (!runtime.some((name) => name.startsWith(`@ajustinjames/${meta.design.system}-`)))
-      fail(`package.json must depend on @ajustinjames/${meta.design.system}-* (ajj-design)`);
+    if (!runtime.some((name) => designPackages.includes(name)))
+      fail(`package.json must depend on ${designPackages.join(" or ")} (ajj-design)`);
     const shared = all.filter((name) => name.startsWith("@project-100/"));
     if (!sameSet(shared, meta.sharedPackages))
       fail(`sharedPackages must list exactly: [${shared.join(", ")}]`);
+    if (meta.status === "labs" || meta.status === "live") {
+      if (!shared.includes("@project-100/web"))
+        fail("labs and live apps must use @project-100/web (project web standards)");
+      for (const script of ["build", "typecheck"]) {
+        if (!pkg.scripts?.[script]) fail(`package.json needs a "${script}" script`);
+      }
+    }
     const thirdParty = runtime.filter(
-      (name) => !name.startsWith("@project-100/") && !name.startsWith("@ajustinjames/"),
+      (name) => !name.startsWith("@project-100/") && !designPackages.includes(name),
     );
     if (!sameSet(thirdParty, meta.dependencies))
       fail(
@@ -222,6 +273,7 @@ export function validateRegistry(entries: RegistryEntry[]): string[] {
   const seenSlugs = new Map<string, string>();
   const seenIds = new Map<number, string>();
   for (const { dir, meta } of entries) {
+    if (!isObject(meta)) continue; // already reported by validateEntry
     const slugOwner = seenSlugs.get(meta.slug);
     if (slugOwner) errors.push(`${dir}: slug "${meta.slug}" is already used by ${slugOwner}`);
     else seenSlugs.set(meta.slug, dir);
@@ -231,7 +283,7 @@ export function validateRegistry(entries: RegistryEntry[]): string[] {
       else seenIds.set(meta.id, dir);
     }
   }
-  const live = entries.filter((e) => e.meta.status === "live").length;
+  const live = entries.filter((e) => isObject(e.meta) && e.meta.status === "live").length;
   if (live > LIVE_TARGET)
     errors.push(`${live} apps are live but only ${LIVE_TARGET} slots exist; archive one first`);
   return errors;

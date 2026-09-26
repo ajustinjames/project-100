@@ -59,7 +59,7 @@ Before requesting launch, the app must meet all of these:
 - **Tested:** core logic has Vitest tests. `pnpm verify` passes.
 - **Honest docs:** `APP.md`, `PRIVACY.md`, and `README.md` are accurate. `app.json` is complete.
 - **Compliant:** uses `ajj-design`, includes the disclosure footer, has no AI-generated media, has asset licenses recorded, and holds all needed approvals.
-- **Independently reviewed:** a different agent (preferably a different model family) has reviewed code, UX, privacy, and accessibility, and its findings are resolved or explained.
+- **Independently reviewed:** a reviewer from a different model family has reviewed code, UX, privacy, and accessibility, and its findings are resolved or explained (see [AI_ROLES.md](AI_ROLES.md#model-assignments)).
 - **Maintainable:** passes the [maintainability test](PROJECT_CHARTER.md#maintainability-test).
 
 ## Launch packet

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { AI_DISCLOSURE, renderFooter, renderHead } from "./html.ts";
+import { checkBuiltPage } from "./check.ts";
+import { AI_DISCLOSURE, type HeadOptions, headTags, renderFooter, renderTags } from "./html.ts";
 import { renderRobots, renderSitemap } from "./sitemap.ts";
 
 const app = {
@@ -9,6 +10,8 @@ const app = {
   analytics: "standard" as const,
 };
 const options = { origin: "https://example.com", analyticsToken: "abc123" };
+const renderHead = (meta: Parameters<typeof headTags>[0], opts: HeadOptions) =>
+  renderTags(headTags(meta, opts));
 
 describe("renderHead", () => {
   it("marks Labs noindex and skips canonical, Open Graph, and analytics", () => {
@@ -28,6 +31,16 @@ describe("renderHead", () => {
     expect(head).toContain("static.cloudflareinsights.com/beacon.min.js");
   });
 
+  it("gives each page of a multi-page app its own canonical URL", () => {
+    const head = renderHead({ ...app, status: "live" }, { ...options, pagePath: "about.html" });
+    expect(head).toContain('href="https://example.com/tide-table/about.html"');
+  });
+
+  it("keeps $ sequences in metadata literal", () => {
+    const head = renderHead({ ...app, description: "Costs $& $1", status: "live" }, options);
+    expect(head).toContain('content="Costs $&amp; $1"');
+  });
+
   it("omits analytics without a token or when the app opts out", () => {
     const live = { ...app, status: "live" as const };
     expect(renderHead(live, { ...options, analyticsToken: null })).not.toContain("beacon");
@@ -41,6 +54,24 @@ describe("renderFooter", () => {
     expect(labs).toContain(AI_DISCLOSURE);
     expect(labs).toContain("Labs prototype");
     expect(renderFooter({ status: "live" }, null)).not.toContain("Labs");
+  });
+});
+
+describe("checkBuiltPage", () => {
+  const good = `<title>X</title><meta name="robots" content="noindex, nofollow"><footer data-p100-footer></footer>`;
+
+  it("accepts a compliant Labs page", () => {
+    expect(checkBuiltPage({ status: "labs" }, good)).toEqual([]);
+  });
+
+  it("fails closed on missing noindex, footer, or leaked analytics", () => {
+    const problems = checkBuiltPage(
+      { status: "labs" },
+      `<title>X</title><script src="https://static.cloudflareinsights.com/beacon.min.js"></script>`,
+    ).join();
+    expect(problems).toContain("noindex");
+    expect(problems).toContain("footer");
+    expect(problems).toContain("analytics");
   });
 });
 

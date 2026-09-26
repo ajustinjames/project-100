@@ -15,7 +15,7 @@ Any agent (Claude Code, Codex, or another) may take any role. One session may ho
 | **Maintainer** | Keeps live apps healthy: dependency updates, bug fixes, and improvements to shared packages and `ajj-design`. |
 | **Steward** | Audits the registry and live apps, recommends archives, and writes retrospectives. |
 
-**Independent review** means a separate session that didn't write the code. Launch reviews and security- or privacy-relevant changes need a model from a different family than the builder's; the final review below provides that.
+**Independent review** means a separate session that didn't write the work, whether that is code, a design brief, or a proposal. Launch reviews and security- or privacy-relevant changes **require** a reviewer from a different model family than the author's.
 
 ## Model assignments
 
@@ -30,12 +30,14 @@ Current as of 2026-09-26. Roles stay model-neutral; only this table changes when
 **Build flow:**
 
 1. Opus screens ideas. Sol critiques the survivors. Opus selects and records the candidates.
-2. Opus writes the implementation brief as a GitHub issue ("Build brief: `<slug>`"): the problem, UX/UI direction, architecture, and acceptance criteria. Durable decisions from it go into `APP.md`.
+2. Opus writes the implementation brief as a GitHub issue ("Build brief: `<slug>`"): the problem, UX/UI direction, architecture, and acceptance criteria. Sol reviews the brief before building starts, so Opus's design decisions get an independent check. Durable decisions from it go into `APP.md`.
 3. Luna implements in PRs that reference the brief. Sol reviews each PR.
-4. Before a launch request, and for any security- or privacy-relevant change, Opus does the final review. Allow at most two review-and-fix rounds; after that, follow [When stuck](#when-stuck).
+4. Before a launch request, and for any security- or privacy-relevant change, Opus does the final review.
 5. Opus opens the launch packet.
 
-**Maintenance:** Sol handles it. Non-trivial fixes go to Luna, and archive questions go to Opus. If Sol struggles to maintain an app, flag the app as too complex: it is failing the [maintainability test](PROJECT_CHARTER.md#maintainability-test).
+**Maintenance:** Sol handles it. Routine dependency updates that pass CI need no further review. Other maintenance PRs by Sol are reviewed by a separate session (Luna by default, or Opus for security- or privacy-relevant changes). Non-trivial fixes go to Luna, and archive questions go to Opus. If Sol struggles to maintain an app, flag the app as too complex: it is failing the [maintainability test](PROJECT_CHARTER.md#maintainability-test).
+
+**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds; after that, follow [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it goes to the owner as a [disagreement](#disagreements-between-agents).
 
 ## Decision rights
 
@@ -61,7 +63,7 @@ Get explicit owner approval **before** implementing any of these. Use the "Owner
 | Handling any personal data | `personal-data` |
 | Accounts or login | `accounts` |
 | Public user-generated content or anything needing moderation | `user-generated-content` |
-| Any recurring cost beyond the baseline budget | `recurring-cost` |
+| Any recurring cost beyond the baseline budget. The charter's revenue exception applies only once the owner has confirmed the revenue evidence. | `recurring-cost` |
 | Unusual infrastructure (anything beyond static assets plus modest Workers, KV, D1, or R2 on the free plan) | `infrastructure` |
 | Launching an app | `launch` |
 | Archiving an app | `archive` |
@@ -92,17 +94,22 @@ Don't paper over problems. Don't disable tests or checks, and don't claim succes
 
 All changes go through PRs; never push directly to `main`. PRs exist for the CI gate, the audit trail, and easy reverts, not for human review.
 
-**Agents merge their own PRs** (squash, e.g. `gh pr merge --auto --squash`) once the `verify` check passes and any review required above is done.
+**Agents merge their own PRs** (squash, e.g. `gh pr merge --auto --squash`) once CI passes and any review required above is done.
 
-**Owner-merged PRs:** for the changes below, open the PR, request review from `@ajustinjames`, and don't merge it yourself:
+**Owner-merged PRs:** CI (`pnpm p100 check-changes`) flags these, and fails until the owner applies the `owner-approved` label:
 
 - a status change to `live` or `archived`
-- adding an entry to any `approvals` list
-- changes to `docs/PROJECT_CHARTER.md` or to this file's decision rights, escalation, or merging rules
-- anything under `.github/` (workflows, CODEOWNERS, Dependabot, templates)
-- deploy configuration (deploy workflow, `wrangler.jsonc`) or secrets handling
+- any change to an `approvals` list or to `monetization.eligible`
+- `.github/` (workflows, CODEOWNERS, Dependabot, templates)
+- `scripts/` and `packages/registry/` (the checks themselves)
+- `docs/PROJECT_CHARTER.md` and this file
+- any `wrangler` config (deploy configuration and bindings)
 
-Agents use the owner's GitHub identity, so this rule is enforced by convention, not by GitHub. Following it exactly is a condition of agents' merge rights.
+For these, open the PR, request review from `@ajustinjames`, and stop. **Agents never apply `owner-approved` and never merge these PRs.**
+
+The same check also enforces history: registry entries are never deleted, ids never change or get reused, and status changes follow [LIFECYCLE.md](LIFECYCLE.md#transitions).
+
+**Limits:** agents use the owner's GitHub identity, and a PR can edit the check itself, so this stops careless mistakes, not a deliberately misbehaving agent. The owner-merged list is how that edge is watched. If stronger enforcement is ever needed, give agents a separate GitHub identity without merge rights to gated paths.
 
 ## Working norms
 

@@ -87,13 +87,17 @@ Derived values are not stored: the URL path comes from `status` + `slug`, and th
 
 There is no separate registry file. The registry is the set of all `apps/*/app.json` and `candidates/*/app.json` files, loaded by `loadRegistry()` in `@project-100/registry`. The same loader will power the public directory, the counter, sitemaps, and audits once those exist.
 
-`pnpm p100 validate` (run in CI) checks shape, lifecycle rules, required approvals, completed retrospectives for archived apps, unique ids and slugs, the 100-live cap, and that `app.json` agrees with `package.json`.
+CI runs three registry checks:
+
+- **`pnpm p100 validate`** checks each snapshot: shape, lifecycle rules, required approvals (linked to this repository), completed retrospectives, unique ids and slugs, the 100-live cap, and that `app.json` agrees with `package.json`. Labs and live apps must also use `@project-100/web` and have `build` and `typecheck` scripts.
+- **`pnpm p100 check-builds`** checks every built page of every Labs and live app (and the template) for the title, disclosure footer, and noindex/no-analytics on non-live pages. It checks the output, so it holds however the page was built.
+- **`pnpm p100 check-changes <base>`** compares a PR with `main`: history is preserved and transitions are legal, and it flags owner-merged changes ([AI_ROLES.md](AI_ROLES.md#merging)).
 
 ## @project-100/web
 
 Project-wide web standards that every app must follow, so they live in one place instead of 100:
 
-- `project100()` Vite plugin: sets `base` to `/<slug>/` (live) or `/labs/<slug>/` (everything else), injects head tags, and replaces `<!-- p100:footer -->` with the disclosure footer. The build fails if the placeholder is missing or the page hard-codes a `<title>`.
+- `project100()` Vite plugin: sets `base` to `/<slug>/` (live) or `/labs/<slug>/` (everything else), injects head tags, and replaces `<!-- p100:footer -->` with the disclosure footer. The build fails if the placeholder is missing or the page hard-codes a `<title>`. In multi-page apps, each page gets its own canonical URL but shares the app's title and description. Add per-page metadata when an app needs it.
 - `renderHead`, `renderFooter`, `renderSitemap`, and `renderRobots`: pure functions, unit-tested.
 - `site.ts`: site constants, including `SITE_ORIGIN` (`https://hundred.ajustinjames.com`).
 

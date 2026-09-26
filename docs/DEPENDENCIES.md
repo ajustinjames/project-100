@@ -22,6 +22,8 @@ Before adding one, confirm:
 - **Stable:** no install scripts unless unavoidable. pnpm blocks them by default, and allowing one is a deliberate decision.
 - **Non-overlapping:** it doesn't duplicate something already in the repo (for example, a second icon set, date library, or UI framework).
 
+Anything the browser bundle imports belongs in `dependencies` (not `devDependencies`), so the registry's dependency list stays true. Reviewers check this.
+
 Record each third-party runtime dependency and its reason in the app's `APP.md`. `pnpm p100 validate` ensures `app.json` `dependencies` matches `package.json`.
 
 ## Baseline dependencies
@@ -62,6 +64,7 @@ Calls to external APIs should go through a Worker only when needed to protect a 
 
 - **Dependabot** opens weekly grouped PRs for npm (minor and patch grouped; majors separate) and monthly PRs for GitHub Actions. It waits 7 days after a release before proposing it.
 - **pnpm** refuses to install versions published less than 24 hours ago (`minimumReleaseAge` in `pnpm-workspace.yaml`).
+- **pnpm stays on a major version that Dependabot supports** (currently 10). Newer pnpm majors change the lockfile format, and Dependabot can't update what it can't parse. Check GitHub's supported-ecosystems list before upgrading pnpm.
 - Every update goes through CI (`pnpm verify`). Nothing auto-merges.
 - The Maintainer reviews major updates for breaking changes, fixes breakage in the same PR, and doesn't merge red PRs.
 - Keep the lockfile committed. CI installs with `--frozen-lockfile`.

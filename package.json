@@ -2,7 +2,7 @@
   "name": "project-100",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@10.34.5",
   "engines": {
     "node": ">=24"
   },
@@ -13,7 +13,7 @@
     "typecheck": "tsc -p . && pnpm -r --if-present typecheck",
     "test": "vitest run",
     "build": "pnpm -r --if-present build",
-    "verify": "biome ci . && pnpm typecheck && pnpm test && pnpm p100 validate && pnpm build"
+    "verify": "biome ci . && pnpm typecheck && pnpm test && pnpm p100 validate && pnpm build && pnpm p100 check-builds"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

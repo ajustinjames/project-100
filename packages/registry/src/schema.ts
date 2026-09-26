@@ -88,5 +88,8 @@ export const RESERVED_SLUGS = [
   "well-known",
 ];
 
+/** Approval refs must link into this repository (an issue, PR, or comment where the owner approved). */
+export const APPROVAL_REF_PREFIX = "https://github.com/ajustinjames/project-100/";
+
 /** Marker left in RETRO.md until a real retrospective is written. */
 export const RETRO_INCOMPLETE_MARKER = "<!-- retro:incomplete -->";

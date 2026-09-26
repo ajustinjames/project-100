@@ -20,6 +20,7 @@ Project 100 aims to have 100 useful web apps live at the same time, conceived, b
 - Every app uses `ajj-design`, keeps the `<!-- p100:footer -->` disclosure, and keeps `app.json`, `APP.md`, and `PRIVACY.md` accurate.
 - Labs is hidden, noindex, and never monetized.
 - Never commit secrets or private configuration. The repository is public.
+- Never apply the `owner-approved` label or merge owner-gated PRs.
 - Don't add speculative infrastructure, dependencies, or abstractions.
 - Don't escalate ordinary implementation decisions. Decide, and record why.
 
@@ -31,6 +32,7 @@ pnpm verify                         # run before every PR (same as CI)
 pnpm fix                            # auto-format and fix lint
 pnpm test                           # vitest
 pnpm p100 validate | status | list
+pnpm p100 check-changes origin/main  # history + owner-gated check CI runs on PRs
 pnpm p100 candidate <slug> "<Name>"
 pnpm p100 promote <slug>
 pnpm --filter @project-100/app-<slug> dev

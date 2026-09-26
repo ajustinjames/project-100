@@ -30,6 +30,7 @@ function labsEntry(overrides: Partial<AppMeta> = {}): RegistryEntry {
     packageJson: {
       name: `@project-100/app-${slug}`,
       private: true,
+      scripts: { build: "vite build", typecheck: "tsc -p ." },
       dependencies: { "@ajustinjames/hardline-components": "^0.1.0" },
       devDependencies: { "@project-100/web": "workspace:*", vite: "^8.0.0" },
     },
@@ -40,8 +41,9 @@ function labsEntry(overrides: Partial<AppMeta> = {}): RegistryEntry {
 const launch = {
   kind: "launch" as const,
   date: "2026-09-10",
-  ref: "https://github.com/x/y/issues/1",
+  ref: "https://github.com/ajustinjames/project-100/issues/1",
 };
+const completeRetro = `# Retro\n\n## What was learned\n\n${"A real sentence about the app. ".repeat(5)}\n`;
 
 describe("validateEntry", () => {
   it("accepts a well-formed Labs app", () => {
@@ -54,7 +56,7 @@ describe("validateEntry", () => {
     entry.meta.slug = "Not A Slug";
     const errors = validateEntry(entry).join("\n");
     expect(errors).toContain('unknown field "extra"');
-    expect(errors).toContain("slug must be lowercase kebab-case");
+    expect(errors).toContain("must be lowercase kebab-case");
   });
 
   it("rejects leftover TODO placeholders", () => {
@@ -81,8 +83,48 @@ describe("validateEntry", () => {
     expect(errors).toContain('"archive" approval');
     expect(errors).toContain("completed RETRO.md");
     archived.meta.approvals.push({ ...launch, kind: "archive", date: "2026-12-01" });
-    archived.retro = "# Retro\nDone.\n";
+    archived.retro = "# Retro\n\n## What was learned\n\n<!-- fill in -->\n";
+    expect(validateEntry(archived).join()).toContain("completed RETRO.md");
+    archived.retro = completeRetro;
     expect(validateEntry(archived)).toEqual([]);
+  });
+
+  it("requires a fresh launch approval to relaunch a revived app", () => {
+    const relaunched = labsEntry({
+      status: "live",
+      dates: { created: "2026-09-01", launched: "2026-09-10", archived: null },
+      approvals: [launch, { ...launch, kind: "archive", date: "2026-12-01" }],
+    });
+    expect(validateEntry(relaunched).join()).toContain('new "launch" approval');
+    relaunched.meta.approvals.push({ ...launch, date: "2027-02-01" });
+    expect(validateEntry(relaunched)).toEqual([]);
+  });
+
+  it("requires approval refs to link into this repository", () => {
+    const entry = labsEntry({ approvals: [{ ...launch, kind: "external-api", ref: "trust me" }] });
+    expect(validateEntry(entry).join()).toContain("ref");
+  });
+
+  it("requires a retrospective for discarded Labs apps", () => {
+    const discarded = labsEntry({
+      status: "rejected",
+      rejection: { date: "2026-10-01", reason: "Not useful enough." },
+    });
+    expect(validateEntry(discarded).join()).toContain("discarded Labs apps");
+    discarded.retro = completeRetro;
+    expect(validateEntry(discarded)).toEqual([]);
+  });
+
+  it("requires Labs and live apps to use the project web standards and build scripts", () => {
+    const entry = labsEntry({ sharedPackages: [] });
+    entry.packageJson = { ...entry.packageJson, devDependencies: {}, scripts: {} };
+    const errors = validateEntry(entry).join("\n");
+    expect(errors).toContain("@project-100/web");
+    expect(errors).toContain('"build" script');
+  });
+
+  it("rejects reserved slugs", () => {
+    expect(validateEntry(labsEntry({ slug: "labs" })).join()).toContain("reserved");
   });
 
   it("never allows Labs to be monetized", () => {
@@ -103,11 +145,14 @@ describe("validateEntry", () => {
       name: "wrong",
       private: true,
       dependencies: { "@ajustinjames/glassline-components": "^0.1.0", "date-fns": "^4.0.0" },
+      optionalDependencies: { "@ajustinjames/other-thing": "^1.0.0" },
     };
     const errors = validateEntry(entry).join("\n");
     expect(errors).toContain('name must be "@project-100/app-tide-table"');
-    expect(errors).toContain("@ajustinjames/hardline-*");
-    expect(errors).toContain("[date-fns]");
+    expect(errors).toContain("@ajustinjames/hardline-tokens or @ajustinjames/hardline-components");
+    expect(errors).toContain(
+      "[@ajustinjames/glassline-components, date-fns, @ajustinjames/other-thing]",
+    );
   });
 
   it("keeps candidates in candidates/ without ids", () => {
