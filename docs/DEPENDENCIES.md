@@ -62,9 +62,9 @@ Calls to external APIs should go through a Worker only when needed to protect a 
 
 ## Updates
 
-- **Dependabot** opens weekly grouped PRs for npm (minor and patch grouped; majors separate) and monthly PRs for GitHub Actions. It waits 7 days after a release before proposing it.
+- **Dependabot** opens one weekly PR grouping every npm update (majors included) and monthly PRs for GitHub Actions. It waits 7 days after a release before proposing it.
 - **pnpm** refuses to install versions published less than 24 hours ago (`minimumReleaseAge` in `pnpm-workspace.yaml`).
 - **pnpm stays on a major version that Dependabot supports** (currently 10). Newer pnpm majors change the lockfile format, and Dependabot can't update what it can't parse. Check GitHub's supported-ecosystems list before upgrading pnpm.
 - Every update goes through CI (`pnpm verify`). Nothing auto-merges.
-- The Maintainer reviews major updates for breaking changes, fixes breakage in the same PR, and doesn't merge red PRs.
+- The Maintainer reviews major updates for breaking changes, fixes breakage in the same PR, and doesn't merge red PRs. If one package's major update can't be fixed quickly, drop it from the group PR by pinning it or closing its update, and track it in an issue, so it doesn't block everything else.
 - Keep the lockfile committed. CI installs with `--frozen-lockfile`.

@@ -26,18 +26,19 @@ Current as of 2026-09-26. Roles stay model-neutral; only this table changes when
 | **Opus 5.5** | Originator, Builder (design), final Reviewer, Steward | Selects ideas; frames the product; sets UX/UI direction and architecture; writes the implementation brief; does the final product, UI, and architecture review; decides which findings matter; escalates to the owner only when needed; recommends archives and writes retrospectives. |
 | **Luna 6 Max** | Builder (implementation) | Implements, iterates, writes tests, refactors. |
 | **Sol 6** | Critic, Reviewer, Maintainer | Critiques candidates adversarially before selection; does economical independent review of every build PR; maintains live apps; runs regression and dependency passes. |
+| **Astra** | Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
 
 **Build flow:**
 
 1. Opus screens ideas. Sol critiques the survivors. Opus selects and records the candidates.
 2. Opus writes the implementation brief as a GitHub issue ("Build brief: `<slug>`"): the problem, UX/UI direction, architecture, and acceptance criteria. Sol reviews the brief before building starts, so Opus's design decisions get an independent check. Durable decisions from it go into `APP.md`.
 3. Luna implements in PRs that reference the brief. Sol reviews each PR.
-4. Before a launch request, and for any security- or privacy-relevant change, Opus does the final review.
-5. Opus opens the launch packet.
+4. Before a launch request, and for any security- or privacy-relevant change, Opus does the final review, then Astra does an adversarial review.
+5. Opus opens the launch packet, linking both reviews.
 
 **Maintenance:** Sol handles it. Routine dependency updates that pass CI need no further review. Other maintenance PRs by Sol are reviewed by a separate session (Luna by default, or Opus for security- or privacy-relevant changes). Non-trivial fixes go to Luna, and archive questions go to Opus. If Sol struggles to maintain an app, flag the app as too complex: it is failing the [maintainability test](PROJECT_CHARTER.md#maintainability-test).
 
-**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds; after that, follow [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it goes to the owner as a [disagreement](#disagreements-between-agents).
+**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds; after that, follow [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it becomes a [disagreement](#disagreements-between-agents) for Astra to arbitrate.
 
 ## Decision rights
 
@@ -47,7 +48,7 @@ Current as of 2026-09-26. Roles stay model-neutral; only this table changes when
 | Visual design within `ajj-design` | Recording candidates | Archive |
 | Tests, refactors, and bug fixes | Promoting a candidate to Labs (when no escalation applies) | Everything in [Escalation](#escalation) |
 | Routine dependency updates that pass CI | Discarding a Labs prototype | Changes to the charter or these decision rights |
-| Docs updates | Adding a dependency (recorded in APP.md) | Resolving agent disagreements |
+| Docs updates | Adding a dependency (recorded in APP.md) | Disagreements Astra's arbitration doesn't settle |
 | | Changes to shared packages and `ajj-design` | |
 
 "Records the reason" means in the PR description and the relevant APP.md or doc.
@@ -77,8 +78,9 @@ While waiting on the owner, continue other work. Don't build the part that needs
 ## Disagreements between agents
 
 1. Each agent states its position and evidence in the PR or issue. Keep it short.
-2. If still unresolved after one round, label the issue `disagreement` and ask the owner.
-3. Until the owner decides, take the more conservative option: less scope, less data, fewer dependencies, no launch.
+2. If still unresolved after one round, label the issue `disagreement`, and Astra arbitrates, deciding with reasons.
+3. The owner decides only if an agent still disputes Astra's ruling with new evidence, or the question is in the owner's [decision rights](#decision-rights) anyway.
+4. Until it is resolved, take the more conservative option: less scope, less data, fewer dependencies, no launch.
 
 ## When stuck
 

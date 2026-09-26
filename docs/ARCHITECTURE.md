@@ -121,6 +121,7 @@ A shared package is `packages/<name>/` with `package.json` named `@project-100/<
 
 - Pure logic gets Vitest unit tests (`*.test.ts` next to the code).
 - Add DOM tests only when they earn their keep. Set `// @vitest-environment happy-dom` per file and add the dependency then, not before.
+- **No committed screenshot tests for apps.** Across 100 apps, baselines would break on every intentional UI change, differ between machines, and get re-baselined by agents without real review, which costs more than it catches. Visual regression belongs in `ajj-design`, which already screenshot-tests its shared components. App UI is checked in review instead: the reviewer captures throwaway screenshots with the Playwright CLI on the preview URL (desktop and mobile). An app whose value is mostly visual may add screenshot tests if `APP.md` justifies them.
 - CI runs `pnpm verify` on every PR, including Dependabot PRs.
 
 ## Not built yet (deliberately)
