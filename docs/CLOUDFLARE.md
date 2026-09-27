@@ -35,7 +35,8 @@ Cloudflare builds and deploys straight from this GitHub repository (dashboard Gi
   | Root directory | `/` (the repository root, where `wrangler.jsonc` and `pnpm-workspace.yaml` are) |
   | Build command | `pnpm build:site` |
   | Deploy command | `npx wrangler deploy` (the default) |
-  | Non-production branch deploy command | `npx wrangler preview` (the default), which creates a Preview at `<preview-name>-project-100.<subdomain>.workers.dev` |
+  | Non-production branch deploy command | `npx wrangler preview` (the default), which creates a Preview on the preview domain (`<branch>.hundred.dev.ajustinjames.com`, see below) |
+  | Preview domain | `hundred.dev.ajustinjames.com` |
   | Production branch | `main` |
 
   The output folder, `dist`, is set in the committed [`wrangler.jsonc`](../wrangler.jsonc), not the dashboard.
