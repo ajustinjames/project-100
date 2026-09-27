@@ -67,8 +67,8 @@ function checkPages(
 }
 
 /**
- * The site's own pages. 404.html matters: without it, Cloudflare Pages would answer every unknown
- * path with the home page.
+ * The site's own pages. 404.html matters: wrangler.jsonc's `not_found_handling: "404-page"`
+ * serves it, with status 404, for every unknown path.
  */
 const SITE_PAGES = ["index.html", "labs/index.html", "404.html"];
 
