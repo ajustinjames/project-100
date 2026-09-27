@@ -77,6 +77,19 @@ describe("scaffolding", () => {
     expect(readFileSync(join(appDir, "README.md"), "utf8")).toContain(name);
   });
 
+  it("states the candidate's privacy class in PRIVACY.md", () => {
+    const dir = createCandidate(options, "tide-table", "Tide Table");
+    fillIn(dir);
+    const file = join(dir, "app.json");
+    const meta = JSON.parse(readFileSync(file, "utf8"));
+    writeFileSync(file, JSON.stringify({ ...meta, privacy: "local-only" }));
+    const appDir = promoteCandidate(options, "tide-table");
+    expect(readFileSync(join(appDir, "PRIVACY.md"), "utf8")).toContain(
+      "**Classification:** `local-only`",
+    );
+    expect(validateRegistry(loadRegistry(root).entries)).toEqual([]);
+  });
+
   it("carries extra candidate files into the app", () => {
     const dir = createCandidate(options, "tide-table", "Tide Table");
     fillIn(dir);

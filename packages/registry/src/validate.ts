@@ -9,6 +9,7 @@ import {
   type ApprovalKind,
   LIVE_TARGET,
   PRIVACY_CLASSES,
+  PRIVACY_CLASSIFICATION,
   RESERVED_SLUGS,
   RETRO_INCOMPLETE_MARKER,
   SCHEMA_VERSION,
@@ -34,6 +35,8 @@ export interface RegistryEntry {
   packageJson: PackageJson | null;
   /** Contents of RETRO.md, or null if the file does not exist. */
   retro: string | null;
+  /** Contents of PRIVACY.md, or null if the file does not exist. */
+  privacyDoc: string | null;
 }
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -226,6 +229,14 @@ export function validateEntry(entry: RegistryEntry): string[] {
   // Candidates may declare personal data while the owner decides; nothing reaches apps/ without approval.
   if (meta.privacy === "personal-data" && entry.location === "apps" && !has("personal-data"))
     fail('privacy "personal-data" needs a "personal-data" approval from the project owner');
+  // PRIVACY.md is what users read, so it must state the same class. Discarded apps are exempt.
+  if (entry.location === "apps" && meta.status !== "rejected") {
+    const stated = entry.privacyDoc?.match(PRIVACY_CLASSIFICATION)?.[1] ?? null;
+    if (stated !== meta.privacy)
+      fail(
+        `PRIVACY.md must state **Classification:** \`${meta.privacy}\` to match privacy (docs/PRIVACY_AND_DATA.md)`,
+      );
+  }
 
   // 3. app.json must agree with package.json, so the registry stays truthful.
   if ((meta.status === "labs" || meta.status === "live") && entry.packageJson === null)

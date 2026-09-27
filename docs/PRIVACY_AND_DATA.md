@@ -58,7 +58,7 @@ The repository is public. Never commit secrets, API keys, tokens, private analyt
 
 Every app's `PRIVACY.md` states, even when the answer is "nothing":
 
-- its classification (matching `app.json`)
+- its classification, on the `**Classification:**` line, matching `app.json` (`pnpm p100 validate` checks this)
 - what data it handles, and where it is stored
 - what leaves the device, and to whom
 - the third parties involved

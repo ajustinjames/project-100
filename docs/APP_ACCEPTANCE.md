@@ -144,7 +144,7 @@ Promotion is the Originator's decision, and its reason is recorded ([decision ri
 Then:
 
 1. Branch from `main` and run `pnpm p100 promote <slug>`. This moves the candidate to `apps/<slug>/` with status `labs` and the next id, and keeps `PROPOSAL.md` as history.
-2. Run `pnpm install`. Fill in `APP.md` (problem, audience, scope, and alternatives come from the proposal) with a dated product decision saying why the app entered Labs. Fill in `PRIVACY.md`.
+2. Run `pnpm install`. Fill in `APP.md` (problem, audience, scope, and alternatives come from the proposal) with a dated product decision saying why the app entered Labs. Fill in `PRIVACY.md`: `promote` sets its classification line from `app.json`, but the rest of the template describes `none`.
 3. Run `pnpm verify` and open a PR titled `Promote: <slug> (#<id>)`. The description gives the reason for promotion and links the candidate PR, the critique, and any approvals. Merge it once CI passes. If CI reports an id collision, rebase and renumber ([IDs](LIFECYCLE.md#ids)).
 
 Building then follows the [build flow](AI_ROLES.md#model-assignments), starting with the build brief. Labs is for testing feasibility. Discard freely; see [LIFECYCLE.md](LIFECYCLE.md#discarding-a-labs-prototype).

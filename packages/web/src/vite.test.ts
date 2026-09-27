@@ -46,6 +46,7 @@ function addLabsApp(slug: string, name: string): void {
     dependencies: { "@ajustinjames/hardline-tokens": "^0.1.0" },
     devDependencies: { "@project-100/web": "workspace:*" },
   });
+  writeFileSync(join(repoRoot, "apps", slug, "PRIVACY.md"), "**Classification:** `none`\n");
 }
 
 /** Runs the plugin's hooks the way Vite would, for one page. */

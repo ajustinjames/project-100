@@ -35,6 +35,7 @@ function labsEntry(overrides: Partial<AppMeta> = {}): RegistryEntry {
       devDependencies: { "@project-100/web": "workspace:*", vite: "^8.0.0" },
     },
     retro: `# Retro\n${RETRO_INCOMPLETE_MARKER}\n`,
+    privacyDoc: `# Privacy\n\n**Classification:** \`${overrides.privacy ?? "none"}\`\n`,
   };
 }
 
@@ -148,6 +149,19 @@ describe("validateEntry", () => {
     candidate.dir = "candidates/tide-table";
     candidate.packageJson = null;
     expect(validateEntry(candidate)).toEqual([]);
+  });
+
+  it("keeps PRIVACY.md's classification in sync with app.json", () => {
+    const entry = labsEntry({ privacy: "local-only" });
+    expect(validateEntry(entry)).toEqual([]);
+    entry.privacyDoc = "# Privacy\n\n**Classification:** `none` (must match app.json)\n";
+    expect(validateEntry(entry).join()).toContain("**Classification:** `local-only`");
+    entry.privacyDoc = null;
+    expect(validateEntry(entry).join()).toContain("PRIVACY.md");
+    entry.meta.status = "rejected";
+    entry.meta.rejection = { date: "2026-10-01", reason: "Not useful enough." };
+    entry.retro = completeRetro;
+    expect(validateEntry(entry)).toEqual([]);
   });
 
   it("keeps app.json in sync with package.json", () => {

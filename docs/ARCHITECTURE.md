@@ -91,7 +91,7 @@ There is no separate registry file. The registry is the set of all `apps/*/app.j
 
 CI runs three registry checks:
 
-- **`pnpm p100 validate`** checks each snapshot: shape, lifecycle rules, required approvals (linked to this repository), completed retrospectives, unique ids and slugs, the 100-live cap, and that `app.json` agrees with `package.json`. Labs and live apps must also use `@project-100/web` and have `build` and `typecheck` scripts.
+- **`pnpm p100 validate`** checks each snapshot: shape, lifecycle rules, required approvals (linked to this repository), completed retrospectives, unique ids and slugs, the 100-live cap, that `app.json` agrees with `package.json`, and that `PRIVACY.md` states the same data class as `app.json`. Labs and live apps must also use `@project-100/web` and have `build` and `typecheck` scripts.
 - **`pnpm p100 check-builds`** checks every built page of every Labs and live app (and the template) for the title, disclosure footer, and noindex/no-analytics on non-live pages. It checks the output, so it holds however the page was built.
 - **`pnpm p100 check-changes <base>`** compares a PR with `main`: history is preserved and transitions are legal, and it flags owner-merged changes ([AI_ROLES.md](AI_ROLES.md#merging)).
 

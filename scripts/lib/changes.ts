@@ -18,6 +18,11 @@ const OWNER_GATED_PATHS = [
   ".github/",
   "scripts/",
   "packages/registry/",
+  // The rest of the checks, and the rules that decide what is public and how it is served.
+  "packages/web/src/check.ts",
+  "packages/web/src/headers.ts",
+  "packages/web/src/publish.ts",
+  "vitest.config.ts",
   "docs/PROJECT_CHARTER.md",
   "docs/AI_ROLES.md",
 ];
@@ -60,17 +65,25 @@ export function transitionErrors(base: AppMeta[], head: AppMeta[]): string[] {
   return errors;
 }
 
-/** Reasons this change needs the owner to merge it. Empty means agents may merge it themselves. */
+/**
+ * Reasons this change needs the owner to merge it. Empty means agents may merge it themselves.
+ * `rootScripts` is the root package.json "scripts" before and after the change.
+ */
 export function ownerGatedReasons(
   base: AppMeta[],
   head: AppMeta[],
   changedFiles: string[],
+  rootScripts: { before: unknown; after: unknown },
 ): string[] {
   const reasons: string[] = [];
   for (const file of changedFiles) {
     if (OWNER_GATED_PATHS.some((p) => file.startsWith(p)) || WRANGLER_CONFIG.test(file))
       reasons.push(`changes ${file}`);
   }
+  // Only "scripts" (they define pnpm verify, which CI runs). Dependabot's devDependency bumps
+  // to the same file stay agent-mergeable.
+  if (JSON.stringify(rootScripts.before) !== JSON.stringify(rootScripts.after))
+    reasons.push('changes "scripts" in the root package.json');
   const baseBySlug = bySlug(base);
   for (const after of head) {
     const before = baseBySlug.get(after.slug);

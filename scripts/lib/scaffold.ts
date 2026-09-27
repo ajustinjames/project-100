@@ -20,6 +20,7 @@ import {
   loadRegistry,
   nextId,
   type PackageJson,
+  PRIVACY_CLASSIFICATION,
   SCHEMA_VERSION,
   slugProblem,
   validateEntry,
@@ -186,12 +187,20 @@ export function promoteCandidate(options: ScaffoldOptions, slug: string): string
       for (const file of carried)
         cpSync(join(from, file), join(staging, file), { recursive: true });
 
+      // The template's PRIVACY.md is written for "none". State the real class here.
+      const privacyDoc = readFileSync(join(staging, "PRIVACY.md"), "utf8").replace(
+        PRIVACY_CLASSIFICATION,
+        `**Classification:** \`${meta.privacy}\``,
+      );
+      writeFileSync(join(staging, "PRIVACY.md"), privacyDoc);
+
       const errors = validateEntry({
         dir: `apps/${slug}`,
         location: "apps",
         meta,
         packageJson: pkg,
         retro: readFileSync(join(staging, "RETRO.md"), "utf8"),
+        privacyDoc,
       });
       if (errors.length > 0) throw new Error(`promotion would be invalid:\n${errors.join("\n")}`);
 

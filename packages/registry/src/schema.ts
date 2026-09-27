@@ -99,3 +99,6 @@ export const APPROVAL_REF_PREFIX = "https://github.com/ajustinjames/project-100/
 
 /** Marker left in RETRO.md until a real retrospective is written. */
 export const RETRO_INCOMPLETE_MARKER = "<!-- retro:incomplete -->";
+
+/** The PRIVACY.md line stating the app's data class, e.g. **Classification:** `local-only`. */
+export const PRIVACY_CLASSIFICATION = /^\*\*Classification:\*\* `([a-z-]+)`/m;

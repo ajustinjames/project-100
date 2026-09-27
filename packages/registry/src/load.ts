@@ -44,7 +44,9 @@ export function loadRegistry(rootDir: string): { entries: RegistryEntry[]; error
       }
       const retroFile = join(rootDir, dir, "RETRO.md");
       const retro = existsSync(retroFile) ? readFileSync(retroFile, "utf8") : null;
-      entries.push({ dir, location, meta, packageJson, retro });
+      const privacyFile = join(rootDir, dir, "PRIVACY.md");
+      const privacyDoc = existsSync(privacyFile) ? readFileSync(privacyFile, "utf8") : null;
+      entries.push({ dir, location, meta, packageJson, retro, privacyDoc });
     }
   }
 
