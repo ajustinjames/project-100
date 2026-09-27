@@ -66,7 +66,6 @@ describe("ownerGatedReasons", () => {
       [],
       [],
       [
-        ".claude/settings.json",
         "packages/web/src/check.ts",
         "packages/web/src/headers.ts",
         "packages/web/src/publish.ts",
@@ -74,7 +73,7 @@ describe("ownerGatedReasons", () => {
       ],
       { before: scripts, after: { verify: "pnpm test" } },
     );
-    expect(reasons).toHaveLength(6);
+    expect(reasons).toHaveLength(5);
     expect(reasons.join("\n")).toContain('"scripts" in the root package.json');
   });
 

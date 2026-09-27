@@ -16,7 +16,6 @@ const ALLOWED_TRANSITIONS: Record<Status, Status[]> = {
 /** Paths only the owner may change (checked as prefixes, except wrangler config anywhere). */
 const OWNER_GATED_PATHS = [
   ".github/",
-  ".claude/settings.json",
   "scripts/",
   "packages/registry/",
   // The rest of the checks, and the rules that decide what is public and how it is served.
