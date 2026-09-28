@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "scene-call",
+  "name": "Scene Call",
+  "status": "rejected",
+  "description": "Enter your show's scene breakdown and who can't make which rehearsals, then see at a glance which scenes you can run on any date.",
+  "problem": "Directors and stage managers of small productions keep a scene-by-character breakdown and a conflict calendar in separate spreadsheets, and work out by hand which scenes can be rehearsed on a given night; every new conflict or doubled role means redoing that cross-check.",
+  "category": "performing-arts",
+  "dates": {
+    "created": "2026-09-28",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": {
+    "date": "2026-09-28",
+    "reason": "Quince, a free tool, already works out which scenes can be rehearsed around actor conflicts, and the remaining advantage (no account, data kept on the device) doesn't justify it, especially since cast availability needs a personal-data escalation."
+  }
+}
