@@ -4,11 +4,8 @@ version: 2
 # Nothing is auto-merged. See docs/DEPENDENCIES.md.
 updates:
   - package-ecosystem: "npm"
-    directories:
-      - "/"
-      - "/packages/*"
-      - "/apps/*"
-      - "/templates/app"
+    # One root: every workspace package shares the root pnpm-lock.yaml.
+    directory: "/"
     schedule:
       interval: "weekly"
     # Wait a week after a release before proposing it (supply-chain safety).
