@@ -68,7 +68,7 @@ Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files
 Answer all of these for each survivor before recording anything. Open every page you link and check that it says what you claim; never cite a source from memory. If you can't verify sources (for example, you have no web access), stop here and don't record the idea.
 
 - **Audience and recurrence.** Who exactly has the problem, how often, and what they do about it today. "Everyone" and "developers" are not audiences. Link public evidence that the problem recurs, such as forum threads, repeated community questions, or guides describing a workaround. Link to it; don't copy people's personal details.
-- **Real alternatives.** Name what people actually use now: at least three where they exist, including the non-app default (a spreadsheet, a notes app, paper, a general-purpose tool) and the best free tool. Link each one, and say what it does well and where it falls short for this audience.
+- **Real alternatives.** Name what people actually use now: at least three where they exist, including the non-app default (a spreadsheet, a notes app, paper, a general-purpose tool) and the best free tool. Link each one, and say what it does well and where it falls short for this audience. Search by the job the app does, not only by its category. Check the web, the major app stores, and F-Droid, and don't skip new or little-known tools: a free tool that does the core job is the most common reason the critique kills a candidate.
 - **What this app would do better.** One or two concrete, checkable differences ("keeps the whole list on the device and works offline", "shows X next to Y so you don't have to switch tabs"). Adjectives such as "simpler", "cleaner", or "modern" don't count.
 - **Shape and escalations.** Whether it can run in the browser with local data, its rough size, and every [escalation](AI_ROLES.md#escalation) it would trigger.
 
@@ -98,7 +98,7 @@ The Critic's job is to argue against the candidate and try to kill it:
 - Test "what this does better": would this audience actually switch?
 - Look for missed escalations, especially anything near a [sensitive subject](PROJECT_CHARTER.md#sensitive-subjects), personal data, or an external API. Look for scope that is too big to maintain, or that needs ongoing human work.
 
-Post the critique as a single PR comment. All agents use the owner's GitHub account, so begin it with `Critique by <role> (<model ID>, effort <level>)`, launched as described in [Launching another model](AI_ROLES.md#launching-another-model). Give each finding a severity:
+Post the critique as a single PR comment. All agents use the owner's GitHub account, so begin it with `Critique by <role> (<model ID>, effort <level>)`, launched as described in [Launching another model](AI_ROLES.md#launching-another-model). The Critic must be able to check sources, so give it live web search (for `codex exec`, add `-c web_search='"live"'`). A read-only Critic usually can't post to GitHub. In that case, the session that launched it posts the Critic's final message verbatim and doesn't edit it. Give each finding a severity:
 
 | Severity | Meaning |
 |---|---|
