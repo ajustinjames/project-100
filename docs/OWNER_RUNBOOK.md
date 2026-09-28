@@ -15,7 +15,9 @@ One-time setup the project owner does by hand. Agents: you don't need this file 
 
 ## Cloudflare domain and deploy
 
-`ajustinjames.com` is already a Cloudflare zone, so the subdomain needs no DNS work outside Cloudflare. Do this when the first app is ready to deploy, not before. It is the same dashboard Git integration as `ajustinjames-v2`.
+`ajustinjames.com` is already a Cloudflare zone, so the subdomain needs no DNS work outside Cloudflare. It is the same dashboard Git integration as `ajustinjames-v2`.
+
+**Status:** set up in September 2026. Production serves at `hundred.ajustinjames.com`, and branch previews at `<branch>.hundred.dev.ajustinjames.com` (PR #5 was among the first). The steps below record how it is configured; repeat them only to rebuild it.
 
 1. **Connect the repository.** Under *Workers & Pages → Create → Import a repository*, choose `ajustinjames/project-100`. Use the same Cloudflare account as the `ajustinjames.com` zone.
 2. **Set the build.**
@@ -26,11 +28,12 @@ One-time setup the project owner does by hand. Agents: you don't need this file 
    - No other settings. Node comes from `.node-version` and pnpm from `packageManager` in `package.json`. If the build image doesn't pick those up, set the `NODE_VERSION` build variable to match `.node-version`.
    - Enable preview deployments for non-production branches.
 3. **Attach the domain.** In the project, open the custom domains settings and add `hundred.ajustinjames.com`. Cloudflare creates the DNS record and certificate automatically. Don't create a `hundred` DNS record by hand first; it will conflict.
-4. **Set up Web Analytics.** Under *Web Analytics → Add a site*, enter `hundred.ajustinjames.com` and choose the JS snippet (not automatic injection). Add its token as the build variable `P100_CF_ANALYTICS_TOKEN` for **production only**, so previews get no beacon.
-5. **Check the first preview** (these need a real Cloudflare deployment; nothing local can confirm them):
+4. **Set the preview domain** to `hundred.dev.ajustinjames.com`, so branch previews are served at `<branch>.hundred.dev.ajustinjames.com` and per-commit ones at `<id>.hundred.dev.ajustinjames.com`, behind a Cloudflare challenge. If it ever changes, update `PREVIEW_URL_PATTERNS` in `packages/web/src/headers.ts` ([CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration)).
+5. **Set up Web Analytics.** Under *Web Analytics → Add a site*, enter `hundred.ajustinjames.com` and choose the JS snippet (not automatic injection). Add its token as the build variable `P100_CF_ANALYTICS_TOKEN` for **production only**, so previews get no beacon.
+6. **Check the first preview** (these need a real Cloudflare deployment; nothing local can confirm them):
    - Its response headers include `X-Robots-Tag: noindex` on every path, including `/`, and the `Content-Security-Policy` from `_headers`. The rules match Cloudflare hostnames by pattern ([CLOUDFLARE.md](CLOUDFLARE.md#deploys-cloudflare-git-integration)); if a preview hostname doesn't match, tell an agent which hostname Cloudflare used.
    - `/labs/` also sends `X-Robots-Tag: noindex`, and an unknown path returns the 404 page with status 404.
    - The page source has no Cloudflare Web Analytics beacon.
-6. **Check production** on `hundred.ajustinjames.com` after the first deploy from `main`: there is **no** `X-Robots-Tag` on `/`, `/sitemap.xml` and `/robots.txt` load, the home page source includes the beacon (if step 4 is done), and the browser console shows no Content-Security-Policy errors other than the blocked Cloudflare "JavaScript detections" inline script (`window.__CF$cv$params`). The zone injects it, and the CSP blocks it on purpose until you decide: turn off Bot Fight Mode or JavaScript detections for the zone, or accept the blocked script. Record the decision in [CLOUDFLARE.md](CLOUDFLARE.md#security-headers) and remove this exception once it's resolved.
+7. **Check production** on `hundred.ajustinjames.com` after the first deploy from `main`: there is **no** `X-Robots-Tag` on `/`, `/sitemap.xml` and `/robots.txt` load, the home page source includes the beacon (if step 5 is done), and the browser console shows no Content-Security-Policy errors other than the blocked Cloudflare "JavaScript detections" inline script (`window.__CF$cv$params`). The zone injects it, and the CSP blocks it on purpose until you decide: turn off Bot Fight Mode or JavaScript detections for the zone, or accept the blocked script. Record the decision in [CLOUDFLARE.md](CLOUDFLARE.md#security-headers) and remove this exception once it's resolved.
 
 No API tokens are created, and nothing is stored in GitHub. The home page at `/` (which every app footer links to) is part of the build, so the first deploy can happen before any app is live.

@@ -124,11 +124,14 @@ All changes go through PRs; never push directly to `main`. PRs exist for the CI 
 - a status change to `live` or `archived`
 - any change to an `approvals` list or to `monetization.eligible`
 - `.github/` (workflows, CODEOWNERS, Dependabot, templates)
-- `scripts/` and `packages/registry/` (the checks themselves)
+- the checks themselves: `scripts/`, `packages/registry/`, `packages/web/src/check.ts`, `vitest.config.ts`, and the `scripts` in the root `package.json` (which define `pnpm verify`)
+- `packages/web/src/headers.ts` (security headers) and `packages/web/src/publish.ts` (what the site publishes)
 - `docs/PROJECT_CHARTER.md` and this file
 - any `wrangler` config (deploy configuration and bindings)
 
 For these, open the PR, request review from `@ajustinjames`, and stop. **Agents never apply `owner-approved` and never merge these PRs.**
+
+The label approves only the commits it was applied to: CI honors it only on the run that adding it triggers. After any new push, CI fails again until the owner removes and re-adds it.
 
 The same check also enforces history: registry entries are never deleted, ids never change or get reused, and status changes follow [LIFECYCLE.md](LIFECYCLE.md#transitions).
 

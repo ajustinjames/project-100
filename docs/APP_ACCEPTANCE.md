@@ -156,7 +156,7 @@ Before requesting launch, the app must meet all of these:
 - **Useful:** does the job in the proposal. Core flows work on mobile and desktop.
 - **Accessible:** keyboard-operable, has visible focus, uses semantic HTML, sufficient contrast, and labelled controls.
 - **Fast and light:** no unnecessary dependencies, and loads quickly on a mid-range phone.
-- **Robust:** handles empty, invalid, and large inputs. No console errors. Stored-data formats are versioned if the data persists.
+- **Robust:** handles empty, invalid, and large inputs. No console errors, apart from the one known CSP error for Cloudflare's blocked "JavaScript detections" script until the owner resolves it ([CLOUDFLARE.md](CLOUDFLARE.md#security-headers)). Stored-data formats are versioned if the data persists.
 - **Tested:** core logic has Vitest tests. `pnpm verify` passes.
 - **Honest docs:** `APP.md`, `PRIVACY.md`, and `README.md` are accurate. `app.json` is complete.
 - **Compliant:** uses `ajj-design`, includes the disclosure footer, has no AI-generated media, has asset licenses recorded, and holds all needed approvals.

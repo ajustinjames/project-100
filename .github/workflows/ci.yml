@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    # labeled/unlabeled re-run the owner gate when the owner-approved label changes.
+    # labeled/unlabeled re-run the owner gate when labels change.
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
 permissions:
@@ -41,5 +41,7 @@ jobs:
       - name: Check changes against base
         if: github.event_name == 'pull_request'
         env:
-          P100_OWNER_APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'owner-approved') }}
+          # The label counts only on the run that adding it triggers, so it approves the commits
+          # the owner saw. After a new push, remove and re-add it.
+          P100_OWNER_APPROVED: ${{ github.event.action == 'labeled' && github.event.label.name == 'owner-approved' }}
         run: pnpm p100 check-changes origin/${{ github.base_ref }}

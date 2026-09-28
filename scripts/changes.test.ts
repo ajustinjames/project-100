@@ -47,14 +47,34 @@ describe("transitionErrors", () => {
 });
 
 describe("ownerGatedReasons", () => {
+  const scripts = { verify: "biome ci . && pnpm test" };
+  const sameScripts = { before: scripts, after: { ...scripts } };
+
   it("lets agents merge ordinary Labs work", () => {
     expect(
       ownerGatedReasons(
         [app({})],
         [app({ name: "Tide Table 2" })],
-        ["apps/tide-table/src/main.ts"],
+        ["apps/tide-table/src/main.ts", "packages/web/src/html.ts", "package.json"],
+        sameScripts,
       ),
     ).toEqual([]);
+  });
+
+  it("flags the checks CI runs and the rules for what is published", () => {
+    const reasons = ownerGatedReasons(
+      [],
+      [],
+      [
+        "packages/web/src/check.ts",
+        "packages/web/src/headers.ts",
+        "packages/web/src/publish.ts",
+        "vitest.config.ts",
+      ],
+      { before: scripts, after: { verify: "pnpm test" } },
+    );
+    expect(reasons).toHaveLength(5);
+    expect(reasons.join("\n")).toContain('"scripts" in the root package.json');
   });
 
   it("flags launches, approvals, monetization, and protected paths", () => {
@@ -74,6 +94,7 @@ describe("ownerGatedReasons", () => {
         }),
       ],
       [".github/workflows/ci.yml", "docs/AI_ROLES.md", "apps/tide-table/wrangler.jsonc"],
+      sameScripts,
     ).join("\n");
     expect(reasons).toContain('status becomes "live"');
     expect(reasons).toContain("approvals change");

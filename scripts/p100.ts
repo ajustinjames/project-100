@@ -3,6 +3,7 @@
 // and checked by `pnpm p100 validate`.
 
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -10,6 +11,7 @@ import {
   countByStatus,
   LIVE_TARGET,
   loadRegistry,
+  type PackageJson,
   validateRegistry,
 } from "../packages/registry/src/index.ts";
 import { checkBuilds } from "./lib/builds.ts";
@@ -109,14 +111,19 @@ function git(...args: string[]): string {
 
 function checkChanges(baseRef: string, head: AppMeta[]): number {
   const lines = (text: string) => text.split("\n").filter(Boolean);
-  const changedFiles = lines(git("diff", "--name-only", `${baseRef}...HEAD`));
+  // --no-renames lists both sides of a rename, so moving a file out of a gated path is caught.
+  const changedFiles = lines(git("diff", "--no-renames", "--name-only", `${baseRef}...HEAD`));
   const base = lines(git("ls-tree", "-r", "--name-only", baseRef, "--", "apps", "candidates"))
     .filter((path) => /^(apps|candidates)\/[^/]+\/app\.json$/.test(path))
     .map((path) => JSON.parse(git("show", `${baseRef}:${path}`)) as AppMeta);
+  const rootScripts = {
+    before: (JSON.parse(git("show", `${baseRef}:package.json`)) as PackageJson).scripts,
+    after: (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as PackageJson).scripts,
+  };
 
   const errors = transitionErrors(base, head);
   for (const error of errors) console.error(`✗ ${error}`);
-  const reasons = ownerGatedReasons(base, head, changedFiles);
+  const reasons = ownerGatedReasons(base, head, changedFiles, rootScripts);
   if (reasons.length > 0) {
     const approved = process.env.P100_OWNER_APPROVED === "true";
     console.log(`${approved ? "✓" : "✗"} Owner-gated change (only the owner merges it):`);

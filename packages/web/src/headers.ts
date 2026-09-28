@@ -1,6 +1,6 @@
 // The Cloudflare `_headers` file for the assembled site: security headers for every response,
 // and noindex for Labs and for every Cloudflare-hosted URL other than the custom domain.
-// Format: https://developers.cloudflare.com/pages/configuration/headers/
+// Format: https://developers.cloudflare.com/workers/static-assets/headers/
 
 /**
  * Strict baseline: only our own files, plus Cloudflare Web Analytics (the beacon script and its

@@ -132,6 +132,5 @@ A shared package is `packages/<name>/` with `package.json` named `@project-100/<
 
 These wait for a real need. See [CLOUDFLARE.md](CLOUDFLARE.md) for the planned shape.
 
-- Connecting Cloudflare's Git integration and the domain (owner setup: [OWNER_RUNBOOK.md](OWNER_RUNBOOK.md#cloudflare-domain-and-deploy))
 - Any Cloudflare resources beyond static hosting
 - Shared storage, testing, or accessibility helpers
