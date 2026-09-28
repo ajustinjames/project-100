@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "size-sieve",
+  "name": "Size Sieve",
+  "status": "candidate",
+  "description": "Open a multi-size knitting or crochet pattern in your browser and read it with only your size's numbers; every substitution is marked, and the pattern never leaves your device.",
+  "problem": "Knitting and crochet patterns print every size's numbers side by side, as in \"cast on 80 (88, 96, 104) sts\", so knitters go through the whole pattern with a highlighter before starting and still misread strings of numbers mid-project.",
+  "category": "crafts",
+  "dates": {
+    "created": "2026-09-28",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
