@@ -1,0 +1,80 @@
+# Size Sieve
+
+<!-- Keep this document current. It is the product and architecture record for this app. -->
+
+## Problem
+
+Knitting and crochet patterns print every size's numbers side by side in each instruction ("cast on 80 (88, 96, 104, 112) sts"). The standard advice is to go through the whole pattern before starting and highlight your size's number in every sequence ([tin can knits](https://blog.tincanknits.com/2020/10/08/reading-multi-size-knitting-pattern-instructions/), [Arnall-Culliford](https://www.actechniques.co.uk/blog/2021/5/17/knitting-know-how-understanding-a-pattern-with-multiple-sizes)). Even so, it's easy to follow the wrong number. This recurs with every multi-size pattern.
+
+## Audience
+
+Knitters and crocheters working from multi-size patterns, typically PDFs bought from designers or on Ravelry, who read them on an iPhone, iPad, or computer. They come back for each new pattern, and reopen a saved one while working on it.
+
+## Scope
+
+**In scope:**
+
+- Open a pattern PDF (text extracted in the browser) or paste pattern text.
+- Detect the pattern's size list, or let the knitter give the number of sizes, and pick a size.
+- Replace each size sequence (`a (b, c)`, `a [b, c]`, grouped `a (b, c) (d, e)`, `a/b/c`, with `-` or `x` placeholders) with the chosen size's value. Mark every substitution and show its original sequence.
+- List the groups the parser couldn't place (count mismatches, size-labelled instructions) without changing them.
+- Save resolved patterns in the browser with the chosen size; reopen, switch size, delete, export and import. Print.
+
+**Explicitly out of scope:**
+
+- Row tracking, counters, stash management (dedicated apps do these well).
+- Sharing or publishing patterns (patterns are usually copyrighted).
+- Scanned or image-only PDFs (no OCR).
+- Resizing or grading patterns to new measurements.
+- Any server processing, AI, or accounts.
+
+## Alternatives researched
+
+Full comparison and sources in [PROPOSAL.md](PROPOSAL.md#existing-alternatives). In short:
+
+- **Highlighter, or manual highlights in a PDF app** (My Row Counter, knitCompanion): free or cheap, keeps the layout, but manual and error-prone.
+- **Rowtine:** free, open-source, deterministic, and offline, but Android only.
+- **TrixiStitches:** browser-based and on-device, with automatic size highlighting in place, but only in its Pro tier (€49.90 a year).
+- **InterTwined:** automatic, but iOS only, uploads patterns to an LLM API, and is paid after three patterns.
+- **Tin Can Knits app:** free "only your size" view, but only for its own patterns.
+
+Worth building because none is free and automatic on iPhone, iPad, or computers for a pattern bought elsewhere. The difference is narrow, so it has to be proved in Labs (see the feasibility gate).
+
+## Product decisions
+
+- 2026-09-28: Entered Labs as app #1. It was selected after two critique rounds ([candidate PR #14](https://github.com/ajustinjames/project-100/pull/14), [round 1](https://github.com/ajustinjames/project-100/pull/14#issuecomment-5880733769), [round 2](https://github.com/ajustinjames/project-100/pull/14#issuecomment-5880919773)) because it would be the only free way to filter any multi-size pattern to one size on iPhone, iPad, and computers, for a problem that recurs with every pattern. No escalations apply.
+- 2026-09-28: The first build task is a feasibility measurement, before any UI polish. Run the parser on at least ten lawfully obtained free patterns from at least six designers, locally, and never commit them. Record per-pattern counts here: size sequences resolved correctly, flagged, missed, and substituted wrongly. **Discard the prototype** unless (a) every substitution is visibly marked, (b) wrong substitutions occur in at most two of the ten patterns and are at most 1% of all size sequences, and (c) the median pattern resolves at least four in five size sequences correctly. This gate came from the critique.
+- 2026-09-28: Open for the build brief: show sizes by highlighting in place on the rendered PDF (pdf.js text layer), which keeps charts and layout, or as resolved extracted text. The parser and data model are the same either way.
+- 2026-09-28: Keep a free tool on every platform as the reason to exist. If Rowtine ships on iOS or the web, or TrixiStitches makes size highlighting free, re-run the screen and discard if this no longer does anything better.
+
+## Architecture
+
+Planned; the app is still the template scaffold. It will be a static Vite app in plain TypeScript (Lit where components help) on `ajj-design` `hardline`. The core is a pure, heavily unit-tested parser module (find the size list, find sequences, resolve or flag them). Tests use short synthetic snippets written for the tests, never copied patterns. Saved patterns go in IndexedDB under `p100:size-sieve:`, with a versioned record format and JSON export and import. No Cloudflare bindings.
+
+## Dependencies
+
+<!-- Each third-party dependency and why a small amount of our own code would not do. See docs/DEPENDENCIES.md. -->
+
+None yet beyond ajj-design (`hardline`).
+
+Planned: `pdfjs-dist` (Mozilla, Apache-2.0) to extract text from PDFs, and render them if in-place highlighting is chosen, in the browser. PDF parsing is the kind of hard problem [DEPENDENCIES.md](../../docs/DEPENDENCIES.md) says to use a library for. It's added in the build PR that first needs it, and loaded only when a PDF is opened.
+
+## Shared packages
+
+- `@project-100/web` — head metadata, disclosure footer, analytics beacon.
+
+## Assets and licenses
+
+<!-- Every third-party font, icon set, image, or sound: source, license, and where it is used. AI must not generate media. -->
+
+None.
+
+## Tradeoffs and known limitations
+
+- PDF text extraction can reorder or drop text in complex layouts (PDF.js has had [reported reading-order failures](https://github.com/mozilla/pdf.js/issues/14493)). Counting can't detect lost text, so the app shows extracted text for checking.
+- The parser will not handle every designer's format; unhandled groups are listed, not chased one by one.
+- Data lives in one browser; export and import are the backup.
+
+## Launch packet
+
+<!-- Filled in before requesting launch approval. See docs/APP_ACCEPTANCE.md#launch-packet. -->
