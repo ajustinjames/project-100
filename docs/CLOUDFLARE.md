@@ -40,6 +40,8 @@ Cloudflare builds and deploys straight from this GitHub repository (dashboard Gi
 
   The output folder, `dist`, is set in the committed [`wrangler.jsonc`](../wrangler.jsonc), not the dashboard.
 
+  Wrangler is pinned as a root devDependency, so `npx wrangler` runs the locked version instead of downloading the newest release on every build. That keeps it under the same 24-hour release delay and Dependabot updates as every other dependency.
+
 The build is one root script, `pnpm build:site`:
 
 1. `pnpm build` builds every workspace package: each app to `apps/<slug>/dist/` (the Vite plugin sets the base path from `app.json`), and the site's own pages to `site/dist/` (the `project100Site()` plugin fills in the counter and app lists from the registry).
