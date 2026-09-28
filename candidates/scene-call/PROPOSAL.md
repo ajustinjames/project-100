@@ -83,7 +83,16 @@ The app stores data only in the user's browser, sends nothing, and never asks fo
 
 ## Critique
 
+[Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/13#issuecomment-5880580086), recommending reject. Every finding is accepted; none is dismissed.
+
 | Severity | Finding | Response |
 |---|---|---|
+| Critical | Cast availability needs a `personal-data` escalation: track labels may be performer names, and a character plus dated absences can identify a performer through a public cast list. | Accepted. Keying on characters doesn't stop a cast list from linking those absences to a named person, and local storage doesn't make this something other than handling personal data. `local-only` and "Escalations needed: None" were wrong. |
+| High | The free-alternatives claim is wrong: Quince, Stage Manager Suite, and StageWise are free. | Accepted, and checked: [Quince](https://www.quince-app.com/) is "Free for now" and "works out which scenes you can work on instead", which is this proposal's core. [Stage Manager Suite](https://stagemanagersuite.com/rehearsal-schedules) is free to start and carries audition conflicts into rehearsal planning. [StageWise](https://www.stagewiseapp.com/) is free through 2026, with scenes, characters, and conflict detection. My research missed all three. The only remaining difference is no account and data kept on the device, which isn't enough to justify an app, and the Critical finding undercuts it. |
+| High | The case for switching from spreadsheets is unproven: re-entering the breakdown and conflicts with no import may cost more than the date view saves. | Accepted. I have no evidence that a small production would recoup the setup, and the free tools above already offer the same trade. |
+| Medium | Partial availability needs a rehearsal time window before "runnable" means anything. | Accepted as a design gap. Moot, given the rejection. |
+| Low | Some citations are broken or overstated (the `www.` Stagehand links, StageManager.tech pricing and features). | Accepted. Not corrected, because the candidate is rejected; the Critic's replacement links are in the critique. |
 
 ## Decision
+
+2026-09-28: Rejected because Quince, a free tool, already works out which scenes can be rehearsed around actor conflicts, and the remaining advantage (no account, data kept on the device) doesn't justify it, especially since cast availability needs a personal-data escalation.
