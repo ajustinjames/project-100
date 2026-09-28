@@ -37,15 +37,16 @@ Charts and schematics are images, so they aren't reproduced. The resolved text i
 | Highlighting in a PDF app: My Row Counter, knitCompanion | [My Row Counter](https://rowcounterapp.com/), [knitCompanion review](https://pdxknitterati.com/2019/05/30/knitcompanion-review/) | Keep the original PDF; add row tracking and counters. My Row Counter's highlighter is free. | Highlighting is manual, one number at a time. knitCompanion's highlighting is in its paid Essentials tier ($9.99 a year in that 2019 review). |
 | Rowtine (Android) | [F-Droid](https://f-droid.org/en/packages/com.rowtine.app/), [GitHub](https://github.com/alxia0/rowtine) | Free, Apache-2.0, offline, no account. Imports a PDF and filters "every number in the text... down to the chosen size", in four languages, with row tracking, charts, and stash management. | Android only, with no iOS or web version mentioned. Knitters on iPhone, iPad, or a computer can't use it. |
 | Tin Can Knits app | [Tin Can Knits](https://blog.tincanknits.com/share-the-tin-can-knits-app/) | Free; shows only your size, one instruction at a time. | Only for Tin Can Knits' own patterns in its in-app format, not a PDF bought elsewhere. |
+| TrixiStitches (browser) | [trixistitches.com](https://trixistitches.com/), [pricing](https://trixistitches.com/pricing) | Runs in the browser, keeps pattern files on the device, imports any PDF, and highlights your size automatically in place, keeping the layout. Free tier with counters and glossaries; no account needed to start. | Automatic size highlighting is a Pro feature (€49.90 a year, or Ultimate at €89.90). |
 | InterTwined (iOS) | [tryintertwined.com](https://www.tryintertwined.com/) | Extracts a pattern for a chosen size automatically, and adds row tracking. | iOS only. It uploads the pattern to be processed by a commercial LLM API. Three free extractions, then paid credits ($4.99 packs). |
 | Grading tools for pattern *designers* | [KnitGrader](https://knitgrader.com/pattern-grading-generator/) | Compute per-size numbers from gauge and measurements when writing a pattern. | They don't read a pattern you bought, so they don't solve this. |
 
 ## What this does better
 
-1. **Free automatic size filtering for any pattern, on iPhone, iPad, and computers, without uploading it.** The only free automatic tool, Rowtine, is Android-only. Tin Can Knits' app works only on its own patterns. InterTwined is iOS-only, paid after three patterns, and sends the pattern to an LLM API. Knitters who read patterns on an iPhone, iPad, or computer have no free automatic option for patterns bought elsewhere.
+1. **Free, automatic size filtering for any pattern, in any browser, without uploading it.** Every automatic option either costs money or is limited to one platform or one publisher. TrixiStitches does it in the browser only in its €49.90-a-year Pro tier. InterTwined is iOS-only, paid after three patterns, and sends the pattern to an LLM API. Rowtine is free but Android-only, and the Tin Can Knits app covers only its own patterns. A knitter on an iPhone, iPad, or computer has no free automatic option for a pattern bought elsewhere.
 2. **Every substitution is visible and reversible.** Each replaced number is marked and shows its original sequence, and unresolved groups are listed. The knitter can check the tool's work at a glance, instead of trusting a language model's rewrite (InterTwined) or an unmarked filtered text.
 
-Rowtine shows that deterministic, on-device size filtering is feasible and wanted. This candidate brings that to the platforms Rowtine doesn't reach, and runs in a browser, so there's nothing to install.
+Rowtine and TrixiStitches show that on-device size filtering is feasible and valued enough to charge for. This candidate's difference is narrow but checkable: it is free and works on every platform. The second point is a design commitment, not a verified advantage over Rowtine, whose documentation doesn't say how it shows substitutions.
 
 ## Likely scope and shape
 
@@ -55,12 +56,16 @@ Rowtine shows that deterministic, on-device size filtering is feasible and wante
 - UI in plain TypeScript or Lit with `ajj-design`, plus print CSS. Rough size: 1,500 to 2,500 lines including tests. No Cloudflare services and no media assets.
 - Privacy class: `local-only`. Pattern text and the chosen size stay in the browser. Like every app, it will get the standard cookieless analytics beacon once live; pattern content is never sent.
 
-**Labs feasibility gate.** Labs exists to test this, and the first build task is a measurement, before any polish. Run the parser on at least ten lawfully obtained free patterns from at least six designers, covering the formats above. Test locally; never commit them. Record in `APP.md` the number of size sequences resolved correctly, flagged, missed, and substituted wrongly. Discard the prototype if any wrong substitution is not visible as a marked substitution, or if fewer than about four in five size sequences resolve correctly across the set.
+**Labs feasibility gate.** Labs exists to test this, and the first build task is a measurement, before any polish. Run the parser on at least ten lawfully obtained free patterns from at least six designers, covering the formats above. Test locally; never commit them. Record per-pattern results in `APP.md`: size sequences resolved correctly, flagged, missed, and substituted wrongly. Discard the prototype unless all of these hold:
+
+- every substitution, right or wrong, is visibly marked;
+- wrong substitutions stay rare: none in at least eight of the ten patterns, and no more than 1% of all size sequences across the set;
+- in the median pattern, at least four in five size sequences resolve correctly.
 
 ## Screen results
 
 - Useful and specific: pass. Garment knitters and crocheters, and a step they repeat for every pattern.
-- Not already well solved: pass for iPhone, iPad, and computers. Rowtine solves it for free on Android. On other platforms, the free options are manual, and the only automatic tool is paid after three uses and uploads patterns to an LLM.
+- Not already well solved: pass, narrowly. Rowtine solves it for free on Android, and TrixiStitches solves it in the browser for €49.90 a year. On iPhone, iPad, and computers there is no free automatic option.
 - Not a thin wrapper / generic generator: pass. It's a domain-specific parser; no API and no AI.
 - Not justified by SEO, monetization, novelty alone, or use of AI: pass.
 - Runs within baseline budget: pass. Static files only.
@@ -70,15 +75,16 @@ Rowtine shows that deterministic, on-device size filtering is feasible and wante
 
 ## Risks
 
-- **PDF text extraction quality.** Multi-column layouts, tables, and text drawn as images can come out out of order or not at all; PDF.js has open reading-order issues ([example](https://github.com/mozilla/pdf.js/issues/14493)). Counting can't detect lost text. Mitigation: show the extracted text for checking against the PDF, accept pasted text, and measure the effect in the feasibility gate. Scanned or image-only PDFs aren't supported, and the app says so.
+- **PDF text extraction quality.** Multi-column layouts, tables, and text drawn as images can come out out of order or not at all; PDF.js has had reported reading-order failures ([example](https://github.com/mozilla/pdf.js/issues/14493), since closed). Counting can't detect lost text. Mitigation: show the extracted text for checking against the PDF, accept pasted text, and measure the effect in the feasibility gate. Scanned or image-only PDFs aren't supported, and the app says so.
 - **Format variety.** Designers vary (grouped parentheses, European alternation, size-labelled instructions, size tables instead of inline numbers). The parser won't handle everything, and handling every exception could outgrow the maintenance budget. The feasibility gate above decides whether the common formats are enough. Unhandled formats are listed, not chased one by one.
-- **Rowtine could add iOS or web.** If a free tool covers these platforms before or during Labs, re-run the screen and discard if this no longer does anything better.
+- **Rowtine could add iOS or web, or TrixiStitches could make size highlighting free.** If a free tool covers these platforms before or during Labs, re-run the screen and discard if this no longer does anything better.
 - **Losing layout.** Reading resolved text beside the original PDF is a real cost compared with highlighting in place. Adding highlights to the PDF itself would be far more complex and is out of scope.
 - **Copyright.** Patterns are copyrighted. The app keeps the user's own copy on their device and offers no sharing or publishing. Test fixtures are written from scratch.
 
 ## Open questions
 
 - Should the first version open PDFs, or accept pasted text only? Proposed: open PDFs, because patterns almost always arrive as PDFs and paste-only adds friction at the first step. If Labs shows extraction is unreliable, fall back to paste-only and drop the dependency.
+- Should it highlight sizes in place on the rendered PDF (pdf.js text layer), rather than showing extracted text? TrixiStitches' in-place highlighting keeps charts and layout, which would answer the switching concern. Decide in the build brief; it doesn't change the data model or the parser.
 - Should it add row tracking? Proposed: no. Dedicated counter apps do that well, and this tool should stay small.
 
 ## Escalations needed
@@ -97,4 +103,16 @@ None. It runs entirely in the browser, sends no pattern content, has no accounts
 | Medium | The Patternism and FiberTools links couldn't be verified. | Both removed. Neither was needed for the comparison, and My Row Counter and knitCompanion cover manual highlighting. (Both pages opened for me on 2026-09-28, but a claim the Critic can't check shouldn't carry weight.) |
 | Low | "Nothing leaves your device" overstates privacy, given standard analytics. | Accepted. The description now says the pattern never leaves your device, and the scope notes the standard analytics beacon once live. |
 
+[Critique round 2](https://github.com/ajustinjames/project-100/pull/14#issuecomment-5880919773), recommending revise. It resolves round-1 findings 1, 4, and 5, and marks 2 and 3 as partly resolved. This was the second and last round (step 6), so I adopted every requested change and decided. No finding is dismissed.
+
+| Severity | Finding (round 2) | Response |
+|---|---|---|
+| High (round 1, partly resolved) | The feasibility gate could pass with many wrong substitutions; add a separate limit and assess per pattern. | Accepted exactly as asked. The gate now records per-pattern results and requires no wrong substitutions in at least eight of ten patterns, at most 1% wrong across all sequences, and at least four in five correct in the median pattern, as well as every substitution being visibly marked. |
+| Medium (round 1, partly resolved) | Demand for a single-size view is shown, but not that users of arbitrary PDFs will accept losing layout. | Accepted as a Labs question. It's now an open question for the build brief: highlight in place on the rendered PDF, as TrixiStitches does, which keeps charts and layout. |
+| Medium | TrixiStitches, a browser tool, is missing: automatic size highlighting in its paid Pro tier. | Accepted and checked ([pricing](https://trixistitches.com/pricing)). Added to the alternatives. "What this does better" and the screen line are rewritten: the difference is now free on every platform, stated as narrow. |
+| Low | The cited PDF.js issue is closed, not open. | Fixed ("reported reading-order failures, since closed"). |
+| (Gate 1 note) | The visibly-reversible-substitutions advantage over Rowtine isn't verified. | Accepted. It's now described as a design commitment, not a verified advantage. |
+
 ## Decision
+
+2026-09-28: Selected for Labs because it's the only free way to filter any multi-size pattern to one size on iPhone, iPad, and computers. The alternatives are Android-only (Rowtine), paid (TrixiStitches Pro at €49.90 a year, InterTwined), or publisher-only (Tin Can Knits). The problem recurs with every multi-size pattern, and the default workaround is highlighting by hand. The critique shaped it: the advantage is stated as narrow and checkable (free, every platform), the reliability promise was replaced by a strict Labs feasibility gate with discard criteria, and in-place PDF highlighting is left as a build-brief question. Needs no escalations.
