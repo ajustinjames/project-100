@@ -40,7 +40,7 @@ Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files
 **Kill an idea if any of these is true:**
 
 - The one-line pitch describes a thousand existing sites ("a Pomodoro timer", "a JSON formatter", "an AI chat for X").
-- A well-known free tool already does it well, and you cannot say concretely what this version does better.
+- A well-known free tool already does it well, and you cannot say concretely what this version does better. A tool merely existing is not enough to kill an idea; see [what counts as doing it better](#3-research-the-survivors).
 - Its value comes from an external API or AI model rather than from the software itself.
 - It mostly exists to rank in search or show ads.
 - It needs ongoing human curation, moderation, or manual operation.
@@ -68,11 +68,16 @@ Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files
 Answer all of these for each survivor before recording anything. Open every page you link and check that it says what you claim; never cite a source from memory. If you can't verify sources (for example, you have no web access), stop here and don't record the idea.
 
 - **Audience and recurrence.** Who exactly has the problem, how often, and what they do about it today. "Everyone" and "developers" are not audiences. Link public evidence that the problem recurs, such as forum threads, repeated community questions, or guides describing a workaround. Link to it; don't copy people's personal details.
-- **Real alternatives.** Name what people actually use now: at least three where they exist, including the non-app default (a spreadsheet, a notes app, paper, a general-purpose tool) and the best free tool. Link each one, and say what it does well and where it falls short for this audience. Search by the job the app does, not only by its category. Check the web, the major app stores, and F-Droid, and don't skip new or little-known tools: a free tool that does the core job is the most common reason the critique kills a candidate.
-- **What this app would do better.** One or two concrete, checkable differences ("keeps the whole list on the device and works offline", "shows X next to Y so you don't have to switch tabs"). Adjectives such as "simpler", "cleaner", or "modern" don't count.
+- **Real alternatives.** Name what people actually use now: at least three where they exist, including the non-app default (a spreadsheet, a notes app, paper, a general-purpose tool) and the best free tool. Link each one, and say what it does well and where it falls short for this audience. Search by the job the app does, not only by its category. Check the web, the major app stores, and F-Droid, and don't skip new or little-known tools: a free tool that does the core job is the most common reason the critique kills a candidate. Then try the best free one: open it and use it for the core job, or read its documentation where you can't. Judge whether it does the job *well* for this audience, not just whether it exists. Many free tools are small, partial, paywalled at the key feature, or limited to one platform.
+- **What this app would do better.** One or two concrete, checkable differences ("keeps the whole list on the device and works offline", "shows X next to Y so you don't have to switch tabs"). An existing tool with a real gap is fair game. These count:
+  - a feature the audience needs that the best free tool lacks, or does badly (show how you checked);
+  - the key feature is paid, or the tool is limited to one platform, one publisher, or one format the audience doesn't all use;
+  - a different representation or interaction that makes the job easier in a way you can describe and check.
+
+  These don't count: adjectives such as "simpler", "cleaner", or "modern"; polish; and "the same, but local and without an account", unless you have evidence this audience cares about that.
 - **Shape and escalations.** Whether it can run in the browser with local data, its rough size, and every [escalation](AI_ROLES.md#escalation) it would trigger.
 
-**Drop the idea quietly if** research turns up a kill criterion after all, you find no evidence that the problem recurs, a free alternative already does the job well for this audience, or the only improvement you can state is an adjective. Otherwise, record it.
+**Drop the idea quietly if** research turns up a kill criterion after all, you find no evidence that the problem recurs, a free alternative already does the job well for this audience, or the only improvement you can state is an adjective. Don't drop it just because alternatives exist: if you can name a concrete gap for this audience, record it and let the critique test it.
 
 ## Gate 2: Candidate proposal
 
@@ -93,7 +98,7 @@ The Critic critiques the candidate PR. The Critic must be a separate session tha
 The Critic's job is to argue against the candidate and try to kill it:
 
 - Re-run the [screen](#2-screen). Say which kill criteria apply, if any, and whether the case rests on anything under "Not reasons to advance".
-- Search independently for alternatives the proposal missed. Check that each linked source exists and says what the proposal claims.
+- Search independently for alternatives the proposal missed. Check that each linked source exists and says what the proposal claims. For each alternative that matters, say whether it does the core job *well* for this audience, and how you know. An alternative that exists but leaves the proposal's stated gap open is a finding about the comparison, not a kill criterion.
 - Test the audience: is the problem real, specific, and recurring, and is there evidence?
 - Test "what this does better": would this audience actually switch?
 - Look for missed escalations, especially anything near a [sensitive subject](PROJECT_CHARTER.md#sensitive-subjects), personal data, or an external API. Look for scope that is too big to maintain, or that needs ongoing human work.
