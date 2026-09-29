@@ -2,6 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { extractPdfText, PdfExtractionError } from "./extract.ts";
 
 const encoder = new TextEncoder();
+const nodeBuffer = (
+  globalThis as typeof globalThis & {
+    Buffer: { from(value: Uint8Array): Uint8Array };
+  }
+).Buffer;
 
 function escapePdfString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
@@ -84,6 +89,11 @@ describe("extractPdfText", () => {
     ]);
   });
 
+  it("copies Node Buffer input into bytes accepted by PDF.js", async () => {
+    const pdf = nodeBuffer.from(makePdf([textAt(72, 720, "Buffer input works")]));
+    await expect(extractPdfText(pdf)).resolves.toBe("Buffer input works");
+  });
+
   it("throws the scanned-PDF error when a document has no extractable text", async () => {
     await expect(extractPdfText(makePdf([""]))).rejects.toMatchObject({
       name: "PdfExtractionError",
@@ -94,6 +104,9 @@ describe("extractPdfText", () => {
   it("throws a typed invalid-PDF error for corrupt bytes", async () => {
     const invalid = encoder.encode("not a PDF");
     await expect(extractPdfText(invalid)).rejects.toBeInstanceOf(PdfExtractionError);
-    await expect(extractPdfText(invalid)).rejects.toMatchObject({ code: "invalid-pdf" });
+    await expect(extractPdfText(invalid)).rejects.toMatchObject({
+      code: "invalid-pdf",
+      cause: expect.objectContaining({ name: "InvalidPDFException" }),
+    });
   });
 });

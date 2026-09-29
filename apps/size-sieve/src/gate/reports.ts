@@ -1,5 +1,6 @@
 import {
   calculateGateCriteria,
+  calculateStrictGateCriteria,
   type GateSequence,
   MAX_WRONG_PATTERNS,
   MAX_WRONG_RATE,
@@ -11,6 +12,7 @@ import type { TruthFile } from "./truth.ts";
 export interface PatternFailure {
   name: string;
   message: string;
+  cause?: string;
 }
 function markdown(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ↵ ");
@@ -168,14 +170,23 @@ export function renderPatternReport(
     `- False positives: ${analysis.counts.falsePositives}`,
     `- Missed by parser: ${analysis.counts.missed}`,
     `- Lost in extraction and counted: ${analysis.counts.lost}`,
-    `- Lost schematic entries excluded from denominator: ${analysis.counts.uncountedFigureLoss}`,
+    `- Size block left as written: ${analysis.counts.sizeBlockLeftAsWritten}`,
+    `- Size block substituted, value correct: ${analysis.counts.sizeBlockSubstitutedCorrectly}`,
+    `- Figure substituted correctly: ${analysis.counts.figureSubstitutedCorrectly}`,
+    `- Figure left: ${analysis.counts.figureLeft}`,
     "",
   );
   return lines.join("\n");
 }
 
-export function renderErrorReport(name: string, message: string): string {
-  return [`# Measurement failed: ${markdown(name)}`, "", markdown(message), ""].join("\n");
+export function renderErrorReport(name: string, message: string, cause?: string): string {
+  return [
+    `# Measurement failed: ${markdown(name)}`,
+    "",
+    markdown(message),
+    ...(cause ? ["", `Cause: ${markdown(cause)}`] : []),
+    "",
+  ].join("\n");
 }
 
 function countCell(
@@ -187,6 +198,10 @@ function countCell(
 
 function formatRate(rate: number | null): string {
   return rate === null ? "not available" : `${(rate * 100).toFixed(2)}%`;
+}
+
+function wrongPatternLabel(count: number): string {
+  return `${count} pattern${count === 1 ? "" : "s"} with wrong substitutions`;
 }
 
 export function renderSummaryReport(
@@ -207,6 +222,7 @@ export function renderSummaryReport(
           })),
         )
       : null;
+  const strictCriteria = failures.length === 0 ? calculateStrictGateCriteria(analyses) : null;
   const names = [
     ...analyses.map((analysis) => analysis.name),
     ...failures.map((failure) => failure.name),
@@ -222,13 +238,15 @@ export function renderSummaryReport(
       failures.length +
       ".",
     "",
-    "| Pattern | Counted | Correct | Flagged | Wrong | False positives | Missed | Lost | Figure loss (excluded) | Detected size count / truth |",
-    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+    "Size-block entries are outside the denominator because the brief excludes that block from the parser's job, and figure entries are outside it because schematics are out of scope; wrong-valued substitutions aligned to either still count as wrong.",
+    "",
+    "| Pattern | Counted | Correct | Flagged | Wrong | False positives | Missed | Lost | size block left as written | size block substituted, value correct | figure substituted correctly | figure left | Detected size count / truth |",
+    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
   ];
   for (const name of names) {
     const analysis = byName.get(name);
     if (!analysis) {
-      lines.push(`| ${markdown(name)} | — | — | — | — | — | — | — | — | ERROR |`);
+      lines.push(`| ${markdown(name)} | — | — | — | — | — | — | — | — | — | — | — | ERROR |`);
       continue;
     }
     const detected =
@@ -251,7 +269,13 @@ export function renderSummaryReport(
         " | " +
         countCell(analysis, "lost") +
         " | " +
-        countCell(analysis, "uncountedFigureLoss") +
+        countCell(analysis, "sizeBlockLeftAsWritten") +
+        " | " +
+        countCell(analysis, "sizeBlockSubstitutedCorrectly") +
+        " | " +
+        countCell(analysis, "figureSubstitutedCorrectly") +
+        " | " +
+        countCell(analysis, "figureLeft") +
         " | " +
         detected +
         " / " +
@@ -264,13 +288,20 @@ export function renderSummaryReport(
   if (failures.length > 0) {
     lines.push(
       "Not evaluated because one or more truth files or sources could not be measured.",
+      "- **Strict size-block reading:** Not evaluated because one or more truth files or sources could not be measured.",
       "",
     );
-    for (const failure of failures)
-      lines.push(`- ${markdown(failure.name)}: ${markdown(failure.message)}`);
+    for (const failure of failures) {
+      const cause = failure.cause ? ` (cause: ${markdown(failure.cause)})` : "";
+      lines.push(`- ${markdown(failure.name)}: ${markdown(failure.message)}${cause}`);
+    }
     lines.push("");
   } else if (!criteria?.evaluated) {
-    lines.push("Not evaluated because no truth files were found.", "");
+    lines.push(
+      "Not evaluated because no truth files were found.",
+      "- **Strict size-block reading:** Not evaluated because no truth files were found.",
+      "",
+    );
   } else {
     lines.push(
       "- **(a) Structural check:** " +
@@ -279,8 +310,8 @@ export function renderSummaryReport(
       "- **(b1) Wrong pattern count:** " +
         (criteria.criterionBPatterns ? "PASS" : "FAIL") +
         " — " +
-        criteria.wrongPatternCount +
-        " patterns with wrong substitutions (limit " +
+        wrongPatternLabel(criteria.wrongPatternCount) +
+        " (limit " +
         MAX_WRONG_PATTERNS +
         ").",
       "- **(b2) Overall wrong rate:** " +
@@ -303,6 +334,7 @@ export function renderSummaryReport(
         ").",
       "",
       `**Overall: ${criteria.passed ? "PASS" : "FAIL"}**`,
+      `- **Strict size-block reading:** ${strictCriteria?.passed ? "PASS" : "FAIL"} — counting every size-block substitution as wrong gives ${strictCriteria?.wrongTotal ?? 0} wrong substitutions / ${strictCriteria?.countedTotal ?? 0} truth entries (${formatRate(strictCriteria?.wrongRate ?? null)}; ${wrongPatternLabel(strictCriteria?.wrongPatternCount ?? 0)}), with a median correct rate of ${formatRate(strictCriteria?.medianCorrectRate ?? null)}.`,
       "",
     );
   }

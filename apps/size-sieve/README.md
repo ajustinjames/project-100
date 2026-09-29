@@ -30,7 +30,7 @@ The parser API is in `src/parser/`. `resolve()` returns source-ordered text, sub
 
 The gate reads each <name>.truth.json in apps/size-sieve/.feasibility/ by default. The optional folder argument can point to another local folder. Each truth file names a .pdf or .txt source in that same folder. PDFs go through src/pdf/extract.ts; text files are read as pasted text. sizeCount is the count a user would confirm or enter, whether or not findSizeList() detects the same count.
 
-Annotate every instruction sequence from the original pattern in document order. Keep values exactly as printed, include a short context and a page or line position, and mark schematic sequences with inFigure and malformed source sequences with sourceError when needed. A truth file contains file, title, designer, url, craft, source, sizeCount, and sequences. Each sequence contains values, context, and position, with optional inFigure and sourceError booleans. For example:
+Annotate every instruction sequence from the original pattern in document order. Keep values exactly as printed, include a short context and a page or line position, mark sequences in the pattern's size or measurement block with inSizeBlock, mark schematic sequences with inFigure, and mark malformed source sequences with sourceError when needed. Size-block and figure entries are outside the gate denominator because the parser is instructed to leave the size block as written and schematics are out of scope; a wrong-valued substitution aligned to either still counts as wrong. A truth file contains file, title, designer, url, craft, source, sizeCount, and sequences. Each sequence contains values, context, and position, with optional inSizeBlock, inFigure, and sourceError booleans. For example:
 
 ```json
 {
@@ -45,10 +45,11 @@ Annotate every instruction sequence from the original pattern in document order.
     {
       "values": ["80", "88", "96"],
       "context": "cast on",
-      "position": "line 12"
+      "position": "line 12",
+      "inSizeBlock": true
     }
   ]
 }
 ```
 
-The harness writes <name>.report.md and summary.md in the same folder. Reports include ordered alignment, the classification of each truth entry, source context for each parser substitution and flag, structural checks, and the three gate thresholds. Schematic entries lost during extraction are reported but excluded from the denominator. Truth files and downloaded patterns are local research material: .feasibility/ is git-ignored and must never be committed.
+The harness writes <name>.report.md and summary.md in the same folder. Reports include ordered alignment, the classification of each truth entry, source context for each parser substitution and flag, structural checks, and the three gate thresholds. The summary has separate columns for size-block entries left as written or substituted correctly, and figures left or substituted correctly; its strict line shows the result if every size-block substitution is counted as wrong. Truth files and downloaded patterns are local research material: .feasibility/ is git-ignored and must never be committed.

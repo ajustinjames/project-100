@@ -68,6 +68,12 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function errorCause(error: unknown): string | undefined {
+  if (!(error instanceof PdfExtractionError) || error.cause === undefined) return undefined;
+  if (error.cause instanceof Error) return `${error.cause.name}: ${error.cause.message}`;
+  return String(error.cause);
+}
+
 async function main(): Promise<void> {
   const folder = path.resolve(process.cwd(), process.argv[2] ?? DEFAULT_FOLDER);
   await mkdir(folder, { recursive: true });
@@ -84,10 +90,11 @@ async function main(): Promise<void> {
       analyses.push(await measureOne(folder, truthPath));
     } catch (error) {
       const message = errorMessage(error);
-      failures.push({ name, message });
+      const cause = errorCause(error);
+      failures.push({ name, message, ...(cause ? { cause } : {}) });
       await writeFile(
         path.join(folder, `${name}.report.md`),
-        renderErrorReport(name, message),
+        renderErrorReport(name, message, cause),
         "utf8",
       );
     }

@@ -5,8 +5,12 @@ export type PdfExtractionErrorCode = "no-text-layer" | "password-protected" | "i
 export class PdfExtractionError extends Error {
   readonly code: PdfExtractionErrorCode;
 
-  constructor(code: PdfExtractionErrorCode, message: string) {
-    super(message);
+  constructor(code: PdfExtractionErrorCode, message: string, cause?: unknown) {
+    if (cause === undefined) {
+      super(message);
+    } else {
+      super(message, { cause });
+    }
     this.name = "PdfExtractionError";
     this.code = code;
   }
@@ -124,9 +128,9 @@ function classifyPdfError(error: unknown): PdfExtractionError {
     typeof error === "object" && error !== null && "name" in error ? String(error.name) : "";
   const message = error instanceof Error ? error.message : String(error);
   if (name === "PasswordException" || /password|encrypted/i.test(message)) {
-    return new PdfExtractionError("password-protected", "This PDF is password protected.");
+    return new PdfExtractionError("password-protected", "This PDF is password protected.", error);
   }
-  return new PdfExtractionError("invalid-pdf", "This PDF is invalid or corrupt.");
+  return new PdfExtractionError("invalid-pdf", "This PDF is invalid or corrupt.", error);
 }
 
 /**
@@ -137,7 +141,8 @@ export async function extractPdfText(
   data: ArrayBuffer | Uint8Array,
   onProgress?: (page: number, pages: number) => void,
 ): Promise<string> {
-  const pdfData = data instanceof Uint8Array ? data.slice() : new Uint8Array(data.slice(0));
+  const pdfData =
+    data instanceof ArrayBuffer ? new Uint8Array(data.slice(0)) : new Uint8Array(data);
   let task: ReturnType<PdfJsModule["getDocument"]> | undefined;
 
   try {

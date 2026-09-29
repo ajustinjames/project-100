@@ -5,6 +5,7 @@ export interface TruthSequence {
   context: string;
   position: string;
   inFigure?: boolean;
+  inSizeBlock?: boolean;
   sourceError?: boolean;
 }
 
@@ -49,7 +50,10 @@ export interface GateCounts {
   falsePositives: number;
   missed: number;
   lost: number;
-  uncountedFigureLoss: number;
+  sizeBlockLeftAsWritten: number;
+  sizeBlockSubstitutedCorrectly: number;
+  figureSubstitutedCorrectly: number;
+  figureLeft: number;
 }
 
 export interface PatternAnalysis {
@@ -148,17 +152,32 @@ function valuePattern(value: string): RegExp | null {
 export function valuesFoundInOrder(text: string, values: string[]): boolean {
   if (values.length === 0) return false;
   const normalizedText = canonicalizeFractions(text).toLowerCase();
-  let cursor = 0;
+  const patterns = values.map(valuePattern);
+  if (patterns.some((pattern) => pattern === null)) return false;
+  const firstPattern = patterns[0];
+  if (!firstPattern) return false;
 
-  for (const value of values) {
-    const pattern = valuePattern(value);
-    if (!pattern) return false;
-    pattern.lastIndex = cursor;
-    const match = pattern.exec(normalizedText);
-    if (!match || /[0-9]/.test(normalizedText.slice(cursor, match.index))) return false;
-    cursor = match.index + match[0].length;
+  while (true) {
+    const firstMatch = firstPattern.exec(normalizedText);
+    if (!firstMatch) break;
+
+    let cursor = firstMatch.index + firstMatch[0].length;
+    let found = true;
+
+    for (const pattern of patterns.slice(1)) {
+      if (!pattern) return false;
+      pattern.lastIndex = cursor;
+      const match = pattern.exec(normalizedText);
+      if (!match || /[0-9]/.test(normalizedText.slice(cursor, match.index))) {
+        found = false;
+        break;
+      }
+      cursor = match.index + match[0].length;
+    }
+
+    if (found) return true;
   }
-  return true;
+  return false;
 }
 
 function lcsPairs(
@@ -322,7 +341,10 @@ function emptyCounts(): GateCounts {
     falsePositives: 0,
     missed: 0,
     lost: 0,
-    uncountedFigureLoss: 0,
+    sizeBlockLeftAsWritten: 0,
+    sizeBlockSubstitutedCorrectly: 0,
+    figureSubstitutedCorrectly: 0,
+    figureLeft: 0,
   };
 }
 
@@ -419,12 +441,29 @@ export function analyzePattern(args: {
       detail = "The truth values could not be found in extracted text in order.";
     }
 
-    const counted = !(entry.inFigure && classification === "lost");
-    if (!counted) {
-      counts.uncountedFigureLoss += 1;
-    } else {
+    const alignedSequence =
+      parserSequenceIndex === null ? undefined : sequences[parserSequenceIndex];
+    const counted = !entry.inFigure && !entry.inSizeBlock;
+
+    if (entry.inSizeBlock) {
+      if (alignedSequence?.kind === "sub") {
+        if (classification === "correct") counts.sizeBlockSubstitutedCorrectly += 1;
+      } else {
+        counts.sizeBlockLeftAsWritten += 1;
+      }
+    }
+    if (entry.inFigure) {
+      if (alignedSequence?.kind === "sub") {
+        if (classification === "correct") counts.figureSubstitutedCorrectly += 1;
+      } else {
+        counts.figureLeft += 1;
+      }
+    }
+
+    if (classification === "wrong") counts.wrong += 1;
+    if (counted) {
       counts.counted += 1;
-      counts[classification] += 1;
+      if (classification !== "wrong") counts[classification] += 1;
     }
 
     return {
@@ -519,4 +558,24 @@ export function calculateGateCriteria(patterns: GateCriterionInput[]): GateCrite
     criterionC,
     passed: criterionA && criterionBPatterns && criterionBOverall && criterionC,
   };
+}
+
+/** Evaluates an alternate reading where every size-block substitution is a wrong result. */
+export function calculateStrictGateCriteria(analyses: PatternAnalysis[]): GateCriteria {
+  return calculateGateCriteria(
+    analyses.map((analysis) => {
+      const sizeBlockSubstitutions = analysis.entries.filter((entry) => {
+        if (!entry.truth.inSizeBlock || entry.parserSequenceIndex === null) return false;
+        return analysis.sequences[entry.parserSequenceIndex]?.kind === "sub";
+      }).length;
+
+      return {
+        name: analysis.name,
+        counted: analysis.counts.counted + sizeBlockSubstitutions,
+        correct: analysis.counts.correct,
+        wrong: analysis.counts.wrong + analysis.counts.sizeBlockSubstitutedCorrectly,
+        structurePassed: analysis.structure.passed,
+      };
+    }),
+  );
 }

@@ -66,6 +66,9 @@ export function parseTruthFile(json: string): TruthFile {
     if (entry.inFigure !== undefined && typeof entry.inFigure !== "boolean") {
       throw new Error(`Truth sequence ${index + 1} inFigure must be a boolean.`);
     }
+    if (entry.inSizeBlock !== undefined && typeof entry.inSizeBlock !== "boolean") {
+      throw new Error(`Truth sequence ${index + 1} inSizeBlock must be a boolean.`);
+    }
     if (entry.sourceError !== undefined && typeof entry.sourceError !== "boolean") {
       throw new Error(`Truth sequence ${index + 1} sourceError must be a boolean.`);
     }
@@ -74,6 +77,7 @@ export function parseTruthFile(json: string): TruthFile {
       context: requireString(entry.context, `sequences[${index}].context`),
       position: requireString(entry.position, `sequences[${index}].position`),
       ...(entry.inFigure === true ? { inFigure: true } : {}),
+      ...(entry.inSizeBlock === true ? { inSizeBlock: true } : {}),
       ...(entry.sourceError === true ? { sourceError: true } : {}),
     };
   });
