@@ -253,14 +253,141 @@ describe("findSequences: conservative exclusions and traps", () => {
     ]);
   });
 
+  it("protects only exact measurement rows with the named unit forms", () => {
+    const units = ['"', "”", "″", "''", "in", "in.", "inch", "inches", "cm", "mm"];
+    for (const unit of units) {
+      expect(matches(`Upper arm, chest / hip: 30 (34, 38) ${unit}`, 3)).toEqual([]);
+    }
+    expect(matches("Body length — 30[34, 38] inches / 76[86, 96] cm", 3)).toEqual([]);
+    expect(matches("Chest upper arm waist hip sleeve neck shoulder: 30 (34, 38) cm", 3)).toEqual(
+      [],
+    );
+    expect(matches("Chest: 30 (34, -) in", 3)).toEqual([]);
+
+    const nearMisses = [
+      "Before starting, check chest with 30 (34, 38) cm",
+      "Waist: about 30 (34, 38) cm",
+      "Chest upper arm waist hip sleeve neck shoulder depth: 30 (34, 38) cm",
+      "Chest- 30 (34, 38) cm",
+    ];
+    for (const text of nearMisses) {
+      expect(matches(text, 3)).toEqual([
+        expect.objectContaining({ kind: "sub", original: "30 (34, 38)" }),
+      ]);
+    }
+
+    const instructionRows =
+      "Instructions:\nChest: 30 (34, 38) cm\nChest after finishing measures 40 (44, 48) cm";
+    expect(matches(instructionRows, 3).map((match) => match.original)).toEqual(["40 (44, 48)"]);
+  });
+
+  it("keeps the whole size block through blank, note, label, and sequence lines", () => {
+    const text = [
+      "Measurements:",
+      "Body length",
+      "30 (34, 38) cm",
+      "40/44/48",
+      "",
+      "Note: measure after washing",
+      "Sleeve / arm: 20 (22, 24) inches",
+      "to fit 30 to 40 inches",
+      "Women's XS (S, M)",
+      "Continue with the instructions below",
+      "Cast on 10 (12, 14) stitches",
+    ].join("\n");
+
+    expect(getSizeListBlockLineIndices(text)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("starts blocks at each listed size and measurement heading", () => {
+    for (const heading of [
+      "Size",
+      "Sizes:",
+      "Finished size",
+      "Finished sizes:",
+      "Finished measurements",
+      "Measurements:",
+    ]) {
+      const text = `${heading}\nChest\n30 (34, 38) cm\nCast on 10 (12, 14) stitches`;
+      expect(getSizeListBlockLineIndices(text)).toEqual([0, 1, 2]);
+      expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+    }
+  });
+
+  it("does not extend an unheaded measurement row into a block", () => {
+    const text = "Chest: 30 (34, 38) cm\n40/44/48\nCast on 10 (12, 14) stitches";
+    expect(getSizeListBlockLineIndices(text)).toEqual([0]);
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["40/44/48", "10 (12, 14)"]);
+  });
+
+  it("stops a size block at its first unknown line", () => {
+    const text = "Sizes:\nS - M - L\nThe shaping starts here\n10 (12, 14) rows";
+    expect(getSizeListBlockLineIndices(text)).toEqual([0, 1]);
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("accepts exact-count dash-separated bracket groups and leaves ranges alone", () => {
+    expect(matches("Cast on 82(92-102-112-122-132) sts", 6)[0]).toMatchObject({
+      kind: "sub",
+      values: ["82", "92", "102", "112", "122", "132"],
+    });
+    expect(matches('Work 22 (24 - 26 - 28)"', 4)[0]).toMatchObject({
+      kind: "sub",
+      values: ["22", "24", "26", "28"],
+    });
+    expect(matches("Work 22(24–26–28) sts", 4)[0]).toMatchObject({ kind: "sub" });
+
+    const ranges = [
+      "Range (1-2)",
+      "Range (4-6 rows)",
+      "Work 10 (1-2) sts",
+      "Work 10 (4-6 rows)",
+      "Work 10  (12-14-16) sts",
+      "Work 10 (12-14 sts)",
+      "Work 82(92-102-112-122-132) sts",
+    ];
+    for (const text of ranges) expect(matches(text, 5, true)).toEqual([]);
+
+    expect(
+      matches("92(102-112-122), then 80-90-100-110 sts", 4).map((match) => match.original),
+    ).toEqual(["92(102-112-122)", "80-90-100-110"]);
+    expect(
+      matches("10 (1-2), then 92(102-112-122), then 80-90-100-110 sts", 4).map(
+        (match) => match.original,
+      ),
+    ).toEqual(["92(102-112-122)"]);
+  });
+
+  it("resolves values attached to stitch abbreviations without replacing the abbreviation", () => {
+    for (const abbreviation of ["k", "p", "K", "P", "sc", "dc", "hdc", "ch", "sl"]) {
+      const text = `${abbreviation}5 (6, 7)`;
+      expect(matches(text, 3)).toEqual([
+        expect.objectContaining({ kind: "sub", original: "5 (6, 7)", values: ["5", "6", "7"] }),
+      ]);
+    }
+
+    expect(matches("K1 (1, 2, 0) (2, 1, 2, 0)", 8)[0]).toMatchObject({
+      kind: "sub",
+      original: "1 (1, 2, 0) (2, 1, 2, 0)",
+      values: ["1", "1", "2", "0", "2", "1", "2", "0"],
+    });
+    expect(matches("k2tog (3, 4)", 3)).toEqual([]);
+    expect(matches("(k2, p2)", 3)).toEqual([]);
+    expect(matches("sl1 (1 st)", 2)).toEqual([]);
+    expect(matches("k2 (3, 4)", 4)).toEqual([]);
+    expect(matches("k2 (3 cm, 4)", 3)).toEqual([]);
+  });
+
   it("uses a detected size-list line without a colon as a measurement-block heading", () => {
     const text =
       "Sizes XS (S, M)\nChest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nCast on 10 (12, 14) sts";
     expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
   });
 
-  it("ends a measurement block at a blank line", () => {
+  it("keeps blank lines inside a measurement block and ends at an unknown line", () => {
     const text = "Measurements\nChest: 30 (34, 38) cm\n\nContinue 10 (12, 14) rows";
+    expect(getSizeListBlockLineIndices(text)).toEqual([0, 1, 2]);
     expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
   });
 

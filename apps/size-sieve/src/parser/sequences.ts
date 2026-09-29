@@ -1,4 +1,11 @@
-import { findSizeList } from "./sizes.ts";
+import {
+  findSizeList,
+  isBareSequenceLine,
+  isLabelOnlyMeasurementLine,
+  isMeasurementRow,
+  isSizeBlockHeading,
+  isSizeLabelsLine,
+} from "./sizes.ts";
 
 export interface SequenceOptions {
   count: number;
@@ -36,6 +43,7 @@ interface ParsedGroup {
   end: number;
   values: ParsedValue[];
   usesSemicolons: boolean;
+  usesDashes: boolean;
 }
 
 interface Candidate {
@@ -43,6 +51,7 @@ interface Candidate {
   end: number;
   values: string[];
   outcome: "sub" | "count-mismatch";
+  usesDashBracket?: boolean;
 }
 
 const SIZE_LABEL_EXCLUSIONS = [
@@ -50,13 +59,8 @@ const SIZE_LABEL_EXCLUSIONS = [
   /\b\d+(?:st|nd|rd|th)(?:\s*(?:,|and|&)\s*\d+(?:st|nd|rd|th))*\s+sizes?(?:\s+only)?\b/gi,
   /\ball\s+sizes\s+except\s+[A-Za-z0-9]+(?:\s*(?:,|and|&)\s*[A-Za-z0-9]+)*\b/gi,
 ];
-const SKIPPED_HEADER = /^\s*(?:to\s+fit|finished\b|chest\b|bust\b)\s*:?/i;
 const INSTRUCTION_HEADING =
   /^\s*(?:cast\s+on\b|instructions?\b|body(?=\s*(?::|$))|back(?=\s*(?::|$)))/i;
-const MEASUREMENT_BLOCK_HEADING =
-  /^\s*(?:finished\s+measurements?|measurements?|sizes?|size)\s*(?::|$)/i;
-const MEASUREMENT_LABEL_WORD =
-  /\b(?:chest|bust|hips?|waist|length|width|circumference|sleeve|arm|yoke|neck|cuff|wrist|depth|ease|shoulder)\b/i;
 const DASH_UNITS = new Set([
   "sts",
   "stitches",
@@ -94,30 +98,33 @@ export function getSizeListBlockLineIndices(text: string, sizeListLine?: number)
   const detectedSizeListLine = findSizeList(text)?.lineIndex;
   if (detectedSizeListLine !== undefined) skipped.add(detectedSizeListLine);
 
-  const headingIndex = lines.findIndex((line) => INSTRUCTION_HEADING.test(line));
-  const blockLimit = Math.min(60, headingIndex < 0 ? 60 : headingIndex);
+  const blockStarts = new Set<number>();
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
     if (line === undefined) continue;
 
-    // Measurement rows can appear after instructions as well as near the size list.
     if (isMeasurementRow(line)) skipped.add(index);
-    if (index >= blockLimit) continue;
+    if (isSizeBlockHeading(line)) blockStarts.add(index);
+  }
 
-    if (SKIPPED_HEADER.test(line)) skipped.add(index);
-    const startsMeasurementBlock =
-      MEASUREMENT_BLOCK_HEADING.test(line) ||
-      index === sizeListLine ||
-      index === detectedSizeListLine;
-    if (!startsMeasurementBlock) continue;
+  for (const start of blockStarts) {
+    for (let index = start; index < lines.length; index += 1) {
+      const line = lines[index];
+      if (line === undefined) break;
+      if (index > start && INSTRUCTION_HEADING.test(line)) break;
 
-    skipped.add(index);
-    for (let next = index + 1; next < blockLimit; next += 1) {
-      const nextLine = lines[next];
-      // Extracted tables can put a measurement label and its values on separate lines.
-      if (nextLine === undefined || nextLine.trim() === "" || INSTRUCTION_HEADING.test(nextLine))
-        break;
-      skipped.add(next);
+      // Blank and note lines belong to the block; the first other unknown line ends it.
+      const continues =
+        index === start ||
+        line.trim() === "" ||
+        /^\s*notes?\b/i.test(line) ||
+        isMeasurementRow(line) ||
+        isBareSequenceLine(line) ||
+        isLabelOnlyMeasurementLine(line) ||
+        /^\s*to\s+fit\b/i.test(line) ||
+        isSizeLabelsLine(line);
+      if (!continues) break;
+      skipped.add(index);
     }
   }
 
@@ -194,26 +201,6 @@ function lineSets(
   }
 
   return { gaugeLines, rowLabelValues };
-}
-
-function isMeasurementRow(line: string): boolean {
-  const match = line.match(/^\s*([\p{L}\p{M}][\p{L}\p{M}\s-]*):\s*(.*?)\s*$/u);
-  const label = match?.[1];
-  const sequenceText = match?.[2];
-  if (label === undefined || sequenceText === undefined || !MEASUREMENT_LABEL_WORD.test(label)) {
-    return false;
-  }
-
-  // The count is not known here. Either count lets the normal parser recognize a
-  // bracketed sequence, including a sequence whose count does not match.
-  const candidate =
-    bracketedCandidateAt(sequenceText, 0, 2) ?? bracketedCandidateAt(sequenceText, 0, 3);
-  if (!candidate) return false;
-
-  const remainder = sequenceText.slice(candidate.end).trim();
-  if (remainder === "") return true;
-  const unit = unitDetails(remainder);
-  return unit !== null && unit.length === remainder.length;
 }
 
 function isGaugeLine(line: string): boolean {
@@ -358,7 +345,31 @@ function parseGroupAt(text: string, start: number): ParsedGroup | null {
     values.push(value);
   }
 
-  return { end: closeIndex + 1, values, usesSemicolons };
+  return { end: closeIndex + 1, values, usesSemicolons, usesDashes: false };
+}
+
+function parseDashGroupAt(text: string, start: number): ParsedGroup | null {
+  const open = text[start];
+  if (open !== "(" && open !== "[") return null;
+  const close = open === "(" ? ")" : "]";
+  const closeIndex = text.indexOf(close, start + 1);
+  if (closeIndex < 0) return null;
+
+  const body = text.slice(start + 1, closeIndex);
+  if (/[()[\]]/.test(body)) return null;
+  const separator = body.includes("–") ? "–" : "-";
+  if (!body.includes(separator)) return null;
+  const pieces = body.split(new RegExp(`\\s*${separator}\\s*`));
+  if (pieces.length < 2) return null;
+
+  const values: ParsedValue[] = [];
+  for (const piece of pieces) {
+    const value = parseWholeValue(piece, { allowSimpleFraction: true, allowCommaDecimal: true });
+    if (!value || value.placeholder || value.family !== "none") return null;
+    values.push(value);
+  }
+
+  return { end: closeIndex + 1, values, usesSemicolons: false, usesDashes: true };
 }
 
 function skipWhitespace(text: string, start: number): number {
@@ -383,8 +394,9 @@ function bracketedCandidateAt(text: string, start: number, count: number): Candi
 
   let cursor = skipWhitespace(text, base.end);
   const groups: ParsedGroup[] = [];
+  const firstGroupStart = cursor;
   while (text[cursor] === "(" || text[cursor] === "[") {
-    const group = parseGroupAt(text, cursor);
+    const group = parseGroupAt(text, cursor) ?? parseDashGroupAt(text, cursor);
     if (!group) return null;
     groups.push(group);
     cursor = skipWhitespace(text, group.end);
@@ -393,6 +405,13 @@ function bracketedCandidateAt(text: string, start: number, count: number): Candi
 
   const parsedValues = [base, ...groups.flatMap((group) => group.values)];
   const totalValues = parsedValues.length;
+  const containsDashGroup = groups.some((group) => group.usesDashes);
+
+  if (containsDashGroup) {
+    const gap = text.slice(base.end, firstGroupStart);
+    // A dash can mean a range, so this form needs a close bracket and an exact size count.
+    if (count < 3 || !/^ ?$/.test(gap) || totalValues !== count) return null;
+  }
 
   const firstGroup = groups[0];
   const lastGroup = groups[groups.length - 1];
@@ -419,6 +438,62 @@ function bracketedCandidateAt(text: string, start: number, count: number): Candi
     end: lastGroup?.end ?? base.end,
     values: parsedValues.map((value) => value.text),
     outcome: exactCount ? "sub" : "count-mismatch",
+    usesDashBracket: containsDashGroup,
+  };
+}
+
+interface StitchSequence {
+  candidate: Candidate | null;
+  end: number;
+}
+
+function stitchSequenceAt(text: string, start: number, count: number): StitchSequence | null {
+  const prefixStart = Math.max(0, start - 3);
+  const abbreviation = text.slice(prefixStart, start).match(/(hdc|sc|dc|ch|sl|k|p)$/i)?.[0];
+  if (!abbreviation) return null;
+  const abbreviationStart = start - abbreviation.length;
+  if (isWordCharacter(text[abbreviationStart - 1])) return null;
+
+  const base = parseScalarAt(text, start, { allowSimpleFraction: true, allowCommaDecimal: true });
+  if (!base || base.placeholder || base.family !== "none") return null;
+  let cursor = skipWhitespace(text, base.end);
+  if (text[cursor] !== "(" && text[cursor] !== "[") return null;
+
+  const groups: ParsedGroup[] = [];
+  let validPlainNumbers = true;
+  while (text[cursor] === "(" || text[cursor] === "[") {
+    const close = text[cursor] === "(" ? ")" : "]";
+    const closeIndex = text.indexOf(close, cursor + 1);
+    if (closeIndex < 0) break;
+
+    const group = parseGroupAt(text, cursor);
+    if (!group) {
+      validPlainNumbers = false;
+      cursor = closeIndex + 1;
+    } else {
+      if (group.values.some((value) => value.placeholder || value.family !== "none")) {
+        validPlainNumbers = false;
+      }
+      groups.push(group);
+      cursor = group.end;
+    }
+    cursor = skipWhitespace(text, cursor);
+  }
+
+  const end = cursor;
+  if (groups.length === 0) return { candidate: null, end };
+  const values = [base, ...groups.flatMap((group) => group.values)];
+  if (!validPlainNumbers || values.length !== count) return { candidate: null, end };
+
+  const lastGroup = groups[groups.length - 1];
+  return {
+    candidate: {
+      start,
+      end: lastGroup?.end ?? base.end,
+      values: values.map((value) => value.text),
+      outcome: "sub",
+    },
+    end: lastGroup?.end ?? base.end,
   };
 }
 
@@ -617,6 +692,60 @@ function toLocated(text: string, candidate: Candidate): LocatedSequence {
   };
 }
 
+function dashBracketRanges(text: string): Array<{ start: number; end: number }> {
+  const ranges: Array<{ start: number; end: number }> = [];
+  for (let start = 0; start < text.length; start += 1) {
+    const open = text[start];
+    if (open !== "(" && open !== "[") continue;
+    const close = open === "(" ? ")" : "]";
+    const closeIndex = text.indexOf(close, start + 1);
+    if (closeIndex < 0) continue;
+    if (/[–-]/.test(text.slice(start + 1, closeIndex))) {
+      ranges.push({ start, end: closeIndex + 1 });
+    }
+    start = closeIndex;
+  }
+  return ranges;
+}
+
+function hasResolvedDashBracket(
+  text: string,
+  options: SequenceOptions,
+  starts: number[],
+  skippedLines: Set<number>,
+  gaugeLines: Set<number>,
+  rowLabelValues: Set<number>,
+  labels: LocatedSequence[],
+): boolean {
+  for (let position = 0; position < text.length; position += 1) {
+    if (!/[0-9¼½¾]/.test(text[position] ?? "") || !isTokenBoundary(text, position)) continue;
+    const line = lineIndexAt(starts, position);
+    if (skippedLines.has(line) || gaugeLines.has(line) || rowLabelValues.has(position)) continue;
+
+    const base = parseScalarAt(text, position, {
+      allowSimpleFraction: true,
+      allowCommaDecimal: true,
+    });
+    if (!base) continue;
+    const groupStart = skipWhitespace(text, base.end);
+    const open = text[groupStart];
+    if (open !== "(" && open !== "[") continue;
+    const close = open === "(" ? ")" : "]";
+    const closeIndex = text.indexOf(close, groupStart + 1);
+    if (closeIndex < 0 || !/[–-]/.test(text.slice(groupStart + 1, closeIndex))) continue;
+
+    const candidate = bracketedCandidateAt(text, position, options.count);
+    return (
+      candidate?.usesDashBracket === true &&
+      candidate.outcome === "sub" &&
+      !spanTouchesLineSet(position, candidate.end, starts, skippedLines) &&
+      !spanTouchesLineSet(position, candidate.end, starts, gaugeLines) &&
+      !overlapsLabel(position, candidate.end, labels)
+    );
+  }
+  return false;
+}
+
 /** Finds sequence candidates in source order and classifies substitutions and flags. */
 export function findSequences(text: string, options: SequenceOptions): LocatedSequence[] {
   if (!Number.isInteger(options.count) || options.count < 2) return [];
@@ -625,17 +754,52 @@ export function findSequences(text: string, options: SequenceOptions): LocatedSe
   const skippedLines = skippedLineSet(text, options);
   const { gaugeLines, rowLabelValues } = lineSets(text, starts, options);
   const labelMatches = sizeLabelMatches(text, starts, skippedLines, gaugeLines);
+  const dashRanges = dashBracketRanges(text);
+  const useDashRuns =
+    options.usesDashes ||
+    hasResolvedDashBracket(
+      text,
+      options,
+      starts,
+      skippedLines,
+      gaugeLines,
+      rowLabelValues,
+      labelMatches,
+    );
+  const scanOptions = { ...options, usesDashes: useDashRuns };
   const found: LocatedSequence[] = [...labelMatches];
 
   let position = 0;
+  let dashRangeIndex = 0;
   while (position < text.length) {
-    if (!isTokenBoundary(text, position)) {
+    const line = lineIndexAt(starts, position);
+    if (skippedLines.has(line) || gaugeLines.has(line) || rowLabelValues.has(position)) {
       position += 1;
       continue;
     }
 
-    const line = lineIndexAt(starts, position);
-    if (skippedLines.has(line) || gaugeLines.has(line) || rowLabelValues.has(position)) {
+    if (/[0-9¼½¾]/.test(text[position] ?? "")) {
+      const stitch = stitchSequenceAt(text, position, options.count);
+      if (stitch) {
+        if (stitch.candidate) found.push(toLocated(text, stitch.candidate));
+        position = Math.max(position + 1, stitch.end);
+        continue;
+      }
+    }
+
+    while (
+      dashRangeIndex < dashRanges.length &&
+      (dashRanges[dashRangeIndex]?.end ?? 0) <= position
+    ) {
+      dashRangeIndex += 1;
+    }
+    const dashRange = dashRanges[dashRangeIndex];
+    if (dashRange && position > dashRange.start && position < dashRange.end) {
+      position += 1;
+      continue;
+    }
+
+    if (!isTokenBoundary(text, position)) {
       position += 1;
       continue;
     }
@@ -646,7 +810,7 @@ export function findSequences(text: string, options: SequenceOptions): LocatedSe
       continue;
     }
 
-    const candidate = candidateAt(text, position, options);
+    const candidate = candidateAt(text, position, scanOptions);
     if (
       !candidate ||
       spanTouchesLineSet(position, candidate.end, starts, skippedLines) ||

@@ -56,6 +56,8 @@ The src/pdf/ module dynamically loads PDF.js to extract text from an in-memory P
 
 Browser extraction text from Chromium and WebKit under `wrangler dev` was compared byte-for-byte with the harness's Node extraction for all six cohort PDFs; all 12 comparisons were identical.
 
+**2026-09-29 parser fix round:** measurement rows accept the listed inch marks and inch/cm/mm units, labels of up to eight words, and a second measurement system; the size/measurement block continues across blank lines, notes, measurement rows, bare sequences, labels, `to fit` lines, and size labels. Size detection checks up to three nonblank, non-note lines after a `Size`/`Sizes` heading and strips the listed audience prefixes and measurement tails. Numeric dash groups inside brackets resolve only for at least three sizes with an exact count and no more than one space before the bracket; a successful first group also enables the existing dash-format rules for the pattern. Attached stitch abbreviations resolve only when their following plain-number groups total the size count, and the abbreviation remains text.
+
 ## Dependencies
 
 <!-- Each third-party dependency and why a small amount of our own code would not do. See docs/DEPENDENCIES.md. -->

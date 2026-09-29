@@ -38,6 +38,31 @@ describe("resolve", () => {
     });
   });
 
+  it("keeps stitch abbreviations in text when replacing only their following numbers", () => {
+    expect(resolved("k5 (7, 7, 8)", 4, 2)).toEqual([
+      { kind: "text", text: "k" },
+      { kind: "sub", original: "5 (7, 7, 8)", value: "7", notApplicable: false },
+    ]);
+
+    expect(resolved("K1 (1, 2, 0) (2, 1, 2, 0)", 8, 4)).toEqual([
+      { kind: "text", text: "K" },
+      {
+        kind: "sub",
+        original: "1 (1, 2, 0) (2, 1, 2, 0)",
+        value: "2",
+        notApplicable: false,
+      },
+    ]);
+  });
+
+  it("resolves a bracketed dash group as one marked source span", () => {
+    expect(resolve('Work 22(24-26-28)"', { count: 4, usesDashes: false }, 2)).toEqual([
+      { kind: "text", text: "Work " },
+      { kind: "sub", original: "22(24-26-28)", value: "26", notApplicable: false },
+      { kind: "text", text: '"' },
+    ]);
+  });
+
   it("keeps count mismatches and size-labelled instructions as flag segments", () => {
     expect(resolved("Cast on 10 (12, 14) sts", 5, 2)).toEqual([
       { kind: "text", text: "Cast on " },
@@ -176,6 +201,11 @@ describe("resolve", () => {
       "Sizes: XS (S, M, L)\nFinished chest: 30 (34, 38, 42) cm\nCast on 80 (88, 96, 104) sts.",
       "Row 3 (RS): work 10 (12, 14) stitches, then repeat 4/5/6 times.",
       "Sizes: S - M - L\n104-112-120 sts\nUse rows 1-4 as written.",
+      "Cast on 82(92-102-112-122-132) sts",
+      'Work 22 (24 - 26 - 28)"',
+      "k5 (7, 7, 8)",
+      "K1 (1, 2, 0) (2, 1, 2, 0)",
+      "Measurements:\n\nNote: checked after washing\nBody length\n30 (34, 38) cm\nCast on 10 (12, 14) sts",
       "Work for size M only; keep 10 (12) cm between markers.",
       "Tension 10,5 (11,5; 12,5) cm\nA wrapped group is 1 (2,\n3) [4, 5].",
       "A fraction 1/2, a phone 555-123-4567, and a date 2026-09-28 stay as text.",

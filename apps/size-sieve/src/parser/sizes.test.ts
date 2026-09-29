@@ -63,6 +63,52 @@ describe("findSizeList", () => {
     }
   });
 
+  it("finds labels below a Size heading and ignores audience and measurement-system text", () => {
+    expect(
+      findSizeList("Size\n\nNote: sizes are shown below\n\nWomen's XS (S, M, L)\nCast on"),
+    ).toEqual({
+      labels: ["XS", "S", "M", "L"],
+      count: 4,
+      sourceLine: "Women's XS (S, M, L)",
+      lineIndex: 4,
+      usesDashes: false,
+      conflict: null,
+    });
+
+    expect(
+      findSizeList("Measurements\nChest: 31[35, 39] inches / 78.5[89, 99] cm\nInstructions"),
+    ).toMatchObject({
+      labels: ["31", "35", "39"],
+      count: 3,
+      sourceLine: "Chest: 31[35, 39] inches / 78.5[89, 99] cm",
+      lineIndex: 1,
+    });
+    expect(
+      findSizeList("Finished measurements: 30 (34, 38) inches [76 (86, 96) cm]"),
+    ).toMatchObject({
+      labels: ["30", "34", "38"],
+      count: 3,
+    });
+
+    expect(
+      findSizeList("Sizes:\nIntroduction\nAnother note\nFourth line: no list\nCast on"),
+    ).toBeNull();
+  });
+
+  it("uses measurement labels and the listed inch and metric units", () => {
+    const units = ['"', "”", "″", "''", "in", "in.", "inch", "inches", "cm", "mm"];
+    for (const unit of units) {
+      expect(findSizeList(`Upper arm / chest: 30 (34, 38) ${unit}`)).toMatchObject({
+        count: 3,
+        sourceLine: `Upper arm / chest: 30 (34, 38) ${unit}`,
+      });
+    }
+    expect(findSizeList("Yoke, sleeve length — 30 (34, 38) in. / 76 (86, 96) cm")).toMatchObject({
+      count: 3,
+      usesDashes: false,
+    });
+  });
+
   it("prefers a labels line and reports a conflicting measurement count", () => {
     const result = findSizeList(
       "Sizes: XS (S, M, L)\nFinished bust: 30 (34, 38, 42, 46) cm\nCast on",
@@ -102,5 +148,6 @@ describe("findSizeList", () => {
     expect(findSizeList("XS (S, M)\nCast on")).toBeNull();
     expect(findSizeList("Sizes: XS (S, M is large)\nInstructions")).toBeNull();
     expect(findSizeList("To fit: XS\nBody")).toBeNull();
+    expect(findSizeList("To fit:\nXS (S, M)\nBody")).toBeNull();
   });
 });

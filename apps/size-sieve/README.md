@@ -26,6 +26,8 @@ node apps/size-sieve/tools/measure.ts [folder] [--holdout <main-cohort-folder>]
 
 The parser API is in `src/parser/`. `resolve()` returns source-ordered text, substitution, and flag segments; substitution values are selected from the detected sequence, and flags leave their source unchanged. `rejoinSegments()` must reproduce the complete original input exactly. Keep that round-trip invariant covered when changing scanner rules.
 
+The parser fix round also protects complete size/measurement blocks and exact measurement rows, detects labels shortly after a `Size`/`Sizes` heading, and supports exact-count numeric dash groups in brackets. The first resolved dash group activates the existing dash-format rules for that pattern. Stitch abbreviations stay as text while only their following size number and plain-number groups can be substituted.
+
 ### Feasibility truth files
 
 The gate reads each <name>.truth.json in apps/size-sieve/.feasibility/ by default. The optional folder argument can point to another local folder. Each truth file names a .pdf or .txt source in that same folder. PDFs go through src/pdf/extract.ts; text files are read as pasted text. sizeCount is the count a user would confirm or enter, whether or not findSizeList() detects the same count.
