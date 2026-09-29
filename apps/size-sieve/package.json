@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@ajustinjames/hardline-components": "^0.1.0",
-    "@ajustinjames/hardline-tokens": "^0.1.0"
+    "@ajustinjames/hardline-tokens": "^0.1.0",
+    "pdfjs-dist": "^6.3.289"
   },
   "devDependencies": {
     "@project-100/web": "workspace:*",

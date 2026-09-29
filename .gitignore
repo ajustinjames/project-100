@@ -10,3 +10,4 @@ coverage/
 *.log
 .DS_Store
 .p100.lock
+apps/size-sieve/.feasibility/

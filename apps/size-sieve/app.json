@@ -15,7 +15,9 @@
   "design": {
     "system": "hardline"
   },
-  "dependencies": [],
+  "dependencies": [
+    "pdfjs-dist"
+  ],
   "sharedPackages": [
     "@project-100/web"
   ],

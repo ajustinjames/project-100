@@ -49,15 +49,17 @@ Worth building because none is free and automatic on iPhone, iPad, or computers 
 
 ## Architecture
 
-The app is a static Vite app in plain TypeScript on `ajj-design` `hardline`. Its built parser is pure TypeScript with no DOM or runtime dependencies: it detects a size list, classifies supported instruction sequences, and resolves them to source-ordered segments. Rejoining each segment's original text reproduces the input exactly. Parser tests use synthetic snippets written for the tests. PDF extraction, the reader, and storage remain planned. No Cloudflare bindings.
+The app is a static Vite app in plain TypeScript on ajj-design hardline. Its parser is pure TypeScript with no DOM or runtime dependencies: it detects a size list, classifies supported instruction sequences, and resolves them to source-ordered segments. Rejoining each segment's original text reproduces the input exactly. Parser tests use synthetic snippets written for the tests.
+
+The src/pdf/ module dynamically loads PDF.js to extract text from an in-memory PDF. The browser worker is emitted by Vite as a same-origin asset; the Node feasibility harness selects PDF.js's Node entry point and does not render pages. The tools/measure.ts harness uses that same extractor for PDFs, reads pasted-text fixtures from .txt files, resolves every size index, and compares the results with ignored truth files in apps/size-sieve/.feasibility/. It writes per-pattern and combined Markdown reports beside those files. No reader UI or storage is implemented yet. No Cloudflare bindings.
 
 ## Dependencies
 
 <!-- Each third-party dependency and why a small amount of our own code would not do. See docs/DEPENDENCIES.md. -->
 
-None yet beyond ajj-design (`hardline`).
+pdfjs-dist (Mozilla, Apache-2.0) handles PDF text parsing, a hard problem that would be error-prone to reproduce with a small amount of app code, as described in [DEPENDENCIES.md](../../docs/DEPENDENCIES.md). It is loaded only when a PDF is opened. The optional native @napi-rs/canvas package is used by PDF.js only for Node rendering; this app never renders PDFs and the package is never bundled into the browser app.
 
-Planned: `pdfjs-dist` (Mozilla, Apache-2.0) to extract text from PDFs, and render them if in-place highlighting is chosen, in the browser. PDF parsing is the kind of hard problem [DEPENDENCIES.md](../../docs/DEPENDENCIES.md) says to use a library for. It's added in the build PR that first needs it, and loaded only when a PDF is opened.
+The app also uses the shared ajj-design hardline components and tokens.
 
 ## Shared packages
 
@@ -71,7 +73,7 @@ None.
 
 ## Tradeoffs and known limitations
 
-- PDF text extraction can reorder or drop text in complex layouts (PDF.js has had [reported reading-order failures](https://github.com/mozilla/pdf.js/issues/14493)). Counting can't detect lost text, so the app shows extracted text for checking.
+- PDF text extraction can reorder or drop text in complex layouts (PDF.js has had [reported reading-order failures](https://github.com/mozilla/pdf.js/issues/14493)). The feasibility harness reports text that could not be recovered; a future reader must show extracted text for checking.
 - The parser will not handle every designer's format; unhandled groups are listed, not chased one by one.
 - Data lives in one browser; export and import are the backup.
 
