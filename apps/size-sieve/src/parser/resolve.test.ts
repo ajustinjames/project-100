@@ -61,6 +61,38 @@ describe("resolve", () => {
     ]);
   });
 
+  it("reproduces and fixes the four reviewed parser failures", () => {
+    const indentedSizeList = "  Sizes: 1 (2, 3)\nCast on 20 (22, 24) sts";
+    expect(resolve(indentedSizeList, { count: 3, usesDashes: false }, 1)).toEqual([
+      { kind: "text", text: "  Sizes: 1 (2, 3)\nCast on " },
+      { kind: "sub", original: "20 (22, 24)", value: "22", notApplicable: false },
+      { kind: "text", text: " sts" },
+    ]);
+
+    const measurements =
+      "Sizes: XS (S, M)\nFinished measurements\nChest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nCast on 10 (12, 14) sts";
+    expect(resolve(measurements, { count: 3, usesDashes: false }, 1)).toEqual([
+      {
+        kind: "text",
+        text: "Sizes: XS (S, M)\nFinished measurements\nChest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nCast on ",
+      },
+      { kind: "sub", original: "10 (12, 14)", value: "12", notApplicable: false },
+      { kind: "text", text: " sts" },
+    ]);
+
+    for (const rowLabel of ["Instructions: Row 1 (2, 3): knit", "Rows 1 (2, 3): knit"]) {
+      expect(resolve(rowLabel, { count: 3, usesDashes: false }, 1)).toEqual([
+        { kind: "text", text: rowLabel },
+      ]);
+    }
+
+    const sizeLabel = "For sizes M and L only, work next round";
+    expect(resolve(sizeLabel, { count: 3, usesDashes: false }, 1)).toEqual([
+      { kind: "flag", original: "For sizes M and L only", reason: "size-label" },
+      { kind: "text", text: ", work next round" },
+    ]);
+  });
+
   it("rejoins every fixture to its exact original input", () => {
     const fixtures = [
       "Cast on 80 (88, 96, 104, 112) sts",

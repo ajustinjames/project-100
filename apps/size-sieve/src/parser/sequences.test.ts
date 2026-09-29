@@ -140,20 +140,35 @@ describe("findSequences: outcome table", () => {
   });
 
   it("flags size-labelled instructions", () => {
-    const examples = [
-      "Sizes 1–3 only use the small chart.",
-      "Work this for size M only.",
-      "Repeat for the 2nd and 4th sizes.",
-      "Work all sizes except XS.",
+    const examples: Array<[string, string]> = [
+      ["Sizes 1–3 only use the small chart.", "Sizes 1–3 only"],
+      ["Work this for size M only.", "for size M only"],
+      ["For sizes M and L only, work next round.", "For sizes M and L only"],
+      ["Work size 2 only.", "size 2 only"],
+      ["Sizes XS, S and M only are worked the same way.", "Sizes XS, S and M only"],
+      ["Work the 2nd and 4th sizes only.", "2nd and 4th sizes only"],
+      ["Repeat for the 2nd and 4th sizes.", "2nd and 4th sizes"],
+      ["Work all sizes except XS.", "all sizes except XS"],
+      ["Work all sizes except XS and S.", "all sizes except XS and S"],
     ];
-    for (const text of examples) {
+    for (const [text, label] of examples) {
       expect(matches(text, 5)).toEqual([
-        expect.objectContaining({ kind: "flag", reason: "size-label" }),
+        expect.objectContaining({ original: label, kind: "flag", reason: "size-label" }),
       ]);
     }
     expect(matches("For size M work 10 (12, 14) sts.", 3)).toEqual([
       expect.objectContaining({ kind: "sub", original: "10 (12, 14)" }),
     ]);
+  });
+
+  it("does not flag nearby ordinary prose as size-labelled instructions", () => {
+    const examples = [
+      "Only work the next round.",
+      "All sizes are listed here.",
+      "Sizes are given in parentheses.",
+      "Work sizes M and L together.",
+    ];
+    for (const text of examples) expect(matches(text, 5)).toEqual([]);
   });
 
   it("does not interpret a size-list label line as an instruction", () => {
@@ -195,12 +210,53 @@ describe("findSequences: conservative exclusions and traps", () => {
     expect(matches(text, 3, false, 0).map((match) => match.original)).toEqual(["20 (22, 24)"]);
   });
 
+  it("protects the measurement block by its heading and extent", () => {
+    const text =
+      "Sizes: XS (S, M)\nFinished measurements\nChest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nCast on 10 (12, 14) sts";
+    expect(getSizeListBlockLineIndices(text)).toEqual([0, 1, 2, 3]);
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("protects measurement rows even when there is no measurement heading", () => {
+    const text =
+      "Chest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nSleeve length: 15 (17, 19) cm\nCast on 10 (12, 14) sts";
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("uses a detected size-list line without a colon as a measurement-block heading", () => {
+    const text =
+      "Sizes XS (S, M)\nChest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nCast on 10 (12, 14) sts";
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("ends a measurement block at a blank line", () => {
+    const text = "Measurements\nChest: 30 (34, 38) cm\n\nContinue 10 (12, 14) rows";
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
   it("does not treat row labels, instruction names, or codes as sequences", () => {
     expect(matches("Row 3 (4, 5): knit to C4F, then work M1L and k2tog", 3)).toEqual([]);
     expect(matches("Rnd 2 (dec rnd): work evenly", 3)).toEqual([]);
     expect(matches("Row 3 (RS): knit across", 3)).toEqual([]);
     expect(matches("Row 3: cast on 20 (22, 24) sts", 3)).toEqual([
       expect.objectContaining({ kind: "sub", original: "20 (22, 24)" }),
+    ]);
+  });
+
+  it("protects row labels at instruction boundaries and after any row word form", () => {
+    const examples = [
+      "Instructions: Row 1 (2, 3): knit",
+      "Rows 1 (2, 3): knit",
+      "The next section; Rnds 1 (2, 3): knit",
+      "After this. Rounds 1 [2, 3] work evenly",
+      "At the end, row 1 (2, 3):",
+    ];
+    for (const text of examples) expect(matches(text, 3)).toEqual([]);
+  });
+
+  it("still substitutes a repeat count that follows rows mid-sentence", () => {
+    expect(matches("rep last 2 rows 5 (6, 7) more times", 3)).toEqual([
+      expect.objectContaining({ kind: "sub", original: "5 (6, 7)" }),
     ]);
   });
 

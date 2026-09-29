@@ -13,6 +13,17 @@ describe("findSizeList", () => {
     });
   });
 
+  it("allows leading whitespace before a size-list header", () => {
+    expect(findSizeList("  Sizes: 1 (2, 3)\nCast on 20 (22, 24) sts")).toEqual({
+      labels: ["1", "2", "3"],
+      count: 3,
+      sourceLine: "  Sizes: 1 (2, 3)",
+      lineIndex: 0,
+      usesDashes: false,
+      conflict: null,
+    });
+  });
+
   it("counts grouped numeric labels and alternation labels", () => {
     expect(findSizeList("Size: 1 (2, 3, 4, 5) (6, 7, 8, 9)\nInstructions")).toMatchObject({
       labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],

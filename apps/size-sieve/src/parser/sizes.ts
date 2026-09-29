@@ -17,10 +17,11 @@ interface HeaderMatch {
   content: string;
 }
 
-const INSTRUCTION_HEADING = /^\s*(?:cast\s+on|instructions?\b|body\b|back\b)/i;
-const LABEL_HEADER = /^(?:sizes?|to\s+fit)\s*:?\s*/i;
+const INSTRUCTION_HEADING =
+  /^\s*(?:cast\s+on\b|instructions?\b|body(?=\s*(?::|$))|back(?=\s*(?::|$)))/i;
+const LABEL_HEADER = /^\s*(?:sizes?|to\s+fit)\s*:?\s*/i;
 const MEASUREMENT_HEADER =
-  /^(?:finished\s+(?:chest|bust|circumference|measurements)|chest|bust)\s*:?\s*/i;
+  /^\s*(?:finished\s+(?:chest|bust|circumference|measurements)|chest|bust)\s*:?\s*/i;
 const LABEL_ATOM = /^(?:[A-Za-z]+\d*|\d+[A-Za-z]+|\d+(?:\.\d+)?(?:[¼½¾])?)(?:[¼½¾])?$/;
 
 function findHeader(line: string): HeaderMatch | null {

@@ -46,13 +46,15 @@ interface Candidate {
 }
 
 const SIZE_LABEL_EXCLUSIONS = [
-  /\b(?:sizes?\s+\d+(?:\s*[-–—]\s*\d+)+\s+only)\b/gi,
-  /\bfor\s+size\s+[A-Za-z0-9]+\s+only\b/gi,
-  /\b\d+(?:st|nd|rd|th)\s+and\s+\d+(?:st|nd|rd|th)\s+sizes\b/gi,
-  /\ball\s+sizes\s+except\s+[A-Za-z0-9]+\b/gi,
+  /\b(?:for\s+)?sizes?\s+(?:[A-Za-z0-9]+(?:\s*(?:,|and|&)\s*[A-Za-z0-9]+)*|[A-Za-z0-9]+\s*[-–—]\s*[A-Za-z0-9]+)\s+only\b/gi,
+  /\b\d+(?:st|nd|rd|th)(?:\s*(?:,|and|&)\s*\d+(?:st|nd|rd|th))*\s+sizes?(?:\s+only)?\b/gi,
+  /\ball\s+sizes\s+except\s+[A-Za-z0-9]+(?:\s*(?:,|and|&)\s*[A-Za-z0-9]+)*\b/gi,
 ];
 const SKIPPED_HEADER = /^\s*(?:to\s+fit|finished\b|chest\b|bust\b)\s*:?/i;
-const INSTRUCTION_HEADING = /^\s*(?:cast\s+on|instructions?\b|body\b|back\b)/i;
+const INSTRUCTION_HEADING =
+  /^\s*(?:cast\s+on\b|instructions?\b|body(?=\s*(?::|$))|back(?=\s*(?::|$)))/i;
+const MEASUREMENT_BLOCK_HEADING =
+  /^\s*(?:finished\s+measurements?|measurements?|sizes?|size)\s*(?::|$)/i;
 const DASH_UNITS = new Set([
   "sts",
   "stitches",
@@ -87,14 +89,28 @@ export function getSizeListBlockLineIndices(text: string, sizeListLine?: number)
   if (sizeListLine !== undefined && sizeListLine >= 0 && sizeListLine < lines.length) {
     skipped.add(sizeListLine);
   }
-  const detectedSizeList = findSizeList(text);
-  if (detectedSizeList) skipped.add(detectedSizeList.lineIndex);
+  const detectedSizeListLine = findSizeList(text)?.lineIndex;
+  if (detectedSizeListLine !== undefined) skipped.add(detectedSizeListLine);
 
   const headingIndex = lines.findIndex((line) => INSTRUCTION_HEADING.test(line));
   const blockLimit = Math.min(60, headingIndex < 0 ? 60 : headingIndex);
   for (let index = 0; index < blockLimit; index += 1) {
     const line = lines[index];
-    if (line !== undefined && SKIPPED_HEADER.test(line)) skipped.add(index);
+    if (line === undefined) continue;
+
+    if (SKIPPED_HEADER.test(line) || isMeasurementRow(line)) skipped.add(index);
+    const startsMeasurementBlock =
+      MEASUREMENT_BLOCK_HEADING.test(line) ||
+      index === sizeListLine ||
+      index === detectedSizeListLine;
+    if (!startsMeasurementBlock) continue;
+
+    skipped.add(index);
+    for (let next = index + 1; next < blockLimit; next += 1) {
+      const nextLine = lines[next];
+      if (nextLine === undefined || nextLine.trim() === "" || isSectionHeading(nextLine)) break;
+      skipped.add(next);
+    }
   }
 
   return [...skipped].sort((left, right) => left - right);
@@ -140,6 +156,7 @@ function spanTouchesLineSet(
 function lineSets(
   text: string,
   starts: number[],
+  options: SequenceOptions,
 ): { gaugeLines: Set<number>; rowLabelValues: Set<number> } {
   const lines = text.split(/\r?\n/);
   const gaugeLines = new Set<number>();
@@ -150,15 +167,58 @@ function lineSets(
     if (line === undefined) continue;
     if (isGaugeLine(line)) gaugeLines.add(lineIndex);
 
-    const rowLabel = line.match(/^\s*(?:row|rnd|round)\s+(\d+)\s*(?:\(|\[)/i);
-    const rowNumber = rowLabel?.[1];
-    if (rowNumber) {
-      const numberOffset = rowLabel?.[0].indexOf(rowNumber) ?? -1;
-      if (numberOffset >= 0) rowLabelValues.add((starts[lineIndex] ?? 0) + numberOffset);
+    const rowLabels = /\b(?:row|rows|rnd|rnds|round|rounds)\s+(\d+)(?=\s*(?:\(|\[))/gi;
+    for (const rowLabel of line.matchAll(rowLabels)) {
+      const rowNumber = rowLabel[1];
+      const wordStart = rowLabel.index ?? 0;
+      const numberOffset = rowLabel[0].lastIndexOf(rowNumber ?? "");
+      if (!rowNumber || numberOffset < 0) continue;
+
+      const beforeWord = line.slice(0, wordStart).trimEnd();
+      const wordHasLabelBoundary = beforeWord === "" || /[:.;]$/.test(beforeWord);
+      const numberPosition = numberOffset + wordStart;
+      const sequence = candidateAt(line, numberPosition, options);
+      const sequenceHasColon = sequence !== null && /^\s*:/.test(line.slice(sequence.end));
+      if (wordHasLabelBoundary || sequenceHasColon) {
+        rowLabelValues.add((starts[lineIndex] ?? 0) + numberPosition);
+      }
     }
   }
 
   return { gaugeLines, rowLabelValues };
+}
+
+function isMeasurementRow(line: string): boolean {
+  const match = line.match(/^\s*([\p{L}\p{M}][\p{L}\p{M}\s-]*):\s*(.*?)\s*$/u);
+  const sequenceText = match?.[2];
+  if (sequenceText === undefined) return false;
+
+  // The count is not known here. Either count lets the normal parser recognize a
+  // bracketed sequence, including a sequence whose count does not match.
+  const candidate =
+    bracketedCandidateAt(sequenceText, 0, 2) ?? bracketedCandidateAt(sequenceText, 0, 3);
+  if (!candidate) return false;
+
+  const remainder = sequenceText.slice(candidate.end).trim();
+  if (remainder === "") return true;
+  const unit = unitDetails(remainder);
+  return unit !== null && unit.length === remainder.length;
+}
+
+function isSectionHeading(line: string): boolean {
+  if (INSTRUCTION_HEADING.test(line) || MEASUREMENT_BLOCK_HEADING.test(line)) return true;
+  if (isMeasurementRow(line)) return false;
+
+  const heading = line.trim();
+  if (heading.length === 0 || heading.length > 80 || /[.!?]/.test(heading)) return false;
+
+  // Section titles are usually one word, title case, all caps, or end with a colon.
+  return (
+    /^[\p{Lu}][\p{L}\p{M}'-]*$/u.test(heading) ||
+    /^[\p{Lu}][\p{L}\p{M}'-]*(?:\s+[\p{Lu}][\p{L}\p{M}'-]*){1,5}:?$/u.test(heading) ||
+    /^[\p{Lu}\s&/'-]+$/u.test(heading) ||
+    /^[\p{L}][\p{L}\p{M}\s&/'-]{0,60}:$/u.test(heading)
+  );
 }
 
 function isGaugeLine(line: string): boolean {
@@ -568,7 +628,7 @@ export function findSequences(text: string, options: SequenceOptions): LocatedSe
 
   const starts = lineStarts(text);
   const skippedLines = skippedLineSet(text, options);
-  const { gaugeLines, rowLabelValues } = lineSets(text, starts);
+  const { gaugeLines, rowLabelValues } = lineSets(text, starts, options);
   const labelMatches = sizeLabelMatches(text, starts, skippedLines, gaugeLines);
   const found: LocatedSequence[] = [...labelMatches];
 
