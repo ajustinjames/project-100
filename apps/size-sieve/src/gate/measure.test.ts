@@ -3,7 +3,6 @@ import { findSizeList, resolve } from "../parser/index.ts";
 import {
   analyzePattern,
   calculateGateCriteria,
-  calculateStrictGateCriteria,
   type GateSequence,
   gateValuesEqual,
   inspectResolutions,
@@ -98,8 +97,9 @@ describe("gate alignment and classification", () => {
       missed: 1,
       lost: 1,
       sizeBlockLeftAsWritten: 0,
-      sizeBlockSubstitutedCorrectly: 0,
+      sizeBlockSubstituted: 0,
       figureSubstitutedCorrectly: 0,
+      figureSubstitutedWrongly: 0,
       figureLeft: 1,
     });
     expect(result.sourceErrorSubstitutions).toHaveLength(1);
@@ -163,34 +163,117 @@ describe("gate alignment and classification", () => {
       counted: 5,
       correct: 1,
       flagged: 1,
-      wrong: 4,
+      wrong: 5,
       falsePositives: 1,
       missed: 1,
       lost: 1,
       sizeBlockLeftAsWritten: 2,
-      sizeBlockSubstitutedCorrectly: 1,
+      sizeBlockSubstituted: 2,
       figureSubstitutedCorrectly: 1,
+      figureSubstitutedWrongly: 1,
       figureLeft: 3,
     });
+    expect(result.entries.slice(5, 9).map((entry) => entry.classification)).toEqual([
+      "missed",
+      "flagged",
+      "wrong",
+      "wrong",
+    ]);
+    expect(result.entries.slice(9).map((entry) => entry.classification)).toEqual([
+      "correct",
+      "flagged",
+      "missed",
+      "lost",
+      "wrong",
+    ]);
 
-    const strict = calculateStrictGateCriteria([result]);
-    expect(strict).toMatchObject({
+    expect(
+      calculateGateCriteria([
+        {
+          name: result.name,
+          counted: result.counts.counted,
+          correct: result.counts.correct,
+          wrong: result.counts.wrong,
+          structurePassed: result.structure.passed,
+        },
+      ]),
+    ).toMatchObject({
       wrongTotal: 5,
-      countedTotal: 7,
-      wrongRate: 5 / 7,
-      medianCorrectRate: 1 / 7,
+      wrongPatternCount: 1,
+      countedTotal: 5,
+      wrongRate: 1,
       passed: false,
     });
     const summary = renderSummaryReport([result], [], 1);
     expect(summary).toContain(
-      "| size block left as written | size block substituted, value correct | figure substituted correctly | figure left |",
+      "| size block left as written | size block substituted | figure substituted correctly | figure substituted wrongly | figure left |",
     );
     expect(summary).toContain(
-      "Size-block entries are outside the denominator because the brief excludes that block from the parser's job, and figure entries are outside it because schematics are out of scope; wrong-valued substitutions aligned to either still count as wrong.",
+      "Size-block entries are outside the denominator because the brief excludes that block from the parser's job; every substitution there counts as wrong. Figure entries are outside it because schematics are out of scope; correct substitutions are reported, and wrong-valued substitutions still count as wrong.",
     );
-    expect(summary).toContain(
-      "**Strict size-block reading:** FAIL — counting every size-block substitution as wrong gives 5 wrong substitutions / 7 truth entries (71.43%; 1 pattern with wrong substitutions), with a median correct rate of 14.29%.",
-    );
+    expect(summary).not.toContain("Strict size-block reading");
+  });
+
+  it("aligns substitutions from source values, not their output values", () => {
+    const original = "10 (12)";
+    const extractedText = `${original}; later text: 20, 22`;
+    const result = analyzePattern({
+      name: "source-alignment",
+      sizeCount: 2,
+      detectedSizeCount: 2,
+      truth: [truth(["10", "12"]), truth(["20", "22"])],
+      sequences: [
+        {
+          kind: "sub",
+          original,
+          values: ["20", "22"],
+          start: 0,
+          end: original.length,
+        },
+      ],
+      extractedText,
+      structure: passingStructure,
+    });
+
+    expect(result.entries.map((entry) => entry.classification)).toEqual(["wrong", "missed"]);
+    expect(result.entries.map((entry) => entry.parserSequenceIndex)).toEqual([0, null]);
+    expect(result.counts.wrong).toBe(1);
+  });
+
+  it("searches for unaligned truth only between neighboring aligned source spans", () => {
+    const extractedText = "30 then 32. 10 (12). 20 (22).";
+    const firstStart = extractedText.indexOf("10 (12)");
+    const lastStart = extractedText.indexOf("20 (22)");
+    const result = analyzePattern({
+      name: "position-aware-loss",
+      sizeCount: 2,
+      detectedSizeCount: 2,
+      truth: [truth(["10", "12"]), truth(["30", "32"]), truth(["20", "22"])],
+      sequences: [
+        {
+          kind: "sub",
+          original: "10 (12)",
+          values: ["10", "12"],
+          start: firstStart,
+          end: firstStart + "10 (12)".length,
+        },
+        {
+          kind: "sub",
+          original: "20 (22)",
+          values: ["20", "22"],
+          start: lastStart,
+          end: lastStart + "20 (22)".length,
+        },
+      ],
+      extractedText,
+      structure: passingStructure,
+    });
+
+    expect(result.entries.map((entry) => entry.classification)).toEqual([
+      "correct",
+      "lost",
+      "correct",
+    ]);
   });
 
   it("aligns repeated identical groups to their occurrences in order", () => {
@@ -217,7 +300,14 @@ describe("gate alignment and classification", () => {
       sizeCount: 2,
       detectedSizeCount: 2,
       truth: [truth(["14 1/2 cm", "8½"])],
-      sequences: [sub("14½ (8 1/2 in)", ["14½", "8 1/2 in"])],
+      sequences: [
+        {
+          kind: "sub",
+          original: "14½ (8 1/2 in)",
+          values: ["14½", "8 1/2 in"],
+          sourceValues: ["14½", "8 1/2 in"],
+        },
+      ],
       extractedText: "",
       structure: passingStructure,
     });
@@ -258,7 +348,12 @@ describe("gate alignment and classification", () => {
       stableAcrossSizes: true,
     });
     expect(inspected.sequences).toEqual([
-      expect.objectContaining({ kind: "sub", original: "10 (12, 14)", values: ["10", "12", "14"] }),
+      expect.objectContaining({
+        kind: "sub",
+        original: "10 (12, 14)",
+        values: ["10", "12", "14"],
+        sourceValues: ["10", "12", "14"],
+      }),
     ]);
   });
 });

@@ -9,7 +9,13 @@ describe("resolve", () => {
   it("returns ordered text and substitution segments with the selected value", () => {
     expect(resolved("Cast on 80 (88, 96) sts", 3, 1)).toEqual([
       { kind: "text", text: "Cast on " },
-      { kind: "sub", original: "80 (88, 96)", value: "88", notApplicable: false },
+      {
+        kind: "sub",
+        original: "80 (88, 96)",
+        value: "88",
+        notApplicable: false,
+        sourceValues: ["80", "88", "96"],
+      },
       { kind: "text", text: " sts" },
     ]);
   });
@@ -23,6 +29,7 @@ describe("resolve", () => {
         original: `10 (${placeholder}, 12)`,
         value: placeholder,
         notApplicable: true,
+        sourceValues: ["10", placeholder, "12"],
       });
     }
     expect(resolved("10 (0, 12)", 3, 1).find((segment) => segment.kind === "sub")).toMatchObject({
@@ -56,7 +63,13 @@ describe("resolve", () => {
     const segments = resolve(text, { count: 3, usesDashes: false, sizeListLine: 0 }, 1);
     expect(segments).toEqual([
       { kind: "text", text: "Sizes: XS (S, M)\nFinished chest: 30 (34, 38) cm\nCast on " },
-      { kind: "sub", original: "20 (22, 24)", value: "22", notApplicable: false },
+      {
+        kind: "sub",
+        original: "20 (22, 24)",
+        value: "22",
+        notApplicable: false,
+        sourceValues: ["20", "22", "24"],
+      },
       { kind: "text", text: " sts" },
     ]);
   });
@@ -65,7 +78,13 @@ describe("resolve", () => {
     const indentedSizeList = "  Sizes: 1 (2, 3)\nCast on 20 (22, 24) sts";
     expect(resolve(indentedSizeList, { count: 3, usesDashes: false }, 1)).toEqual([
       { kind: "text", text: "  Sizes: 1 (2, 3)\nCast on " },
-      { kind: "sub", original: "20 (22, 24)", value: "22", notApplicable: false },
+      {
+        kind: "sub",
+        original: "20 (22, 24)",
+        value: "22",
+        notApplicable: false,
+        sourceValues: ["20", "22", "24"],
+      },
       { kind: "text", text: " sts" },
     ]);
 
@@ -76,7 +95,13 @@ describe("resolve", () => {
         kind: "text",
         text: "Sizes: XS (S, M)\nFinished measurements\nChest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nCast on ",
       },
-      { kind: "sub", original: "10 (12, 14)", value: "12", notApplicable: false },
+      {
+        kind: "sub",
+        original: "10 (12, 14)",
+        value: "12",
+        notApplicable: false,
+        sourceValues: ["10", "12", "14"],
+      },
       { kind: "text", text: " sts" },
     ]);
 

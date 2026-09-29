@@ -1,6 +1,6 @@
+import type { CohortProfile } from "./cohort.ts";
 import {
   calculateGateCriteria,
-  calculateStrictGateCriteria,
   type GateSequence,
   MAX_WRONG_PATTERNS,
   MAX_WRONG_RATE,
@@ -171,8 +171,9 @@ export function renderPatternReport(
     `- Missed by parser: ${analysis.counts.missed}`,
     `- Lost in extraction and counted: ${analysis.counts.lost}`,
     `- Size block left as written: ${analysis.counts.sizeBlockLeftAsWritten}`,
-    `- Size block substituted, value correct: ${analysis.counts.sizeBlockSubstitutedCorrectly}`,
+    `- Size block substituted (counted as wrong): ${analysis.counts.sizeBlockSubstituted}`,
     `- Figure substituted correctly: ${analysis.counts.figureSubstitutedCorrectly}`,
+    `- Figure substituted wrongly: ${analysis.counts.figureSubstitutedWrongly}`,
     `- Figure left: ${analysis.counts.figureLeft}`,
     "",
   );
@@ -208,10 +209,11 @@ export function renderSummaryReport(
   analyses: PatternAnalysis[],
   failures: PatternFailure[],
   truthFileCount: number,
+  cohortProfile?: CohortProfile,
 ): string {
   const byName = new Map(analyses.map((analysis) => [analysis.name, analysis]));
   const criteria =
-    failures.length === 0
+    failures.length === 0 && cohortProfile?.eligible !== false
       ? calculateGateCriteria(
           analyses.map((analysis) => ({
             name: analysis.name,
@@ -222,7 +224,6 @@ export function renderSummaryReport(
           })),
         )
       : null;
-  const strictCriteria = failures.length === 0 ? calculateStrictGateCriteria(analyses) : null;
   const names = [
     ...analyses.map((analysis) => analysis.name),
     ...failures.map((failure) => failure.name),
@@ -238,15 +239,15 @@ export function renderSummaryReport(
       failures.length +
       ".",
     "",
-    "Size-block entries are outside the denominator because the brief excludes that block from the parser's job, and figure entries are outside it because schematics are out of scope; wrong-valued substitutions aligned to either still count as wrong.",
+    "Size-block entries are outside the denominator because the brief excludes that block from the parser's job; every substitution there counts as wrong. Figure entries are outside it because schematics are out of scope; correct substitutions are reported, and wrong-valued substitutions still count as wrong.",
     "",
-    "| Pattern | Counted | Correct | Flagged | Wrong | False positives | Missed | Lost | size block left as written | size block substituted, value correct | figure substituted correctly | figure left | Detected size count / truth |",
-    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+    "| Pattern | Counted | Correct | Flagged | Wrong | False positives | Missed | Lost | size block left as written | size block substituted | figure substituted correctly | figure substituted wrongly | figure left | Detected size count / truth |",
+    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
   ];
   for (const name of names) {
     const analysis = byName.get(name);
     if (!analysis) {
-      lines.push(`| ${markdown(name)} | — | — | — | — | — | — | — | — | — | — | — | ERROR |`);
+      lines.push(`| ${markdown(name)} | — | — | — | — | — | — | — | — | — | — | — | — | ERROR |`);
       continue;
     }
     const detected =
@@ -271,9 +272,11 @@ export function renderSummaryReport(
         " | " +
         countCell(analysis, "sizeBlockLeftAsWritten") +
         " | " +
-        countCell(analysis, "sizeBlockSubstitutedCorrectly") +
+        countCell(analysis, "sizeBlockSubstituted") +
         " | " +
         countCell(analysis, "figureSubstitutedCorrectly") +
+        " | " +
+        countCell(analysis, "figureSubstitutedWrongly") +
         " | " +
         countCell(analysis, "figureLeft") +
         " | " +
@@ -284,24 +287,36 @@ export function renderSummaryReport(
     );
   }
 
+  lines.push("", "## Cohort profile", "");
+  if (cohortProfile) {
+    lines.push(
+      `- Mode: ${cohortProfile.mode}`,
+      `- Patterns: ${cohortProfile.patternCount}`,
+      `- Distinct designers: ${cohortProfile.designerCount}`,
+    );
+    if (cohortProfile.eligible) {
+      lines.push("- Profile: eligible for a gate verdict.");
+    } else {
+      lines.push(`- **NO VERDICT** — ${cohortProfile.issues.map(markdown).join("; ")}.`);
+    }
+  } else {
+    lines.push("No cohort profile was supplied.");
+  }
+
   lines.push("", "## Gate criteria", "");
   if (failures.length > 0) {
-    lines.push(
-      "Not evaluated because one or more truth files or sources could not be measured.",
-      "- **Strict size-block reading:** Not evaluated because one or more truth files or sources could not be measured.",
-      "",
-    );
+    lines.push("**NO VERDICT** — one or more truth files or sources could not be measured.", "");
     for (const failure of failures) {
       const cause = failure.cause ? ` (cause: ${markdown(failure.cause)})` : "";
       lines.push(`- ${markdown(failure.name)}: ${markdown(failure.message)}${cause}`);
     }
     lines.push("");
   } else if (!criteria?.evaluated) {
-    lines.push(
-      "Not evaluated because no truth files were found.",
-      "- **Strict size-block reading:** Not evaluated because no truth files were found.",
-      "",
-    );
+    const reason =
+      cohortProfile?.eligible === false
+        ? "The required cohort profile is not satisfied."
+        : "No truth files were found.";
+    lines.push(`**NO VERDICT** — ${reason}`, "");
   } else {
     lines.push(
       "- **(a) Structural check:** " +
@@ -334,7 +349,6 @@ export function renderSummaryReport(
         ").",
       "",
       `**Overall: ${criteria.passed ? "PASS" : "FAIL"}**`,
-      `- **Strict size-block reading:** ${strictCriteria?.passed ? "PASS" : "FAIL"} — counting every size-block substitution as wrong gives ${strictCriteria?.wrongTotal ?? 0} wrong substitutions / ${strictCriteria?.countedTotal ?? 0} truth entries (${formatRate(strictCriteria?.wrongRate ?? null)}; ${wrongPatternLabel(strictCriteria?.wrongPatternCount ?? 0)}), with a median correct rate of ${formatRate(strictCriteria?.medianCorrectRate ?? null)}.`,
       "",
     );
   }

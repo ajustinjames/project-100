@@ -1,6 +1,10 @@
 type PdfJsModule = Pick<typeof import("pdfjs-dist"), "getDocument" | "GlobalWorkerOptions">;
 
-export type PdfExtractionErrorCode = "no-text-layer" | "password-protected" | "invalid-pdf";
+export type PdfExtractionErrorCode =
+  | "no-text-layer"
+  | "password-protected"
+  | "invalid-pdf"
+  | "load-failed";
 
 export class PdfExtractionError extends Error {
   readonly code: PdfExtractionErrorCode;
@@ -15,6 +19,8 @@ export class PdfExtractionError extends Error {
     this.code = code;
   }
 }
+
+export type PdfJsLoader = () => Promise<PdfJsModule>;
 
 interface LineBuffer {
   text: string;
@@ -130,6 +136,18 @@ function classifyPdfError(error: unknown): PdfExtractionError {
   if (name === "PasswordException" || /password|encrypted/i.test(message)) {
     return new PdfExtractionError("password-protected", "This PDF is password protected.", error);
   }
+  if (
+    name === "WorkerError" ||
+    /worker|failed to fetch dynamically imported module|chunkload|pdfjs.*(?:load|import)/i.test(
+      message,
+    )
+  ) {
+    return new PdfExtractionError(
+      "load-failed",
+      "PDF support could not be loaded because its module or worker failed.",
+      error,
+    );
+  }
   return new PdfExtractionError("invalid-pdf", "This PDF is invalid or corrupt.", error);
 }
 
@@ -141,12 +159,30 @@ export async function extractPdfText(
   data: ArrayBuffer | Uint8Array,
   onProgress?: (page: number, pages: number) => void,
 ): Promise<string> {
+  return extractPdfTextWithLoader(data, loadPdfJs, onProgress);
+}
+
+/** Test seam for PDF.js module and worker setup failures. */
+export async function extractPdfTextWithLoader(
+  data: ArrayBuffer | Uint8Array,
+  loader: PdfJsLoader,
+  onProgress?: (page: number, pages: number) => void,
+): Promise<string> {
   const pdfData =
     data instanceof ArrayBuffer ? new Uint8Array(data.slice(0)) : new Uint8Array(data);
   let task: ReturnType<PdfJsModule["getDocument"]> | undefined;
 
   try {
-    const pdfjs = await loadPdfJs();
+    let pdfjs: PdfJsModule;
+    try {
+      pdfjs = await loader();
+    } catch (error) {
+      throw new PdfExtractionError(
+        "load-failed",
+        "PDF support could not be loaded because its module or worker failed.",
+        error,
+      );
+    }
     // PDF.js 6.3.289 has no isEvalSupported parameter; its standard browser files contain no eval call.
     task = pdfjs.getDocument({
       data: pdfData,

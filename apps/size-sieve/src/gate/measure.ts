@@ -1,4 +1,4 @@
-import { rejoinSegments, type Segment } from "../parser/index.ts";
+import { findSequences, rejoinSegments, type Segment } from "../parser/index.ts";
 
 export interface TruthSequence {
   values: string[];
@@ -14,6 +14,7 @@ export type GateSequence =
       kind: "sub";
       original: string;
       values: string[];
+      sourceValues?: string[];
       start?: number;
       end?: number;
     }
@@ -51,8 +52,9 @@ export interface GateCounts {
   missed: number;
   lost: number;
   sizeBlockLeftAsWritten: number;
-  sizeBlockSubstitutedCorrectly: number;
+  sizeBlockSubstituted: number;
   figureSubstitutedCorrectly: number;
+  figureSubstitutedWrongly: number;
   figureLeft: number;
 }
 
@@ -223,6 +225,69 @@ function originalContains(sequence: GateSequence, truth: TruthSequence): boolean
   return valuesFoundInOrder(sequence.original, truth.values);
 }
 
+function sourceValuesFor(sequence: Extract<GateSequence, { kind: "sub" }>): string[] | null {
+  if (sequence.sourceValues) return sequence.sourceValues;
+  const parsed = findSequences(sequence.original, {
+    count: sequence.values.length,
+    usesDashes: true,
+  }).find((candidate) => candidate.kind === "sub");
+  return parsed?.kind === "sub" ? parsed.values : null;
+}
+
+function sourceSpans(
+  sequences: GateSequence[],
+  extractedText: string,
+): Array<{ start: number; end: number } | null> {
+  let cursor = 0;
+  return sequences.map((sequence) => {
+    if (
+      sequence.start !== undefined &&
+      sequence.end !== undefined &&
+      Number.isFinite(sequence.start) &&
+      Number.isFinite(sequence.end) &&
+      sequence.start >= 0 &&
+      sequence.end >= sequence.start
+    ) {
+      cursor = Math.max(cursor, sequence.end);
+      return { start: sequence.start, end: sequence.end };
+    }
+
+    const start = extractedText.indexOf(sequence.original, cursor);
+    if (start < 0) return null;
+    const end = start + sequence.original.length;
+    cursor = end;
+    return { start, end };
+  });
+}
+
+function truthSearchRegion(
+  truthIndex: number,
+  truthCount: number,
+  alignments: Map<number, { sequenceIndex: number; kind: "exact" | "wrong" }>,
+  spans: Array<{ start: number; end: number } | null>,
+  textLength: number,
+): { start: number; end: number } {
+  let start = 0;
+  let end = textLength;
+  for (let index = truthIndex - 1; index >= 0; index -= 1) {
+    const alignment = alignments.get(index);
+    const span = alignment ? spans[alignment.sequenceIndex] : null;
+    if (span) {
+      start = span.end;
+      break;
+    }
+  }
+  for (let index = truthIndex + 1; index < truthCount; index += 1) {
+    const alignment = alignments.get(index);
+    const span = alignment ? spans[alignment.sequenceIndex] : null;
+    if (span) {
+      end = span.start;
+      break;
+    }
+  }
+  return start <= end ? { start, end } : { start: end, end };
+}
+
 function originalForSegment(segment: Segment): string {
   return segment.kind === "text" ? segment.text : segment.original;
 }
@@ -303,10 +368,17 @@ export function inspectResolutions(
         const candidate = resolution[segmentIndex];
         return candidate?.kind === "sub" ? candidate.value : "";
       });
+      const candidate = first[segmentIndex];
       sequences.push({
         kind: "sub",
         original,
         values,
+        sourceValues:
+          candidate?.kind === "sub"
+            ? (candidate.sourceValues ??
+              sourceValuesFor({ kind: "sub", original, values }) ??
+              undefined)
+            : undefined,
         start: sourceOffset,
         end: sourceOffset + original.length,
       });
@@ -342,13 +414,14 @@ function emptyCounts(): GateCounts {
     missed: 0,
     lost: 0,
     sizeBlockLeftAsWritten: 0,
-    sizeBlockSubstitutedCorrectly: 0,
+    sizeBlockSubstituted: 0,
     figureSubstitutedCorrectly: 0,
+    figureSubstitutedWrongly: 0,
     figureLeft: 0,
   };
 }
 
-/** Aligns equal value lists first, then identifies a wrong sub only when its source contains the truth values. */
+/** Aligns against each substitution's parsed source values, then scores its output values. */
 export function analyzePattern(args: {
   name: string;
   sizeCount: number;
@@ -361,51 +434,20 @@ export function analyzePattern(args: {
   const { truth, sequences, extractedText } = args;
   const alignments = new Map<number, { sequenceIndex: number; kind: "exact" | "wrong" }>();
   const usedSequenceIndexes = new Set<number>();
+  const spans = sourceSpans(sequences, extractedText);
 
-  const exactPairs = lcsPairs(sequences.length, truth.length, (sequenceIndex, truthIndex) => {
+  const sourcePairs = lcsPairs(sequences.length, truth.length, (sequenceIndex, truthIndex) => {
     const sequence = sequences[sequenceIndex];
     const entry = truth[truthIndex];
     if (!sequence || !entry) return false;
-    if (sequence.kind === "sub") return gateValuesEqual(sequence.values, entry.values);
+    if (sequence.kind === "sub") {
+      const sourceValues = sourceValuesFor(sequence);
+      return sourceValues !== null && gateValuesEqual(sourceValues, entry.values);
+    }
     return originalContains(sequence, entry);
   });
-  for (const [sequenceIndex, truthIndex] of exactPairs) {
+  for (const [sequenceIndex, truthIndex] of sourcePairs) {
     alignments.set(truthIndex, { sequenceIndex, kind: "exact" });
-    usedSequenceIndexes.add(sequenceIndex);
-  }
-
-  const remainingSubIndexes = sequences
-    .map((sequence, index) =>
-      sequence.kind === "sub" && !usedSequenceIndexes.has(index) ? index : -1,
-    )
-    .filter((index) => index >= 0);
-  const remainingTruthIndexes = truth
-    .map((_, index) => (alignments.has(index) ? -1 : index))
-    .filter((index) => index >= 0);
-  // Raw source links a mis-resolved substitution to its truth entry. Exact value matches were
-  // aligned above, so this pass separates wrong substitutions from unrelated false positives.
-  const wrongPairs = lcsPairs(
-    remainingSubIndexes.length,
-    remainingTruthIndexes.length,
-    (subPosition, truthPosition) => {
-      const sequenceIndex = remainingSubIndexes[subPosition];
-      const truthIndex = remainingTruthIndexes[truthPosition];
-      const sequence = sequenceIndex === undefined ? undefined : sequences[sequenceIndex];
-      const entry = truthIndex === undefined ? undefined : truth[truthIndex];
-      return Boolean(
-        sequence &&
-          sequence.kind === "sub" &&
-          entry &&
-          !gateValuesEqual(sequence.values, entry.values) &&
-          originalContains(sequence, entry),
-      );
-    },
-  );
-  for (const [subPosition, truthPosition] of wrongPairs) {
-    const sequenceIndex = remainingSubIndexes[subPosition];
-    const truthIndex = remainingTruthIndexes[truthPosition];
-    if (sequenceIndex === undefined || truthIndex === undefined) continue;
-    alignments.set(truthIndex, { sequenceIndex, kind: "wrong" });
     usedSequenceIndexes.add(sequenceIndex);
   }
 
@@ -426,19 +468,41 @@ export function analyzePattern(args: {
         detail = entry.sourceError
           ? "Source error was correctly left flagged."
           : "The parser left this sequence unchanged and flagged it.";
+      } else if (sequence?.kind === "sub" && entry.inSizeBlock) {
+        classification = "wrong";
+        detail =
+          "A size-block substitution is wrong because the parser must leave that block as written.";
       } else if (sequence?.kind === "sub" && entry.sourceError) {
         classification = "wrong";
         detail = "Source error was substituted; the expected result is a flag.";
+      } else if (sequence?.kind === "sub" && !gateValuesEqual(sequence.values, entry.values)) {
+        classification = "wrong";
+        detail = "The parsed source values match this entry, but the substituted values differ.";
       } else {
         classification = "correct";
-        detail = "The substituted values match the truth values.";
+        detail =
+          sequence?.kind === "sub"
+            ? "The parsed source and substituted values match the truth values."
+            : "The parser left this sequence unchanged and flagged it.";
       }
-    } else if (valuesFoundInOrder(extractedText, entry.values)) {
-      classification = "missed";
-      detail = "The truth values are present in extracted text, but no parser sequence aligned.";
     } else {
-      classification = "lost";
-      detail = "The truth values could not be found in extracted text in order.";
+      const region = truthSearchRegion(
+        truthIndex,
+        truth.length,
+        alignments,
+        spans,
+        extractedText.length,
+      );
+      const regionText = extractedText.slice(region.start, region.end);
+      if (valuesFoundInOrder(regionText, entry.values)) {
+        classification = "missed";
+        detail =
+          "The truth values occur between neighboring aligned entries, but no parser sequence aligned.";
+      } else {
+        classification = "lost";
+        detail =
+          "The truth values could not be found between neighboring aligned entries in extracted text.";
+      }
     }
 
     const alignedSequence =
@@ -447,7 +511,7 @@ export function analyzePattern(args: {
 
     if (entry.inSizeBlock) {
       if (alignedSequence?.kind === "sub") {
-        if (classification === "correct") counts.sizeBlockSubstitutedCorrectly += 1;
+        counts.sizeBlockSubstituted += 1;
       } else {
         counts.sizeBlockLeftAsWritten += 1;
       }
@@ -455,6 +519,7 @@ export function analyzePattern(args: {
     if (entry.inFigure) {
       if (alignedSequence?.kind === "sub") {
         if (classification === "correct") counts.figureSubstitutedCorrectly += 1;
+        if (classification === "wrong") counts.figureSubstitutedWrongly += 1;
       } else {
         counts.figureLeft += 1;
       }
@@ -558,24 +623,4 @@ export function calculateGateCriteria(patterns: GateCriterionInput[]): GateCrite
     criterionC,
     passed: criterionA && criterionBPatterns && criterionBOverall && criterionC,
   };
-}
-
-/** Evaluates an alternate reading where every size-block substitution is a wrong result. */
-export function calculateStrictGateCriteria(analyses: PatternAnalysis[]): GateCriteria {
-  return calculateGateCriteria(
-    analyses.map((analysis) => {
-      const sizeBlockSubstitutions = analysis.entries.filter((entry) => {
-        if (!entry.truth.inSizeBlock || entry.parserSequenceIndex === null) return false;
-        return analysis.sequences[entry.parserSequenceIndex]?.kind === "sub";
-      }).length;
-
-      return {
-        name: analysis.name,
-        counted: analysis.counts.counted + sizeBlockSubstitutions,
-        correct: analysis.counts.correct,
-        wrong: analysis.counts.wrong + analysis.counts.sizeBlockSubstitutedCorrectly,
-        structurePassed: analysis.structure.passed,
-      };
-    }),
-  );
 }

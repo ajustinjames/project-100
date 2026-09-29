@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { extractPdfText, PdfExtractionError } from "./extract.ts";
+import { extractPdfText, extractPdfTextWithLoader, PdfExtractionError } from "./extract.ts";
 
 const encoder = new TextEncoder();
 const nodeBuffer = (
@@ -107,6 +107,35 @@ describe("extractPdfText", () => {
     await expect(extractPdfText(invalid)).rejects.toMatchObject({
       code: "invalid-pdf",
       cause: expect.objectContaining({ name: "InvalidPDFException" }),
+    });
+  });
+
+  it("reports PDF.js module loading failures separately from invalid PDFs", async () => {
+    const loader = async () => {
+      throw new Error("Cannot load the pdfjs-dist module");
+    };
+    await expect(
+      extractPdfTextWithLoader(encoder.encode("not a PDF"), loader),
+    ).rejects.toMatchObject({
+      name: "PdfExtractionError",
+      code: "load-failed",
+      cause: expect.objectContaining({ message: "Cannot load the pdfjs-dist module" }),
+    });
+  });
+
+  it("reports worker setup failures as loading errors", async () => {
+    const loader = async () =>
+      ({
+        getDocument: () => {
+          throw new Error("Setting up fake worker failed");
+        },
+        GlobalWorkerOptions: { workerSrc: "" },
+      }) as never;
+    await expect(
+      extractPdfTextWithLoader(encoder.encode("not a PDF"), loader),
+    ).rejects.toMatchObject({
+      code: "load-failed",
+      cause: expect.objectContaining({ message: "Setting up fake worker failed" }),
     });
   });
 });
