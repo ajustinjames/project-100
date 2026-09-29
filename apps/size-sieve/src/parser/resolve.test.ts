@@ -41,7 +41,13 @@ describe("resolve", () => {
   it("keeps stitch abbreviations in text when replacing only their following numbers", () => {
     expect(resolved("k5 (7, 7, 8)", 4, 2)).toEqual([
       { kind: "text", text: "k" },
-      { kind: "sub", original: "5 (7, 7, 8)", value: "7", notApplicable: false },
+      {
+        kind: "sub",
+        original: "5 (7, 7, 8)",
+        value: "7",
+        notApplicable: false,
+        sourceValues: ["5", "7", "7", "8"],
+      },
     ]);
 
     expect(resolved("K1 (1, 2, 0) (2, 1, 2, 0)", 8, 4)).toEqual([
@@ -51,6 +57,7 @@ describe("resolve", () => {
         original: "1 (1, 2, 0) (2, 1, 2, 0)",
         value: "2",
         notApplicable: false,
+        sourceValues: ["1", "1", "2", "0", "2", "1", "2", "0"],
       },
     ]);
   });
@@ -58,7 +65,13 @@ describe("resolve", () => {
   it("resolves a bracketed dash group as one marked source span", () => {
     expect(resolve('Work 22(24-26-28)"', { count: 4, usesDashes: false }, 2)).toEqual([
       { kind: "text", text: "Work " },
-      { kind: "sub", original: "22(24-26-28)", value: "26", notApplicable: false },
+      {
+        kind: "sub",
+        original: "22(24-26-28)",
+        value: "26",
+        notApplicable: false,
+        sourceValues: ["22", "24", "26", "28"],
+      },
       { kind: "text", text: '"' },
     ]);
   });
