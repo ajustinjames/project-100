@@ -151,6 +151,17 @@ Then:
 
 Building then follows the [build flow](AI_ROLES.md#model-assignments), starting with the build brief. Labs is for testing feasibility. Discard freely; see [LIFECYCLE.md](LIFECYCLE.md#discarding-a-labs-prototype).
 
+### Measuring a feasibility gate
+
+When `APP.md` records a feasibility gate (a measurement that decides whether the prototype is worth building), measure it so the result can't be argued away, including by its builder. Learned from [Size Sieve](../apps/size-sieve/RETRO.md).
+
+1. **Put it on record before measuring.** Write the criteria, the thresholds, and the exact cohort (the test material, by name) in the build brief before the tool runs on any of it. Make the cohort match the real audience: a sample of 9 knitting patterns and 1 crochet pattern hid the crochet formats that later failed.
+2. **Annotate the ground truth by hand from the originals, before the tool runs on them.** Include everything the tool will encounter, including what it's meant to skip, and mark those items instead of leaving them out. Otherwise correct behavior in a skipped area can score as an error, and the scoring gets disputed after the fact.
+3. **Keep the test material lawful and local.** Use only material you may use (free, published by its owner). Respect stated terms: drop anything whose terms forbid copying. Never commit it; commit counts only.
+4. **Check the harness on one real input before trusting a summary.** Harness bugs look like results.
+5. **Don't change the scoring after seeing a result** without the Reviewer's explicit ruling, recorded on the brief. Report both readings if there is a dispute.
+6. **At most one fix round, then an untouched holdout.** Write the fix-round rules on the brief first. Then collect and annotate a holdout from new sources before the fixed tool touches it. The fix has to pass both the original cohort and the holdout, or the prototype is discarded. Don't tune again against material you've already seen.
+
 ## Gate 4: Launch readiness
 
 Before requesting launch, the app must meet all of these:
