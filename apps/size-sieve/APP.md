@@ -46,18 +46,23 @@ Worth building because none is free and automatic on iPhone, iPad, or computers 
 - 2026-09-28: The first build task is a feasibility measurement, before any UI polish. Run the parser on at least ten lawfully obtained free patterns from at least six designers, locally, and never commit them. Record per-pattern counts here: size sequences resolved correctly, flagged, missed, and substituted wrongly. **Discard the prototype** unless (a) every substitution is visibly marked, (b) wrong substitutions occur in at most two of the ten patterns and are at most 1% of all size sequences, and (c) the median pattern resolves at least four in five size sequences correctly. This gate came from the critique.
 - 2026-09-28: Open for the build brief: show sizes by highlighting in place on the rendered PDF (pdf.js text layer), which keeps charts and layout, or as resolved extracted text. The parser and data model are the same either way.
 - 2026-09-28: Keep a free tool on every platform as the reason to exist. If Rowtine ships on iOS or the web, or TrixiStitches makes size highlighting free, re-run the screen and discard if this no longer does anything better.
+- 2026-09-29: Gate run 1 failed: 9 size-block substitutions counted wrong across 5 patterns, or 9/420 counted sequences (2.14%). Size-block entries remain outside the denominator; any substitution aligned to one counts as wrong. Figure entries remain reportable outside the denominator; correct substitutions are not wrong, and wrong-valued substitutions are wrong. Alignment uses parsed source values, and missed entries are searched only between neighboring aligned source spans. A gate verdict requires an eligible profile: the main cohort has at least 10 patterns from 6 distinct designers, and a holdout has at least 5 patterns from 5 distinct designers with no designer shared with the main cohort. The CLI defaults to the main profile when no mode is selected.
 
 ## Architecture
 
-The app is a static Vite app in plain TypeScript on `ajj-design` `hardline`. Its built parser is pure TypeScript with no DOM or runtime dependencies: it detects a size list, classifies supported instruction sequences, and resolves them to source-ordered segments. Rejoining each segment's original text reproduces the input exactly. Parser tests use synthetic snippets written for the tests. PDF extraction, the reader, and storage remain planned. No Cloudflare bindings.
+The app is a static Vite app in plain TypeScript on ajj-design hardline. Its parser is pure TypeScript with no DOM or runtime dependencies: it detects a size list, classifies supported instruction sequences, and resolves them to source-ordered segments. Rejoining each segment's original text reproduces the input exactly. Parser tests use synthetic snippets written for the tests.
+
+The src/pdf/ module dynamically loads PDF.js to extract text from an in-memory PDF and distinguishes module or worker loading failures from invalid PDFs. The browser worker is emitted by Vite as a same-origin asset; the Node feasibility harness selects PDF.js's Node entry point and does not render pages. The tools/measure.ts harness uses that extractor for PDFs, reads pasted-text fixtures from .txt files, resolves every size index, and compares the results with ignored truth files in apps/size-sieve/.feasibility/. It aligns substitutions against parsed source values and checks unaligned entries only within the text between neighboring aligned source spans, consuming each matching occurrence once in truth order within that region. Main-cohort and holdout profiles prevent a verdict unless their pattern and distinct-designer requirements are met and, for holdout, designers are disjoint from the main cohort. It writes per-pattern and combined Markdown reports beside those files. No reader UI or storage is implemented yet. No Cloudflare bindings.
+
+Browser extraction text from Chromium and WebKit under `wrangler dev` was compared byte-for-byte with the harness's Node extraction for all six cohort PDFs; all 12 comparisons were identical.
 
 ## Dependencies
 
 <!-- Each third-party dependency and why a small amount of our own code would not do. See docs/DEPENDENCIES.md. -->
 
-None yet beyond ajj-design (`hardline`).
+pdfjs-dist (Mozilla, Apache-2.0) handles PDF text parsing, a hard problem that would be error-prone to reproduce with a small amount of app code, as described in [DEPENDENCIES.md](../../docs/DEPENDENCIES.md). It is loaded only when a PDF is opened. The optional native @napi-rs/canvas package is used by PDF.js only for Node rendering; this app never renders PDFs and the package is never bundled into the browser app.
 
-Planned: `pdfjs-dist` (Mozilla, Apache-2.0) to extract text from PDFs, and render them if in-place highlighting is chosen, in the browser. PDF parsing is the kind of hard problem [DEPENDENCIES.md](../../docs/DEPENDENCIES.md) says to use a library for. It's added in the build PR that first needs it, and loaded only when a PDF is opened.
+The app also uses the shared ajj-design hardline components and tokens.
 
 ## Shared packages
 
@@ -71,7 +76,7 @@ None.
 
 ## Tradeoffs and known limitations
 
-- PDF text extraction can reorder or drop text in complex layouts (PDF.js has had [reported reading-order failures](https://github.com/mozilla/pdf.js/issues/14493)). Counting can't detect lost text, so the app shows extracted text for checking.
+- PDF text extraction can reorder or drop text in complex layouts (PDF.js has had [reported reading-order failures](https://github.com/mozilla/pdf.js/issues/14493)). The feasibility harness reports text that could not be recovered; a future reader must show extracted text for checking.
 - The parser will not handle every designer's format; unhandled groups are listed, not chased one by one.
 - Data lives in one browser; export and import are the backup.
 

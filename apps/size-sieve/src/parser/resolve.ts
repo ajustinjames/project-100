@@ -2,7 +2,14 @@ import { findSequences, type SequenceOptions } from "./sequences.ts";
 
 export type Segment =
   | { kind: "text"; text: string }
-  | { kind: "sub"; original: string; value: string; notApplicable: boolean }
+  | {
+      kind: "sub";
+      original: string;
+      value: string;
+      notApplicable: boolean;
+      /** Parsed values from the original sequence, kept for measurement and alignment. */
+      sourceValues?: string[];
+    }
   | { kind: "flag"; original: string; reason: "count-mismatch" | "size-label" };
 
 const PLACEHOLDERS = new Set(["-", "x", "X", "–", "—"]);
@@ -48,6 +55,7 @@ export function resolve(text: string, options: SequenceOptions, chosenIndex: num
         original: sequence.original,
         value,
         notApplicable: PLACEHOLDERS.has(value.trim()),
+        sourceValues: sequence.values,
       });
     }
 
