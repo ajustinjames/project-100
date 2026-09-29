@@ -25,7 +25,7 @@ If work has already started, pick up from the first step that isn't done. Don't 
 
 ## Steps
 
-1. **Write the build brief.** Open a GitHub issue titled `Build brief: <slug>`: the problem, UX and UI direction, architecture, and acceptance criteria. Plan the work as a short sequence of PRs, one concern each. Put any gate recorded in `APP.md` first. Resolve open questions from `APP.md` and `PROPOSAL.md` here, and record the durable decisions in `APP.md` in a PR.
+1. **Write the build brief.** Open a GitHub issue titled `Build brief: <slug>`: the problem, UX and UI direction, architecture, and acceptance criteria. Plan the work as a short sequence of PRs, one concern each. Put any gate recorded in `APP.md` first, measured as [Measuring a feasibility gate](../../../docs/APP_ACCEPTANCE.md#measuring-a-feasibility-gate) describes. When the brief gives rules (for example, a table of cases a parser must handle), give every case exactly one outcome; the Reviewer checks this. Resolve open questions from `APP.md` and `PROPOSAL.md` here, and record the durable decisions in `APP.md` in a PR.
 2. **Brief review.** Launch the Reviewer, a separate session using the model and effort in [AI_ROLES.md](../../../docs/AI_ROLES.md#model-assignments), launched as [described there](../../../docs/AI_ROLES.md#launching-another-model). Give it the brief issue, not your private reasoning. Post its output verbatim as an issue comment. Respond to every finding in the brief: what changed, or why it was dismissed. Don't start implementation until the review is resolved.
 3. **Implement, one PR at a time.** For each PR in the plan:
    - Launch the implementation model from the table on its own branch or worktree, with the brief, the scope of this PR, and the docs to follow. It writes code, tests, and docs. You open the PR (referencing the brief), and make sure `pnpm verify` passes.
@@ -37,7 +37,7 @@ If work has already started, pick up from the first step that isn't done. Don't 
 6. **Launch readiness.** Check every [Gate 4](../../../docs/APP_ACCEPTANCE.md#gate-4-launch-readiness) item against the real app on its preview or Labs URL, on mobile and desktop. Do your final product, UI, and architecture review. Then launch the adversarial review from the table on the whole app. Resolve or explain every finding, and fix gaps in their own PRs.
 7. **Launch packet.** Open a "Launch approval" issue from the template, filling every section from `APP.md` and `PRIVACY.md` and linking both reviews. Then stop. Launch is the owner's decision: never set `live`, never add a `launch` approval, and never merge owner-gated PRs.
 
-Use each author-and-reviewer pair for at most two review-and-fix rounds. After that, follow [When stuck](../../../docs/AI_ROLES.md#when-stuck). If you dismiss a High or Critical finding and the reviewer still objects, follow [Disagreements](../../../docs/AI_ROLES.md#disagreements-between-agents).
+Use each author-and-reviewer pair for at most two review-and-fix rounds. If only Medium or Low findings with a clear fix remain, verify the fix yourself as [AI_ROLES.md](../../../docs/AI_ROLES.md#model-assignments) describes (handoff limits) and record it on the PR; otherwise follow [When stuck](../../../docs/AI_ROLES.md#when-stuck). When you post a launched model's output, add the `model:` and `reasoning effort:` lines from its log header as evidence. If you dismiss a High or Critical finding and the reviewer still objects, follow [Disagreements](../../../docs/AI_ROLES.md#disagreements-between-agents).
 
 ## Stop and report
 

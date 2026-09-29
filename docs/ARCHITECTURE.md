@@ -124,6 +124,7 @@ A shared package is `packages/<name>/` with `package.json` named `@project-100/<
 ## Testing
 
 - Pure logic gets Vitest unit tests (`*.test.ts` next to the code).
+- App tests live in `apps/<slug>/src/` and must be browser-safe: an app's `tsconfig.json` has only DOM and Vite types, so `node:` imports fail its typecheck. Node-only tooling for an app (a local measurement script, say) goes in `apps/<slug>/tools/`, which isn't type-checked or tested by the root config, so keep its logic in `src/` as pure, tested functions and keep the tool a thin wrapper. Never put app files under the root `scripts/` folder: it's owner-gated ([AI_ROLES.md](AI_ROLES.md#merging)).
 - Add DOM tests only when they earn their keep. Set `// @vitest-environment happy-dom` per file and add the dependency then, not before.
 - **No committed screenshot tests for apps.** Across 100 apps, baselines would break on every intentional UI change, differ between machines, and get re-baselined by agents without real review, which costs more than it catches. Visual regression belongs in `ajj-design`, which already screenshot-tests its shared components. App UI is checked in review instead: the reviewer captures throwaway screenshots with the Playwright CLI on the preview URL (desktop and mobile). An app whose value is mostly visual may add screenshot tests if `APP.md` justifies them.
 - CI runs `pnpm verify` on every PR, including Dependabot PRs.

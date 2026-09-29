@@ -47,7 +47,7 @@ codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<
 - `-c web_search='"live"'` lets a Critic or Reviewer open and verify current sources. Keep it for any task that checks external claims or links.
 - `< /dev/null` keeps `codex exec` from waiting on stdin when run from another agent.
 - **From Claude Code's Codex plugin** (the `codex:codex-rescue` agent or `codex-companion.mjs`): only its `task` mode takes `--model` and `--effort`, and it accepts efforts only up to `xhigh`, so use `codex exec` for `max`. The plugin's `review` and `adversarial-review` modes take no `--effort`, so don't use them for required reviews. When delegating through the `codex:codex-rescue` agent, put `--model <id> --effort <level>` in the request, because it adds them only when asked.
-- Start the review or critique comment with the role, model ID, and effort, e.g. `Review by Adversarial Reviewer (gpt-6-astra, effort xhigh)`, copied from the log header rather than assumed.
+- Start the review or critique comment with the role, model ID, and effort, e.g. `Review by Adversarial Reviewer (gpt-6-astra, effort xhigh)`, copied from the log header rather than assumed. The launched model can't see its own model or effort, so its first line may be wrong or vague. The **launching session** checks the `model:` and `reasoning effort:` lines in the log header, and posts them with the verbatim review as the run's evidence. You may also give the header line to the model in the prompt, once you've launched it with the right flags.
 - If a model in the table is unavailable, stop and tell the owner rather than silently substituting another. Update this table when models change.
 
 **Build flow:**
@@ -60,7 +60,7 @@ codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<
 
 **Maintenance:** Sol handles it. Routine dependency updates that pass CI need no further review. Other maintenance PRs by Sol are reviewed by a separate session (Luna by default, or Opus for security- or privacy-relevant changes). Non-trivial fixes go to Luna, and archive questions go to Opus. If Sol struggles to maintain an app, flag the app as too complex: it is failing the [maintainability test](PROJECT_CHARTER.md#maintainability-test).
 
-**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds; after that, follow [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it becomes a [disagreement](#disagreements-between-agents) for Astra to arbitrate.
+**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds. If the last round leaves only Medium or Low findings with a clear fix, the author may make that fix and Opus verifies it as final Reviewer instead of opening a third round: Opus runs the reviewer's failing inputs against the fix, and records the check and its result on the PR. Anything else left after two rounds, including any unresolved High or Critical finding, follows [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it becomes a [disagreement](#disagreements-between-agents) for Astra to arbitrate.
 
 ## Decision rights
 
