@@ -9,6 +9,8 @@ Project 100 aims to have 100 useful web apps live at the same time, conceived, b
 - Always: [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md) and [docs/AI_ROLES.md](docs/AI_ROLES.md) (decision rights and escalation).
 - Ideas, candidates, or promotion to Labs: [docs/APP_ACCEPTANCE.md](docs/APP_ACCEPTANCE.md) (the step-by-step idea-to-Labs workflow).
   In Claude Code, `/screen-apps <N> [focus]` runs that workflow for a batch ([skill](.claude/skills/screen-apps/SKILL.md)).
+- Building a Labs app: the [build flow](docs/AI_ROLES.md#model-assignments), then [launch readiness](docs/APP_ACCEPTANCE.md#gate-4-launch-readiness).
+  In Claude Code, `/build-app <slug>` runs it for one app, up to the launch packet ([skill](.claude/skills/build-app/SKILL.md)).
 - Status changes: [docs/LIFECYCLE.md](docs/LIFECYCLE.md).
 - Code: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), plus [DEPENDENCIES](docs/DEPENDENCIES.md), [PRIVACY_AND_DATA](docs/PRIVACY_AND_DATA.md), and [DESIGN_AND_ASSETS](docs/DESIGN_AND_ASSETS.md) as relevant.
 - Deployment or Cloudflare: [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md).
