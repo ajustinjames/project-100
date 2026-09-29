@@ -14,6 +14,7 @@ export interface CohortProfile {
 const MIN_MAIN_PATTERNS = 10;
 const MIN_MAIN_DESIGNERS = 6;
 const MIN_HOLDOUT_PATTERNS = 5;
+const MIN_HOLDOUT_DESIGNERS = 5;
 
 function designerKey(designer: string | undefined): string | null {
   const normalized = designer?.trim().toLocaleLowerCase("en-US");
@@ -69,6 +70,11 @@ export function evaluateHoldoutCohort(
 
   if (patterns.length < MIN_HOLDOUT_PATTERNS) {
     issues.push(`requires at least ${MIN_HOLDOUT_PATTERNS} patterns (found ${patterns.length})`);
+  }
+  if (designers.size < MIN_HOLDOUT_DESIGNERS) {
+    issues.push(
+      `requires at least ${MIN_HOLDOUT_DESIGNERS} distinct designers (found ${designers.size})`,
+    );
   }
   if (mainPatterns.length === 0) {
     issues.push("the main cohort has no truth files");

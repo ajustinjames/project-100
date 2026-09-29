@@ -276,6 +276,20 @@ describe("gate alignment and classification", () => {
     ]);
   });
 
+  it("consumes unaligned matches in order within a bounded region", () => {
+    const result = analyzePattern({
+      name: "repeated-unaligned",
+      sizeCount: 2,
+      detectedSizeCount: null,
+      truth: [truth(["8", "10"]), truth(["8", "10"])],
+      sequences: [],
+      extractedText: "Cast on 8 (10) stitches.",
+      structure: passingStructure,
+    });
+
+    expect(result.entries.map((entry) => entry.classification)).toEqual(["missed", "lost"]);
+  });
+
   it("aligns repeated identical groups to their occurrences in order", () => {
     const result = analyzePattern({
       name: "repeated",
@@ -409,5 +423,21 @@ describe("feasibility thresholds", () => {
       criterionC: null,
       passed: null,
     });
+  });
+
+  it("does not issue PASS when a cohort profile was not supplied", () => {
+    const analysis = analyzePattern({
+      name: "profile-required",
+      sizeCount: 2,
+      detectedSizeCount: 2,
+      truth: [truth(["10", "12"])],
+      sequences: [sub("10 (12)", ["10", "12"])],
+      extractedText: "Cast on 10 (12) stitches.",
+      structure: passingStructure,
+    });
+    const summary = renderSummaryReport([analysis], [], 1);
+
+    expect(summary).toContain("**NO VERDICT** — no cohort profile was supplied.");
+    expect(summary).not.toContain("**Overall: PASS**");
   });
 });

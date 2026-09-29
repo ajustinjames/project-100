@@ -151,13 +151,18 @@ function valuePattern(value: string): RegExp | null {
  * Checks for a truth group in document order. Separators may be any text, but may not hide
  * another digit, which avoids treating a larger number as a match for a shorter value.
  */
-export function valuesFoundInOrder(text: string, values: string[]): boolean {
-  if (values.length === 0) return false;
+function findValuesInOrder(
+  text: string,
+  values: string[],
+  startIndex = 0,
+): { start: number; end: number } | null {
+  if (values.length === 0) return null;
   const normalizedText = canonicalizeFractions(text).toLowerCase();
   const patterns = values.map(valuePattern);
-  if (patterns.some((pattern) => pattern === null)) return false;
+  if (patterns.some((pattern) => pattern === null)) return null;
   const firstPattern = patterns[0];
-  if (!firstPattern) return false;
+  if (!firstPattern) return null;
+  firstPattern.lastIndex = startIndex;
 
   while (true) {
     const firstMatch = firstPattern.exec(normalizedText);
@@ -167,7 +172,7 @@ export function valuesFoundInOrder(text: string, values: string[]): boolean {
     let found = true;
 
     for (const pattern of patterns.slice(1)) {
-      if (!pattern) return false;
+      if (!pattern) return null;
       pattern.lastIndex = cursor;
       const match = pattern.exec(normalizedText);
       if (!match || /[0-9]/.test(normalizedText.slice(cursor, match.index))) {
@@ -177,9 +182,13 @@ export function valuesFoundInOrder(text: string, values: string[]): boolean {
       cursor = match.index + match[0].length;
     }
 
-    if (found) return true;
+    if (found) return { start: firstMatch.index, end: cursor };
   }
-  return false;
+  return null;
+}
+
+export function valuesFoundInOrder(text: string, values: string[]): boolean {
+  return findValuesInOrder(text, values) !== null;
 }
 
 function lcsPairs(
@@ -434,6 +443,7 @@ export function analyzePattern(args: {
   const { truth, sequences, extractedText } = args;
   const alignments = new Map<number, { sequenceIndex: number; kind: "exact" | "wrong" }>();
   const usedSequenceIndexes = new Set<number>();
+  const missSearchCursors = new Map<string, number>();
   const spans = sourceSpans(sequences, extractedText);
 
   const sourcePairs = lcsPairs(sequences.length, truth.length, (sequenceIndex, truthIndex) => {
@@ -494,7 +504,14 @@ export function analyzePattern(args: {
         extractedText.length,
       );
       const regionText = extractedText.slice(region.start, region.end);
-      if (valuesFoundInOrder(regionText, entry.values)) {
+      const regionKey = `${region.start}:${region.end}`;
+      const match = findValuesInOrder(
+        regionText,
+        entry.values,
+        missSearchCursors.get(regionKey) ?? 0,
+      );
+      if (match) {
+        missSearchCursors.set(regionKey, match.end);
         classification = "missed";
         detail =
           "The truth values occur between neighboring aligned entries, but no parser sequence aligned.";

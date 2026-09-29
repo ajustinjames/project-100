@@ -41,6 +41,14 @@ describe("cohort profiles", () => {
     expect(tooSmall.eligible).toBe(false);
     expect(tooSmall.issues).toContain("requires at least 5 patterns (found 4)");
 
+    const oneDesigner = evaluateHoldoutCohort(patterns(5, ["G"]), main);
+    expect(oneDesigner).toMatchObject({
+      patternCount: 5,
+      designerCount: 1,
+      eligible: false,
+    });
+    expect(oneDesigner.issues).toContain("requires at least 5 distinct designers (found 1)");
+
     const overlapping = evaluateHoldoutCohort(patterns(5, ["A", "H", "I", "J", "K"]), main);
     expect(overlapping.eligible).toBe(false);
     expect(overlapping.issues).toContain("shares designer(s) with the main cohort: a");

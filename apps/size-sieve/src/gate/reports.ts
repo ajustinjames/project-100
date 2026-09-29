@@ -213,7 +213,7 @@ export function renderSummaryReport(
 ): string {
   const byName = new Map(analyses.map((analysis) => [analysis.name, analysis]));
   const criteria =
-    failures.length === 0 && cohortProfile?.eligible !== false
+    failures.length === 0 && cohortProfile?.eligible === true
       ? calculateGateCriteria(
           analyses.map((analysis) => ({
             name: analysis.name,
@@ -300,7 +300,7 @@ export function renderSummaryReport(
       lines.push(`- **NO VERDICT** — ${cohortProfile.issues.map(markdown).join("; ")}.`);
     }
   } else {
-    lines.push("No cohort profile was supplied.");
+    lines.push("**NO VERDICT** — no cohort profile was supplied.");
   }
 
   lines.push("", "## Gate criteria", "");
@@ -313,9 +313,11 @@ export function renderSummaryReport(
     lines.push("");
   } else if (!criteria?.evaluated) {
     const reason =
-      cohortProfile?.eligible === false
-        ? "The required cohort profile is not satisfied."
-        : "No truth files were found.";
+      cohortProfile === undefined
+        ? "No cohort profile was supplied."
+        : cohortProfile.eligible
+          ? "No truth files were found."
+          : "The required cohort profile is not satisfied.";
     lines.push(`**NO VERDICT** — ${reason}`, "");
   } else {
     lines.push(

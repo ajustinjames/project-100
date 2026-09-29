@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import {
   type CohortPattern,
   evaluateHoldoutCohort,
@@ -25,12 +26,12 @@ import { extractPdfText, PdfExtractionError } from "../src/pdf/extract.ts";
 const DEFAULT_FOLDER = "apps/size-sieve/.feasibility/";
 const TRUTH_SUFFIX = ".truth.json";
 
-interface MeasureArgs {
+export interface MeasureArgs {
   folder: string;
   holdoutFolder?: string;
 }
 
-function parseMeasureArgs(args: string[]): MeasureArgs {
+export function parseMeasureArgs(args: string[]): MeasureArgs {
   const positionals: string[] = [];
   let holdoutFolder: string | undefined;
   for (let index = 0; index < args.length; index += 1) {
@@ -129,8 +130,12 @@ function errorCause(error: unknown): string | undefined {
   return String(error.cause);
 }
 
-async function main(): Promise<void> {
-  const args = parseMeasureArgs(process.argv.slice(2));
+export interface MeasurementRun {
+  exitCode: number;
+  output: string[];
+}
+
+export async function runMeasurement(args: MeasureArgs): Promise<MeasurementRun> {
   const folder = path.resolve(process.cwd(), args.folder);
   const holdoutFolder = args.holdoutFolder
     ? path.resolve(process.cwd(), args.holdoutFolder)
@@ -168,17 +173,18 @@ async function main(): Promise<void> {
     renderSummaryReport(analyses, failures, truthNames.length, cohortProfile),
     "utf8",
   );
-  console.log(`Measured ${analyses.length} pattern(s); ${failures.length} error(s).`);
-  console.log(`Reports: ${folder}`);
+  const output = [
+    `Measured ${analyses.length} pattern(s); ${failures.length} error(s).`,
+    `Reports: ${folder}`,
+  ];
 
   if (failures.length > 0) {
-    process.exitCode = 1;
-    console.log("NO VERDICT: one or more truth files or sources could not be measured.");
-    return;
+    output.push("NO VERDICT: one or more truth files or sources could not be measured.");
+    return { exitCode: 1, output };
   }
   if (!cohortProfile.eligible) {
-    console.log(`NO VERDICT: ${cohortProfile.issues.join("; ")}.`);
-    return;
+    output.push(`NO VERDICT: ${cohortProfile.issues.join("; ")}.`);
+    return { exitCode: 0, output };
   }
   const criteria = calculateGateCriteria(
     analyses.map((analysis) => ({
@@ -189,10 +195,23 @@ async function main(): Promise<void> {
       structurePassed: analysis.structure.passed,
     })),
   );
-  if (criteria.evaluated && !criteria.passed) process.exitCode = 1;
+  return {
+    exitCode: criteria.evaluated && !criteria.passed ? 1 : 0,
+    output,
+  };
 }
 
-main().catch((error: unknown) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+async function main(): Promise<void> {
+  try {
+    const result = await runMeasurement(parseMeasureArgs(process.argv.slice(2)));
+    for (const line of result.output) console.log(line);
+    if (result.exitCode !== 0) process.exitCode = result.exitCode;
+  } catch (error: unknown) {
+    console.error(error);
+    process.exitCode = 1;
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  void main();
+}
