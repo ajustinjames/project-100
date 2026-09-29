@@ -41,6 +41,12 @@ Cloudflare builds and deploys straight from this GitHub repository (dashboard Gi
 
   The output folder, `dist`, is set in the committed [`wrangler.jsonc`](../wrangler.jsonc), not the dashboard.
 
+#### Failed build checks
+
+Cloudflare's GitHub check links to the dashboard build but does not include the build log. When it fails, the owner opens that link and shares the log section showing the failing command. Compare it with the GitHub CI result before changing build code.
+
+The preview check on [promotion PR #15](https://github.com/ajustinjames/project-100/pull/15) reported failure, but its Cloudflare log shows `pnpm build:site` completed, four new assets uploaded, `wrangler preview` returned both preview URLs, and the deploy command completed successfully. The GitHub check failed about six seconds later without an error in its summary. This is an unexplained check-status mismatch after a successful deploy, not evidence of a failed site build. If it recurs, retain the build ID and full tail of the dashboard log and investigate the Cloudflare integration before altering deployment settings.
+
 The build is one root script, `pnpm build:site`:
 
 1. `pnpm build` builds every workspace package: each app to `apps/<slug>/dist/` (the Vite plugin sets the base path from `app.json`), and the site's own pages to `site/dist/` (the `project100Site()` plugin fills in the counter and app lists from the registry).

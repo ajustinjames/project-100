@@ -36,7 +36,7 @@ Use `codex exec` directly. It accepts every effort level, and its log header pri
 
 ```bash
 # Read-only review or critique (Sol or Astra). Swap the model and effort per the table.
-codex exec -m gpt-6-astra -c model_reasoning_effort='"xhigh"' -s read-only --ephemeral \
+codex exec -m gpt-6-astra -c model_reasoning_effort='"xhigh"' -c web_search='"live"' -s read-only --ephemeral \
   -o /tmp/review.md "<prompt: what to review, the base ref, the docs to read, the output format>" < /dev/null
 
 # Implementation (Luna) on its own branch or worktree.
@@ -44,6 +44,7 @@ codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<
 ```
 
 - `-s read-only` for reviews, critiques, and arbitration. The reviewer reports findings; the author fixes them.
+- `-c web_search='"live"'` lets a Critic or Reviewer open and verify current sources. Keep it for any task that checks external claims or links.
 - `< /dev/null` keeps `codex exec` from waiting on stdin when run from another agent.
 - **From Claude Code's Codex plugin** (the `codex:codex-rescue` agent or `codex-companion.mjs`): only its `task` mode takes `--model` and `--effort`, and it accepts efforts only up to `xhigh`, so use `codex exec` for `max`. The plugin's `review` and `adversarial-review` modes take no `--effort`, so don't use them for required reviews. When delegating through the `codex:codex-rescue` agent, put `--model <id> --effort <level>` in the request, because it adds them only when asked.
 - Start the review or critique comment with the role, model ID, and effort, e.g. `Review by Adversarial Reviewer (gpt-6-astra, effort xhigh)`, copied from the log header rather than assumed.
