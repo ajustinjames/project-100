@@ -49,7 +49,7 @@ Worth building because none is free and automatic on iPhone, iPad, or computers 
 
 ## Architecture
 
-Planned; the app is still the template scaffold. It will be a static Vite app in plain TypeScript (Lit where components help) on `ajj-design` `hardline`. The core is a pure, heavily unit-tested parser module (find the size list, find sequences, resolve or flag them). Tests use short synthetic snippets written for the tests, never copied patterns. Saved patterns go in IndexedDB under `p100:size-sieve:`, with a versioned record format and JSON export and import. No Cloudflare bindings.
+The app is a static Vite app in plain TypeScript on `ajj-design` `hardline`. Its built parser is pure TypeScript with no DOM or runtime dependencies: it detects a size list, classifies supported instruction sequences, and resolves them to source-ordered segments. Rejoining each segment's original text reproduces the input exactly. Parser tests use synthetic snippets written for the tests. PDF extraction, the reader, and storage remain planned. No Cloudflare bindings.
 
 ## Dependencies
 
