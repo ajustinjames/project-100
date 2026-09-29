@@ -217,10 +217,40 @@ describe("findSequences: conservative exclusions and traps", () => {
     expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
   });
 
+  it("keeps separate measurement labels and values in a headed block", () => {
+    const text =
+      "Sizes: XS (S, M)\nMeasurements\nChest\n30 (34, 38) cm\nWaist:\n28 (32, 36) cm\nHip measurement\n36 (40, 44) cm\nCast on 10 (12, 14) sts";
+    expect(getSizeListBlockLineIndices(text)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("protects through line 60 and resumes substitutions afterward", () => {
+    const lines = [
+      "Measurements",
+      ...Array.from({ length: 57 }, () => "Notes"),
+      "Chest",
+      "30 (34, 38) cm",
+      "Continue 10 (12, 14) rows",
+    ];
+    const text = lines.join("\n");
+
+    expect(getSizeListBlockLineIndices(text)).toContain(59);
+    expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
   it("protects measurement rows even when there is no measurement heading", () => {
     const text =
       "Chest: 30 (34, 38) cm\nBody length: 20 (22, 24) cm\nSleeve length: 15 (17, 19) cm\nCast on 10 (12, 14) sts";
     expect(matches(text, 3).map((match) => match.original)).toEqual(["10 (12, 14)"]);
+  });
+
+  it("protects only standalone rows whose labels name measurements", () => {
+    const text = "Repeat: 3 (4, 5)\nCast on: 20 (22, 24) sts\nBody length: 20 (22, 24) cm";
+    const sequences = matches(text, 3);
+    expect(sequences.map(({ original, start }) => ({ original, start }))).toEqual([
+      { original: "3 (4, 5)", start: text.indexOf("3 (4, 5)") },
+      { original: "20 (22, 24)", start: text.indexOf("20 (22, 24)") },
+    ]);
   });
 
   it("uses a detected size-list line without a colon as a measurement-block heading", () => {

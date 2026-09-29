@@ -55,6 +55,8 @@ const INSTRUCTION_HEADING =
   /^\s*(?:cast\s+on\b|instructions?\b|body(?=\s*(?::|$))|back(?=\s*(?::|$)))/i;
 const MEASUREMENT_BLOCK_HEADING =
   /^\s*(?:finished\s+measurements?|measurements?|sizes?|size)\s*(?::|$)/i;
+const MEASUREMENT_LABEL_WORD =
+  /\b(?:chest|bust|hips?|waist|length|width|circumference|sleeve|arm|yoke|neck|cuff|wrist|depth|ease|shoulder)\b/i;
 const DASH_UNITS = new Set([
   "sts",
   "stitches",
@@ -94,11 +96,15 @@ export function getSizeListBlockLineIndices(text: string, sizeListLine?: number)
 
   const headingIndex = lines.findIndex((line) => INSTRUCTION_HEADING.test(line));
   const blockLimit = Math.min(60, headingIndex < 0 ? 60 : headingIndex);
-  for (let index = 0; index < blockLimit; index += 1) {
+  for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
     if (line === undefined) continue;
 
-    if (SKIPPED_HEADER.test(line) || isMeasurementRow(line)) skipped.add(index);
+    // Measurement rows can appear after instructions as well as near the size list.
+    if (isMeasurementRow(line)) skipped.add(index);
+    if (index >= blockLimit) continue;
+
+    if (SKIPPED_HEADER.test(line)) skipped.add(index);
     const startsMeasurementBlock =
       MEASUREMENT_BLOCK_HEADING.test(line) ||
       index === sizeListLine ||
@@ -108,7 +114,9 @@ export function getSizeListBlockLineIndices(text: string, sizeListLine?: number)
     skipped.add(index);
     for (let next = index + 1; next < blockLimit; next += 1) {
       const nextLine = lines[next];
-      if (nextLine === undefined || nextLine.trim() === "" || isSectionHeading(nextLine)) break;
+      // Extracted tables can put a measurement label and its values on separate lines.
+      if (nextLine === undefined || nextLine.trim() === "" || INSTRUCTION_HEADING.test(nextLine))
+        break;
       skipped.add(next);
     }
   }
@@ -190,8 +198,11 @@ function lineSets(
 
 function isMeasurementRow(line: string): boolean {
   const match = line.match(/^\s*([\p{L}\p{M}][\p{L}\p{M}\s-]*):\s*(.*?)\s*$/u);
+  const label = match?.[1];
   const sequenceText = match?.[2];
-  if (sequenceText === undefined) return false;
+  if (label === undefined || sequenceText === undefined || !MEASUREMENT_LABEL_WORD.test(label)) {
+    return false;
+  }
 
   // The count is not known here. Either count lets the normal parser recognize a
   // bracketed sequence, including a sequence whose count does not match.
@@ -203,22 +214,6 @@ function isMeasurementRow(line: string): boolean {
   if (remainder === "") return true;
   const unit = unitDetails(remainder);
   return unit !== null && unit.length === remainder.length;
-}
-
-function isSectionHeading(line: string): boolean {
-  if (INSTRUCTION_HEADING.test(line) || MEASUREMENT_BLOCK_HEADING.test(line)) return true;
-  if (isMeasurementRow(line)) return false;
-
-  const heading = line.trim();
-  if (heading.length === 0 || heading.length > 80 || /[.!?]/.test(heading)) return false;
-
-  // Section titles are usually one word, title case, all caps, or end with a colon.
-  return (
-    /^[\p{Lu}][\p{L}\p{M}'-]*$/u.test(heading) ||
-    /^[\p{Lu}][\p{L}\p{M}'-]*(?:\s+[\p{Lu}][\p{L}\p{M}'-]*){1,5}:?$/u.test(heading) ||
-    /^[\p{Lu}\s&/'-]+$/u.test(heading) ||
-    /^[\p{L}][\p{L}\p{M}\s&/'-]{0,60}:$/u.test(heading)
-  );
 }
 
 function isGaugeLine(line: string): boolean {
