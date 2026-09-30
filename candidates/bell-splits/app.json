@@ -3,7 +3,7 @@
   "id": null,
   "slug": "bell-splits",
   "name": "Bell Splits",
-  "status": "candidate",
+  "status": "rejected",
   "description": "Mark the bells a handbell piece uses and how many ringers you have, then see which position rings which bells, move bells between positions, and print the assignment chart and the table changes between pieces.",
   "problem": "Handbell directors work out by hand which ringer covers which bells for every piece, and rework it whenever the choir is short of ringers or a piece uses unusual bells; the standard charts assume a full choir, so small choirs redo the split on paper each time.",
   "category": "music",
@@ -23,5 +23,8 @@
     "eligible": false
   },
   "approvals": [],
-  "rejection": null
+  "rejection": {
+    "date": "2026-09-30",
+    "reason": "Rehearsal Assistant, a free app for Windows, Android, and Apple devices, already maps handbell assignments per piece with a bells-used chart and movement instructions between pieces, and the remaining gap (folding a standard split to fewer ringers) is unproven."
+  }
 }

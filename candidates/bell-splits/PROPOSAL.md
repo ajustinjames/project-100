@@ -89,11 +89,17 @@ None. It runs in the browser, stores only piece and bell data locally, has no ac
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+[Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/30#issuecomment-5911185434), recommending revise. Every finding is accepted; none is dismissed. I checked the two apps it found and rejected the candidate instead of revising it, because the High findings can't be answered with evidence.
 
 | Severity | Finding | Response |
 |---|---|---|
+| High | The free-alternatives claim is false: Rehearsal Assistant, a free app, has per-piece handbell assignment maps and movement instructions. | Accepted, and checked. [Rehearsal Assistant](https://www.rehearsalassistant.com/) offers "Handbell Assignment Mapping" with "clear movement instructions", reports about 1,500 ensembles using it, and runs on Windows, Android, and iOS. Its [App Store listing](https://apps.apple.com/us/app/rehearsal-assistant/id1577604686) is free and mentions a "Bells Used Chart", a layout mode, and an assignments process for changing ringers' positions. That covers both things this proposal said it would do better. My searches missed it because its name doesn't mention handbells. "Existing alternatives" and "What this does better" above are wrong as written, and are left as the record of what was proposed. |
+| High | "No software found" is wrong, and the printable is misdescribed: Rico's Bell Curve (paid, iPhone) does piece-specific assignments, and the position cards include 10- and 12-ringer layouts. | Accepted. Rico's Bell Curve leaves a free, cross-platform gap, but Rehearsal Assistant fills it. The position-card description was too narrow. |
+| High | The problem is real, but switching value is unproven: a bells-used list can't show note frequency, simultaneous demands, or skill, so a bell-count warning may add entry work and leave the hard decisions to the director. | Accepted. The proposal's own Risks said the same. I have no evidence that directors would reach a usable split faster, and can't produce any without building it. |
+| Medium | Handbells and handchimes need separate inventories, and the default split needs validating at small-choir sizes. | Accepted as a design gap. Moot, given the rejection. |
+
+The one gap the Critic left open is whether Rehearsal Assistant folds a standard split down to fewer ringers automatically. I couldn't run the app to find out. That feature alone, unproven, isn't enough to justify an app.
 
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ..." or "YYYY-MM-DD: Rejected because ..." -->
+2026-09-30: Rejected because Rehearsal Assistant, a free app for Windows, Android, and Apple devices, already maps handbell assignments per piece with a bells-used chart and movement instructions between pieces, and the remaining gap (folding a standard split to fewer ringers) is unproven.
