@@ -33,6 +33,11 @@ Generate a batch of ten or more ideas, expecting most to die. Start from people 
 - an unusual niche that general-purpose tools serve badly
 - a constraint, representation, or interaction that makes an old problem easier
 
+**Spread the batch.** Left alone, ideas cluster around the last few candidates. The first batches drifted into small calculators and planners for crafts, music, and theatre, where free tools are thickest. Before generating, note the areas and shapes of the recorded candidates and apps, and aim elsewhere:
+
+- Cover at least five of these areas, with no area over a quarter of the batch: work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work (writing, music, art, video); accessibility and daily-living aids; files people already have (exports, logs, spreadsheets, standard formats).
+- Vary the shape, not just the subject: editors, viewers for a file format, trainers that give feedback, references, simulations, and trackers, as well as calculators and planners. Include some larger ideas where the problem calls for one ([charter](PROJECT_CHARTER.md#product-principles)).
+
 Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files and rejection reasons, so you don't propose a recorded idea again. To retry a rejected or archived idea, use [Revival](LIFECYCLE.md#revival), not a new slug.
 
 ### 2. Screen
