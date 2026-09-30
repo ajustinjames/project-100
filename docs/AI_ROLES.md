@@ -8,7 +8,8 @@ Any agent (Claude Code, Codex, or another) may take any role. One session may ho
 
 | Role | Responsibility |
 |---|---|
-| **Originator** | Generates ideas, screens them privately, and records the survivors as candidates. |
+| **Idea generator** | Generates raw ideas for a screening batch, in a separate session. Records and decides nothing: the Originator screens every idea. |
+| **Originator** | Generates ideas, screens and researches the whole batch privately, and records the survivors as candidates. |
 | **Critic** | Challenges candidates: researches alternatives, looks for kill criteria, and argues against weak ideas. |
 | **Builder** | Scopes, designs, and implements Labs prototypes and launches. Writes tests and docs. |
 | **Reviewer** | Independently reviews another agent's work for correctness, UX, accessibility, privacy, security, and policy compliance. |
@@ -19,14 +20,14 @@ Any agent (Claude Code, Codex, or another) may take any role. One session may ho
 
 ## Model assignments
 
-Current as of 2026-09-26. Roles stay model-neutral; only this table changes when models change.
+Current as of 2026-09-29. Roles stay model-neutral; only this table changes when models change.
 
 | Model | Model ID and effort | Roles | Responsibilities |
 |---|---|---|---|
-| **Opus 5.5** | Claude Code, `claude-opus-5-5` | Originator, Builder (design), final Reviewer, Steward | Selects ideas; frames the product; sets UX/UI direction and architecture; writes the implementation brief; does the final product, UI, and architecture review; decides which findings matter; escalates to the owner only when needed; recommends archives and writes retrospectives. |
+| **Opus 5.5** | Claude Code, `claude-opus-5-5` | Originator, Builder (design), final Reviewer, Steward | Generates half of each batch's ideas, screens and researches the whole batch, and selects; frames the product; sets UX/UI direction and architecture; writes the implementation brief; does the final product, UI, and architecture review; decides which findings matter; escalates to the owner only when needed; recommends archives and writes retrospectives. |
 | **Luna 6 Max** | Codex, `gpt-6-luna`, effort `max` | Builder (implementation) | Implements, iterates, writes tests, refactors. |
 | **Sol 6** | Codex, `gpt-6-sol`, effort `high` | Critic, Reviewer, Maintainer | Critiques candidates adversarially before selection; does economical independent review of every build PR; maintains live apps; runs regression and dependency passes. |
-| **Astra** | Codex, `gpt-6-astra`, effort `xhigh` | Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
+| **Astra** | Codex, `gpt-6-astra`, effort `xhigh` | Idea generator, Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: the other half of each screening batch's ideas; adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
 
 ### Launching another model
 
@@ -43,8 +44,9 @@ codex exec -m gpt-6-astra -c model_reasoning_effort='"xhigh"' -c web_search='"li
 codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<build brief>" < /dev/null
 ```
 
-- `-s read-only` for reviews, critiques, and arbitration. The reviewer reports findings; the author fixes them.
+- `-s read-only` for reviews, critiques, arbitration, and idea generation. The reviewer reports findings; the author fixes them.
 - `-c web_search='"live"'` lets a Critic or Reviewer open and verify current sources. Keep it for any task that checks external claims or links.
+- **Idea generation (Astra):** use the read-only command above with live web search, so it can skip ideas that are obviously taken, and write the output to a file outside the repository, such as `/tmp/ideas.md`. The ideas are private Gate 1 material: never commit them, post them, or show them to the owner. What to give it is in [APP_ACCEPTANCE step 1](APP_ACCEPTANCE.md#1-generate-ideas).
 - `< /dev/null` keeps `codex exec` from waiting on stdin when run from another agent.
 - **From Claude Code's Codex plugin** (the `codex:codex-rescue` agent or `codex-companion.mjs`): only its `task` mode takes `--model` and `--effort`, and it accepts efforts only up to `xhigh`, so use `codex exec` for `max`. The plugin's `review` and `adversarial-review` modes take no `--effort`, so don't use them for required reviews. When delegating through the `codex:codex-rescue` agent, put `--model <id> --effort <level>` in the request, because it adds them only when asked.
 - Start the review or critique comment with the role, model ID, and effort, e.g. `Review by Adversarial Reviewer (gpt-6-astra, effort xhigh)`, copied from the log header rather than assumed. The launched model can't see its own model or effort, so its first line may be wrong or vague. The **launching session** checks the `model:` and `reasoning effort:` lines in the log header, and posts them with the verbatim review as the run's evidence. You may also give the header line to the model in the prompt, once you've launched it with the right flags.
@@ -52,7 +54,7 @@ codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<
 
 **Build flow:**
 
-1. Opus screens ideas. Sol critiques the survivors. Opus selects and records the candidates.
+1. Opus and Astra each generate half of a batch's ideas. Opus screens and researches them all. Sol critiques the survivors. Opus selects and records the candidates.
 2. Opus writes the implementation brief as a GitHub issue ("Build brief: `<slug>`"): the problem, UX/UI direction, architecture, and acceptance criteria. Sol reviews the brief before building starts, so Opus's design decisions get an independent check. Durable decisions from it go into `APP.md`.
 3. Luna implements in PRs that reference the brief. Sol reviews each PR.
 4. Before a launch request, and for any security- or privacy-relevant change, Opus does the final review, then Astra does an adversarial review.
@@ -100,7 +102,7 @@ While waiting on the owner, continue other work. Don't build the part that needs
 ## Disagreements between agents
 
 1. Each agent states its position and evidence in the PR or issue. Keep it short.
-2. If still unresolved after one round, label the issue `disagreement`, and Astra arbitrates, deciding with reasons.
+2. If still unresolved after one round, label the issue `disagreement`, and Astra arbitrates, deciding with reasons. Astra doesn't arbitrate a disagreement about a candidate that came from its own idea generation, because it would be judging its own idea; the owner decides that one.
 3. The owner decides only if an agent still disputes Astra's ruling with new evidence, or the question is in the owner's [decision rights](#decision-rights) anyway.
 4. Until it is resolved, take the more conservative option: less scope, less data, fewer dependencies, no launch.
 

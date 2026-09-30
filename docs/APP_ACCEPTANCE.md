@@ -10,7 +10,7 @@ screen (private) → candidate → Labs → launch packet → live
 
 | Step | Who | What gets recorded |
 |---|---|---|
-| 1. [Generate ideas](#1-generate-ideas) | Originator | Nothing |
+| 1. [Generate ideas](#1-generate-ideas) | Originator and Idea generator, half each | Nothing |
 | 2. [Screen](#2-screen) | Originator | Nothing. Drop failures quietly. |
 | 3. [Research the survivors](#3-research-the-survivors) | Originator | Nothing. Drop failures quietly. |
 | 4. [Record the candidate](#4-record-the-candidate) | Originator | `candidates/<slug>/`, and a candidate PR saying why it survived |
@@ -23,7 +23,7 @@ Ideas come from AI; the owner does not supply them ([charter](PROJECT_CHARTER.md
 
 ## Gate 1: Screen (before anything is recorded)
 
-Steps 1 to 3 happen inside the Originator's own session. Commit nothing, open no issue or PR, and don't show these ideas to the owner. Most ideas should die here without being written down.
+Steps 1 to 3 happen inside the Originator's own session, apart from the Idea generator's half of step 1. Commit nothing, open no issue or PR, and don't show these ideas to the owner. Most ideas should die here without being written down.
 
 ### 1. Generate ideas
 
@@ -37,6 +37,12 @@ Generate a batch of ten or more ideas, expecting most to die. Start from people 
 
 - Cover at least five of these areas, with no area over a quarter of the batch: work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work (writing, music, art, video); accessibility and daily-living aids; files people already have (exports, logs, spreadsheets, standard formats).
 - Vary the shape, not just the subject: editors, viewers for a file format, trainers that give feedback, references, simulations, and trackers, as well as calculators and planners. Include some larger ideas where the problem calls for one ([charter](PROJECT_CHARTER.md#product-principles)).
+
+**Split the batch 50/50.** The Originator generates half of the ideas. The [Idea generator](AI_ROLES.md#model-assignments) generates the other half in a separate session, launched as [described there](AI_ROLES.md#launching-another-model). A second model brings ideas the Originator wouldn't think of.
+
+- Split the areas above between the two halves so they don't overlap, and generate your half without reading the other first.
+- Give the Idea generator the charter, this step and [step 2](#2-screen), the recorded candidates and apps with their rejection reasons, any focus for the batch, and its areas. Ask for ideas, not verdicts: for each one, a one-line pitch, the person and the recurring task, and why it might pass the screen. It may note tools it already knows do the job.
+- Screen and research both halves the same way. Where an idea came from doesn't count for or against it. Record the source of each candidate under "Idea source" in `PROPOSAL.md`, so hit rates can be compared.
 
 Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files and rejection reasons, so you don't propose a recorded idea again. To retry a rejected or archived idea, use [Revival](LIFECYCLE.md#revival), not a new slug.
 
