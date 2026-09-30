@@ -2,6 +2,8 @@
 
 <!-- Keep it short. Follow the workflow in docs/APP_ACCEPTANCE.md (steps 4 to 6). Link evidence, and only link pages you have opened and checked. -->
 
+**Idea source:** <!-- Originator or Idea generator, with the model (docs/APP_ACCEPTANCE.md#1-generate-ideas). -->
+
 ## Problem
 
 <!-- The recurring problem in plain language: how often it happens, how painful it is, and what people do about it today. Link evidence that it recurs. -->
