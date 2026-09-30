@@ -38,6 +38,16 @@ Generate a batch of ten or more ideas, expecting most to die. Start from people 
 - Cover at least five of these areas, with no area over a quarter of the batch: work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work (writing, music, art, video); accessibility and daily-living aids; files people already have (exports, logs, spreadsheets, standard formats).
 - Vary the shape, not just the subject: editors, viewers for a file format, trainers that give feedback, references, simulations, and trackers, as well as calculators and planners. Include some larger ideas where the problem calls for one ([charter](PROJECT_CHARTER.md#product-principles)).
 
+**Draw seeds at random.** A model asked for variety returns its favourites, and both models keep landing on the same few niches. So at least half of each generator's ideas start from a random draw that neither model chooses:
+
+```bash
+for i in $(seq 1 20); do
+  echo "$(shuf -n1 docs/idea-seeds/people.txt) | $(shuf -n1 docs/idea-seeds/moments.txt) | $(shuf -n1 docs/idea-seeds/twists.txt)"
+done
+```
+
+Each line is a person, a moment in what they do, and a twist on the app's shape. Write one idea per line, using the person and at least one of the other two. Don't skip a line because it looks unpromising: an idea forced out of an odd draw is the point. The Originator draws the seeds for both halves and gives the Idea generator its lines. Add to the lists in [`docs/idea-seeds/`](idea-seeds/) when you notice a gap; never prune them to suit a batch.
+
 **Split the batch 50/50.** The Originator generates half of the ideas. The [Idea generator](AI_ROLES.md#model-assignments) generates the other half in a separate session, launched as [described there](AI_ROLES.md#launching-another-model). A second model brings ideas the Originator wouldn't think of.
 
 - Split the areas above between the two halves so they don't overlap, and generate your half without reading the other first.
@@ -51,13 +61,14 @@ Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files
 **Kill an idea if any of these is true:**
 
 - The one-line pitch describes a thousand existing sites ("a Pomodoro timer", "a JSON formatter", "an AI chat for X").
-- A well-known free tool already does it well, and you cannot say concretely what this version does better. A tool merely existing is not enough to kill an idea; see [what counts as doing it better](#3-research-the-survivors).
 - Its value comes from an external API or AI model rather than from the software itself.
 - It mostly exists to rank in search or show ads.
 - It needs ongoing human curation, moderation, or manual operation.
 - It touches a [sensitive subject](PROJECT_CHARTER.md#sensitive-subjects) and you would be tempted to argue it doesn't.
 - It can't run within the baseline budget and has no realistic path to paying for itself.
 - You can't name who would use it more than once.
+
+**Don't kill an idea at the screen because a tool exists.** You haven't opened that tool yet, and a search result is not evidence that it does this job. Existing tools are judged in [research](#3-research-the-survivors) and in the critique, not here.
 
 **Promising signs:**
 
@@ -88,7 +99,16 @@ Answer all of these for each survivor before recording anything. Open every page
   These don't count: adjectives such as "simpler", "cleaner", or "modern"; polish; and "the same, but local and without an account", unless you have evidence this audience cares about that.
 - **Shape and escalations.** Whether it can run in the browser with local data, its rough size, and every [escalation](AI_ROLES.md#escalation) it would trigger. If the app would keep text or files the user supplies (a pasted text, an opened document, an imported export), say exactly what is kept and where. Whether that is `local-only` or `personal-data` is an open owner question ([#21](https://github.com/ajustinjames/project-100/issues/21)), and the Critic will raise it, so list it under "Escalations needed" instead of writing "None".
 
-**Drop the idea quietly if** research turns up a kill criterion after all, you find no evidence that the problem recurs, a free alternative already does the job well for this audience, or the only improvement you can state is an adjective. Don't drop it just because alternatives exist: if you can name a concrete gap for this audience, record it and let the critique test it.
+**Drop the idea quietly only if** research turns up a kill criterion after all, you find no evidence that the problem recurs, or a free alternative already does the **same** job well for this audience. That last reason needs all of these: you opened the tool; it does this job, not a related one; it is free for the part that matters; and it runs on the devices this audience uses. None of the following is a reason to drop:
+
+- a related tool, or a tool for a neighbouring audience
+- a search result or a listing you haven't opened
+- a tool that is paid, limited to one platform, abandoned, or needs an account the audience won't make
+- several tools that each do part of the job
+
+**When something related exists, sharpen the idea before judging it.** Ask what the existing tool makes this person do by hand, and rebuild the idea around that. Narrow the audience, change the interaction, or take the one step the tool leaves out. An existing tool with a gap is the normal case, not a warning sign.
+
+**When in doubt, record it.** The early batches screened over a hundred ideas each and recorded almost none, because the Originator dropped anything with a related tool. The critique exists to test the comparison, and a rejected candidate costs little.
 
 ## Gate 2: Candidate proposal
 
@@ -129,7 +149,7 @@ End with a recommendation: **reject**, **revise**, or **advance**.
 
 The Originator decides which findings matter. In the Critique section of `PROPOSAL.md`, link the critique and record the response to each finding: what changed, or why it was dismissed. Then decide:
 
-- **Reject** if any Critical finding stands, or any High finding can't be answered with evidence. Set `status` to `"rejected"` and `rejection` to `{ "date": "YYYY-MM-DD", "reason": "<one sentence>" }`, write the reason under Decision, and merge the PR. The rejected candidate stays in the registry, so the idea isn't proposed again without a [revival](LIFECYCLE.md#revival).
+- **Reject** if any Critical finding stands, or any High finding can't be answered with evidence. A finding that another tool exists is answered by showing the gap it leaves. If the Critic recommends **revise**, try the revision before rejecting: narrow the candidate to the gap and send it back. Set `status` to `"rejected"` and `rejection` to `{ "date": "YYYY-MM-DD", "reason": "<one sentence>" }`, write the reason under Decision, and merge the PR. The rejected candidate stays in the registry, so the idea isn't proposed again without a [revival](LIFECYCLE.md#revival).
 - **Select** otherwise. Under Decision, write why it deserves Labs and which findings shaped it. Merge the PR with status `candidate`.
 
 Before the final critique round, the Critic checks any material revision to the proposal. Any dismissal of a Critical or High finding must also go back to the Critic, even if the proposal is unchanged. The Critic explicitly records whether they accept each dismissal in a PR comment; silence is not acceptance. Link that response in `PROPOSAL.md`. If the Critic still objects, follow [Disagreements](AI_ROLES.md#disagreements-between-agents) and link the resolved outcome. Don't promote until every such dismissal has the Critic's explicit acceptance or a resolved disagreement outcome that permits advancing.

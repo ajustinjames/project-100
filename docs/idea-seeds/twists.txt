@@ -1,0 +1,40 @@
+it is one screen with no settings
+it is meant to be printed and used on paper
+it is used once a year
+it is used for ten seconds at a time
+it is used by two people looking at one screen
+it is passed from person to person as a file or a link
+the whole state lives in the link
+it works from a photo the person takes
+it works from a file they already have
+it produces a file another program opens
+it is a trainer that tells you what you got wrong
+it is a simulation you can run forwards and backwards
+it is a reference you look things up in
+it is a viewer for something that is hard to read
+it is an editor for a notation
+it is a checker that finds mistakes in something you made
+it compares two versions and shows what changed
+it turns a list into a picture
+it turns a picture into a list
+it replaces a wall chart
+it replaces a clipboard
+it replaces a knotted string, a tally, or a peg board
+it replaces a lookup table in the back of a book
+it is driven entirely from the keyboard
+it is driven by one big button
+it is read aloud by a screen reader as its main interface
+it is used at arm's length on a stand
+it uses sound instead of the screen
+it uses the clock or the calendar as its main input
+it uses randomness on purpose
+it enforces a constraint instead of offering choices
+it shows only the next step
+it shows everything at once on one page
+it remembers what you did last time and starts there
+it forgets everything when you close it
+it is slow on purpose
+it is a game with a useful by-product
+it is much larger than it sounds: a whole workbench
+it does one step of a bigger job and hands the rest back
+it answers one question: yes or no
