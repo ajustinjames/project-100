@@ -95,11 +95,16 @@ None. It reads the user's own file in the browser, stores it locally, has no acc
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+[Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/33#issuecomment-5911219192), recommending revise. Every finding is accepted; none is dismissed. I rejected the candidate instead of revising it, because finding 3 goes to the core of the idea and I can't answer it with evidence.
 
 | Severity | Finding | Response |
 |---|---|---|
+| Critical | The personal-data escalation is missing: the app would open and keep user-authored decks, with free-text fields, audio, and possibly review history. | Accepted. "Escalations needed: None" was wrong. A deck a learner wrote is free text that may contain personal details, the policy says to pick the stricter class when unsure, and the same question was left open in [#21](https://github.com/ajustinjames/project-100/issues/21). It would need an owner decision before any build. Not requested, because the candidate is rejected on the findings below. |
+| High | The comparison omits the strongest mobile options: Audio Flash, MintDeck, Audio_Cards, and a free browser Anki tool. | Accepted, and checked for the strongest. [Audio Flash](https://audioflash.app/) imports an exported `.apkg`, keeping "text and audio files", and studies it hands-free on iOS and Android. It grades spoken answers and keeps its own schedule, so it is not a pure playlist, but it covers hands-free listening to your own deck on the phones where that matters. My research missed all four. "It works where the add-ons don't" is not true as written. |
+| High | The proposed sessions miss what the cited users ask for: the 2025 request wants today's reviewed cards or a filtered deck, and says exporting every day isn't feasible. | Accepted. This is the finding that decides it. An app that reads an export can't know what was reviewed today without a new export each day, and the person asking already ruled that out. The proposal listed the export step as a risk; the evidence says it is a dealbreaker for the requested use. I have no evidence that learners want whole-deck listening enough to export for it. |
+| High | The feasibility gate doesn't test the central promise: playback with the phone locked, and headset controls. | Accepted. The gate tested file reading only. Moot, given the rejection. |
+| Medium | Format maintenance is understated: current packages also need Protobuf decoding for the media map, and clip counts don't prove the right clips play in the right order. | Accepted. Moot, given the rejection. |
 
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ..." or "YYYY-MM-DD: Rejected because ..." -->
+2026-09-30: Rejected because the forum requests it cites want to replay today's reviewed cards without a daily export, which an export-reading app can't offer; Audio Flash already imports Anki decks with their audio for hands-free study on Android and iOS; and storing user-authored decks needs a personal-data decision.
