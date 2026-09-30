@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "text-rebuild",
+  "name": "Text Rebuild",
+  "status": "candidate",
+  "description": "Paste a short text and get a set of rebuild-the-text exercises (reorder the pieces, fill the gaps, split the words, restore it from initials) that students open from a link, with no accounts.",
+  "problem": "Language teachers turn each lesson text into reordering, gap-fill, and reconstruction exercises; the tools that make the whole set from one pasted text need a paid subscription, and the free ones each make a single exercise type.",
+  "category": "education",
+  "dates": {
+    "created": "2026-09-30",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
