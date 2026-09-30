@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "deck-listening",
+  "name": "Deck Listening",
+  "status": "candidate",
+  "description": "Open an Anki deck export and play the recordings already in its cards as a listening playlist, in the order and with the pauses you choose, without touching your review schedule.",
+  "problem": "Language learners with audio in their Anki cards want to rehear it hands-free, but Anki only plays a card's audio during a review you grade, and the add-ons that export a deck to audio are broken, Windows-only, or need command-line tools.",
+  "category": "language-learning",
+  "dates": {
+    "created": "2026-09-30",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
