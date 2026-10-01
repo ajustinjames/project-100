@@ -80,11 +80,15 @@ None.
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+[Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/36#issuecomment-5932967921), recommending reject. Every finding is accepted; none is dismissed.
 
 | Severity | Finding | Response |
 |---|---|---|
+| Critical | A free tool appears to do the same job on both phone platforms: PartMemo. | Accepted, and checked. [PartMemo](https://partmemo.meskatech.net/) photographs each step, labels containers with quantities, shows the steps in reverse for reassembly with progress, and exports archives or PDFs. Every feature is free, with "No account, backend, AI processing, ads or telemetry", on iPhone, iPad, and Android. That is the same job, free, on the devices this audience uses, which is a kill under step 3. My research found only the iOS Disassembly app. |
+| High | The Android gap is false: ScrewTrail pins screws on step photos, maps them to tray cells, and replays in reverse. | Accepted. ScrewTrail even has the pin-and-tray interaction this proposal claimed as its difference. |
+| High | Switching is unproven, and the iFixit question was about safe physical reassembly, not order. | Accepted. I misread the evidence: that question is about handling fragile parts, not remembering the order. |
+| Medium | The photo record needs a reliability gate. | Accepted. Moot, given the rejection. |
 
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ..." or "YYYY-MM-DD: Rejected because ..." -->
+2026-10-01: Rejected because partMemo, a free app for iPhone, iPad, and Android with no account, already documents disassembly with annotated step photos and labelled containers, plays the steps back in reverse for reassembly, and exports projects.
