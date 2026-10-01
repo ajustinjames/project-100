@@ -102,10 +102,14 @@ None. It stores the user's own files in their browser, has no accounts, and send
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+[Critique round 1 by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/32#issuecomment-5932933174), recommending revise. Every finding is accepted; none is dismissed. The proposal is revised as below and goes back to the Critic.
 
 | Severity | Finding | Response |
 |---|---|---|
+| High | The free-alternatives claim is wrong: Low Vision PDF is free, in the browser, local, with automatic or manual splitting into a reflowed PDF. Kivunel makes a continuous line but needs an account and uploads. The remaining gap is unproven. | Accepted, and I opened Low Vision PDF's page. It is a general document tool: it cuts each page into 2 to 4 equal segments, or hand-drawn boxes, and writes a PDF with one segment per Letter page, and says it is "not designed specifically for sheet music". That is a related job: equal cuts can fall through a music system, and the output is read in a PDF viewer, not a strip view with pedal reading. Both tools are added to the alternatives, and "What this does better" now names Low Vision PDF and states the gap as system-aware cuts plus a strip reading view. Whether that gap matters is put to the feasibility gate (next row). |
+| High | Switching is not demonstrated: marking and correcting bands is the hardest step for this audience, and the Labs check had no end-to-end threshold. | Accepted. The check is now an end-to-end discard gate: detection quality including cut-off notation, keyboard-only correction at 400% zoom, a full pedal read-through, and legibility, on a cohort plus an untouched holdout, with thresholds fixed in the brief before measuring. The audience is narrowed to low-vision musicians who can see enlarged music, not blind musicians. A new risk states the preparation problem directly. |
+| Medium | The device audience is broader than the evidence: the Android demand is from 2014, and ScorePDF, Podium, Repertoire, and Blackbinder exist. | Accepted. They are added (Repertoire organises scores and isn't a reader, so it's left out). None documents system strips. The claim no longer says Android users "have no such tool"; it says no free, local tool cuts at systems and reads strip by strip. |
+| Low | Lime Lighter has no direct PDF import; cutting a scan can't restore detail. | Fixed: Lime Lighter is removed from the PDF list, and the magnification claim now says the useful limit depends on the source and is tested in the gate. |
 
 ## Decision
 
