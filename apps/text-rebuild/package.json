@@ -1,0 +1,19 @@
+{
+  "name": "@project-100/app-text-rebuild",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@ajustinjames/hardline-components": "^0.1.0",
+    "@ajustinjames/hardline-tokens": "^0.1.0"
+  },
+  "devDependencies": {
+    "@project-100/web": "workspace:*",
+    "vite": "^8.3.1"
+  }
+}
