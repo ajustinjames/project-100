@@ -69,7 +69,7 @@ The Free Classroom Tools, TeachVid, and Cloze Wizard rows come from the critique
 - Analytics: `none`. A shared link carries the text in its fragment, and standard analytics reports the page URL; rather than rely on the fragment being stripped from the beacon, the app sends no beacon at all.
 - Privacy class: `local-only`. The teacher's texts stay in their browser and in the links they choose to share. Sharing through a link fragment is the private kind of sharing [PRIVACY_AND_DATA.md](../../docs/PRIVACY_AND_DATA.md#user-generated-content) allows.
 
-**Labs feasibility gate.** Put the criteria and the text cohort on the build brief before running anything ([APP_ACCEPTANCE.md](../../docs/APP_ACCEPTANCE.md#measuring-a-feasibility-gate)). The cohort: at least ten real teaching texts, at least two each in French, Spanish, and German and two ESL, of 80 to 300 words, plus an untouched holdout of five more. For each text, check by hand: every word token is split correctly (elisions, hyphens, apostrophes, numbers); every exercise accepts every correct answer and rejects wrong ones; the shared link opens the same set in Chromium and WebKit; and the link stays under the length limit. Then a timing check: making and sharing the set for one text takes a teacher under two minutes, against at least ten minutes to make the same exercises by hand. Discard if tokenizing errors remain after one fix round, measured on the holdout, or if the timing check fails.
+**Labs feasibility gate.** Put the criteria and the text cohort on the build brief before running anything ([APP_ACCEPTANCE.md](../../docs/APP_ACCEPTANCE.md#measuring-a-feasibility-gate)). The cohort: at least ten real teaching texts, at least two each in French, Spanish, German, and Italian and two ESL, of 80 to 300 words, plus an untouched holdout of five more. For each text, check by hand: every word token is split correctly (elisions, hyphens, apostrophes, numbers); every exercise accepts every correct answer and rejects wrong ones; the shared link opens the same set in Chromium and WebKit; and the link stays under the length limit. Every exercise must be completable by keyboard alone, and every exercise must print legibly with an answer sheet. Then a timing check against the free tools a non-subscriber would use today: making and sharing all five exercises for one text must take under two minutes, against the time to make the equivalent set with Free Classroom Tools, LearnHip, and LearningApps, measured on the same texts. Discard if tokenizing errors remain after one fix round, measured on the holdout, or if the timing check fails.
 
 ## Screen results
 
@@ -93,7 +93,7 @@ The Free Classroom Tools, TeachVid, and Cloze Wizard rows come from the critique
 ## Open questions
 
 - Should matching exercises (pairs of words and translations), which Textivate also has, be in the first version? Proposed: no. Keep to text reconstruction.
-- Does user-pasted lesson text kept in the browser stay `local-only`? I think so: it is lesson material, not text "likely to contain personal details", and there is no field for names. The general question was raised in [#21](https://github.com/ajustinjames/project-100/issues/21) and closed without a ruling. **Question for the Critic:** if you judge this `personal-data`, say so and I'll escalate.
+- Does user-pasted lesson text kept in the browser stay `local-only`? I think so: it is lesson material, not text "likely to contain personal details", and there is no field for names. The owner has since ruled on [#21](https://github.com/ajustinjames/project-100/issues/21) that it is `local-only` ([#38](https://github.com/ajustinjames/project-100/pull/38)). **Question for the Critic:** if you judge this `personal-data`, say so and I'll escalate.
 
 ## Escalations needed
 
@@ -111,6 +111,16 @@ None. It runs in the browser, has no accounts, no server, no student data, and n
 | Medium | No personal-data escalation is missing, but a shared link exposes the text to whatever channel carries it, and standard analytics may report the URL. | Accepted. The risk now says the link exposes the text to any channel it passes through, and the app says so where the link is made. `analytics` is set to `none`. |
 | Low | The 2017 frenchteacher.net post couldn't be opened. | The quotation is removed. (It opened for me on 2026-09-30, but a source the Critic can't check shouldn't carry weight.) |
 
+[Critique round 2 by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/31#issuecomment-5933023119), recommending reject. I adopted the requested fixes below. I dispute that finding 1 requires rejection, so it goes to [arbitration](../../docs/AI_ROLES.md#disagreements-between-agents).
+
+| Severity | Finding (round 2) | Response |
+|---|---|---|
+| High (round 1, partly resolved) | No evidence that teachers without a subscription need five activities per text, or that one shared set improves their workflow; the timing gate compares against hand-made worksheets, not the free tools. | Fix adopted: the timing gate now compares against making the equivalent set with the free tools (Free Classroom Tools, LearnHip, LearningApps). **Disputed:** I can't produce direct evidence that non-subscribers want five activities per text. The evidence is indirect: Textivate has sold exactly this, many activities from one pasted text, by subscription since 2012, and teachers describe planning around it. The question of whether non-subscribers would use it is what Labs and the gate test. Sent to arbitration. |
+| Medium (round 1, partly resolved) | The new alternatives leave the gap open, but why one set matters more than separate free tools isn't established. | Folded into finding 1 and the revised timing gate. |
+| Medium (round 1, partly resolved) | Italian is promised but missing from the cohort; no keyboard or print criteria. | Fixed: Italian is in the cohort, and keyboard-only completion and legible printing are gate criteria. |
+| Medium | Resolved; the #21 statement should be corrected. | Fixed: the open question now records the owner's ruling. |
+| Low | Resolved. | — |
+
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ..." or "YYYY-MM-DD: Rejected because ..." -->
+<!-- Pending arbitration. -->
