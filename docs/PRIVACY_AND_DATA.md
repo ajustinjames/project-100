@@ -15,6 +15,8 @@ Every app declares one class in `app.json` (`privacy`) and explains it in `PRIVA
 
 When unsure between two classes, pick the stricter one.
 
+**Content the user supplies stays `local-only`.** A pasted text, an opened document or file, an imported export, or labels the user types, including other people's names, is `local-only` and needs no approval, provided it never leaves the device and the app doesn't ask for personal details. Owner ruling of 2026-09-30 on [#21](https://github.com/ajustinjames/project-100/issues/21). Sharing it through a link the user chooses to send is the private sharing allowed under [User-generated content](#user-generated-content). An app that *asks for* personal details, or sends any of this off the device, is still `personal-data`.
+
 ## Personal data
 
 Any personal-data handling must be necessary, minimized, documented, securely designed, and **approved by the owner before implementation**. The approval request must state what is collected, why, where it is stored, who can access it, how long it is kept, and how users delete it.
