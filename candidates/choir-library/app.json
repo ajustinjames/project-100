@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "choir-library",
+  "name": "Choir Library",
+  "status": "rejected",
+  "description": "Catalogue a choir's sheet music with copies, voicing, and season, record every date each piece is sung, and find what fits the next service or concert that you haven't sung lately and have enough copies of.",
+  "problem": "Volunteer choir librarians keep the catalogue in a spreadsheet with a single 'last sung' column, so choosing music for a season means filtering by hand and losing the history of when each piece was actually sung.",
+  "category": "music",
+  "dates": {
+    "created": "2026-10-01",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": {
+    "date": "2026-10-01",
+    "reason": "ChoirDirector.app's free plan already records each piece's usage and past programmes and filters repertoire by tags and voicing, a spreadsheet does the rest well enough for most librarians, and the only remaining gap, a minimum-copies filter, doesn't justify an app."
+  }
+}
