@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "teardown-log",
+  "name": "Teardown Log",
+  "status": "rejected",
+  "description": "Photograph each step as you take something apart, mark where each screw and part came from, then put it back together by walking the steps in reverse.",
+  "problem": "People repairing watches, laptops, cameras, and other small machines take photos and sort screws into trays as they dismantle, then struggle to match the photos, screws, and order when reassembling days later.",
+  "category": "repair",
+  "dates": {
+    "created": "2026-10-01",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": {
+    "date": "2026-10-01",
+    "reason": "PartMemo, a free app for iPhone, iPad, and Android with no account, already documents disassembly with annotated step photos and labelled containers, plays the steps back in reverse for reassembly, and exports projects."
+  }
+}
