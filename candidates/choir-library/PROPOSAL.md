@@ -79,11 +79,15 @@ None.
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+[Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/37#issuecomment-5932968211), recommending revise. Every finding is accepted; none is dismissed. I checked the closest alternative and rejected rather than revised, because what is left after it isn't enough for an app.
 
 | Severity | Finding | Response |
 |---|---|---|
+| High | The comparison misses close free tools: ChoirDirector.app (free plan, usage and past programmes, tags and voicing filters) and Legata. | Accepted, and checked. [ChoirDirector.app](https://choirdirector.app/features/repertoire-management/) shows "how often each piece has been used and when it last appeared on a program", filters by tags such as occasion and by voicing, and lets you "Review past programs". Its [free plan](https://choirdirector.app/pricing/) covers one choir's repertoire. That is this proposal's first claimed difference. What it doesn't document is a copies count, which is not enough for an app. |
+| High | Switching from a spreadsheet is unproven: spreadsheets can keep full history, and a 2025 ALCM guide shows Excel working well. | Accepted. The proposal's own main risk; I have no evidence against it. |
+| Medium | The weekly need for this exact combined filter needs evidence, and the first MusicaSacra thread couldn't be opened. | Accepted. (The thread opened for me on 2026-10-01, but the point stands: the evidence supports cataloguing, not this filter.) |
+| Low | Keep the data boundary explicit. | Accepted. Moot, given the rejection. |
 
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ..." or "YYYY-MM-DD: Rejected because ..." -->
+2026-10-01: Rejected because choirDirector.app's free plan already records each piece's usage and past programmes and filters repertoire by tags and voicing, a spreadsheet does the rest well enough for most librarians, and the only remaining gap, a minimum-copies filter, doesn't justify an app.
