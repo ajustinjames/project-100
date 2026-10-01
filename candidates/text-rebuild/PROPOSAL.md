@@ -13,11 +13,11 @@ The tool they use is Textivate, and it is paid:
 - When it launched, a teacher-training blog described it as creating "instantly what a few years ago would have taken an experienced programmer hours to create", and it was free to register. ([Nik's QuickShout, 2012](https://quickshout.blogspot.com/2012/09/create-instant-interactive-text-based.html))
 - Today its own site says a visitor can only "see some sample resources" ([textivate.com](https://www.textivate.com/)), and its blog says that without a subscription "you can access resources created by others, provided that you have the url". Creating a resource needs a subscription: £36 a year for Basic (20 stored resources), £72 for Premium, which is also the cheapest plan that can share resources with students, and £180 for a group of ten teachers. ([Why subscribe to textivate?](https://textivate.posthaven.com/why-subscribe-to-textivate))
 - Teachers build their planning around it. One languages teacher writes "So much of my planning begins with this website", in a post titled "4 subscription sites for MFL teaching that are worth every penny". ([eclaireMFL](https://mflclassroommagic.com/2020/03/31/4-subscription-sites-for-mfl-teaching-that-are-worth-every-penny/))
-- A long-running blog for French teachers calls it "a super time saver" that lets you adapt a text "precisely to the needs of your own class and instantly make it available on line for class or homework" ([frenchteacher.net blog, 2013](https://frenchteachernet.blogspot.com/2013/12/textivate-revisited.html)), and the same author writes that "Budgets are tighter and tighter and schools and languages departments are often seeking ways to make savings." ([2017](https://frenchteachernet.blogspot.com/2017/06/how-to-save-money-in-your-mfl-department.html))
+- A long-running blog for French teachers calls it "a super time saver" that lets you adapt a text "precisely to the needs of your own class and instantly make it available on line for class or homework" ([frenchteacher.net blog, 2013](https://frenchteachernet.blogspot.com/2013/12/textivate-revisited.html)).
 
 ## Audience
 
-Teachers of modern foreign languages and of English as a second language, in schools and private tuition, who teach from short texts. They would use it for each new text, which for a classroom teacher is weekly or more. Their students open the exercises in class or for homework.
+Teachers of modern foreign languages and of English as a second language who teach from short texts and **don't have a Textivate subscription**: private tutors, ESL teachers outside UK schools, teachers whose department doesn't pay for it, and trainee teachers. Textivate's free access lets them do nothing but open other people's resources, so for them the choice is between making exercises by hand and assembling single-type free tools. The aim is not to win over teachers who already pay for Textivate and value its tracking. They would use it for each new text, which for a classroom teacher is weekly or more. Their students open the exercises in class or for homework.
 
 ## Proposed solution
 
@@ -37,7 +37,7 @@ A browser app in two halves:
 
 There is no class list, no student names, and no marks sent back to the teacher. A teacher who wants proof of homework asks for a screenshot of the finished screen.
 
-It is language-neutral: it splits on spaces and punctuation, so it works for languages written with spaces between words, and says so.
+The first version supports French, Spanish, German, Italian, and English. Splitting text into words has language-specific cases (elisions such as *l'homme* and *j'ai*, hyphenated words, apostrophes in English, numbers, repeated words), so these are handled explicitly and tested on real texts. Languages written without spaces are out of scope.
 
 ## Existing alternatives
 
@@ -49,9 +49,12 @@ It is language-neutral: it splits on spaces and punctuation, so it works for lan
 | LearnHip cloze creator | [learnhip.com](https://learnhip.com/cloze/create.php) | Free; paste a text, mark gaps, share a link without logging in. | One exercise type (gap-fill). Without a login the activity "may be deleted after one month". |
 | Cloze Generator | [cloze-generator.app](https://www.cloze-generator.app/) | Free gap-fill by clicking words, with online answering. | Gap-fill only, and you sign in to save and share. |
 | LearningApps | [learningapps.org](https://learningapps.org/createApp.php) | Free; many templates, including a cloze text and an ordering exercise. | Each exercise is authored separately from a template; the text is re-entered for each one. |
+| Free Classroom Tools | [freeclassroomtools.com](https://www.freeclassroomtools.com/categories/text-tools) | Free text transformations, including first letters, gap fills, and removed spaces. | Separate tools, one transformation each; the Critic found no single shareable interactive set. |
+| TeachVid | [teachvid.com](https://www.teachvid.com/about) | Several reconstruction activities, shareable as unlisted resources. | Built around video; the free tier allows five resources. |
+| Cloze Wizard | [App Store](https://apps.apple.com/us/app/cloze-wizard/id1591517012?mt=12) | Makes several worksheets from one passage. | Mac only; worksheets rather than an interactive link for students. |
 | ESL Lounge Storyboard | [esl-lounge.com](https://www.esl-lounge.com/student/storyboard.php) | Free blank-text reconstruction in the browser. | Six fixed texts; a teacher can't use their own. |
 
-I opened the best free ones and checked them against the core job, "one text in, several reconstruction exercises out". I read each tool's creation page; I could not operate them interactively from this session. LearnHip and Cloze Generator both make a gap-fill from a pasted text and nothing else, and LearningApps offers separate templates, each authored on its own.
+The Free Classroom Tools, TeachVid, and Cloze Wizard rows come from the critique; I have not opened those pages. I opened the others and checked them against the core job, "one text in, several reconstruction exercises out". I read each tool's creation page; I could not operate them interactively from this session. LearnHip and Cloze Generator both make a gap-fill from a pasted text and nothing else, and LearningApps offers separate templates, each authored on its own.
 
 ## What this does better
 
@@ -63,7 +66,10 @@ I opened the best free ones and checked them against the core job, "one text in,
 - Client-only static app. The teacher's list of texts is kept in `localStorage` under `p100:text-rebuild:` with a versioned format, plus export and import. A shared exercise is a link with the text compressed into the fragment, using the browser's built-in `CompressionStream`.
 - Pure functions for the core: split a text into tokens, generate each exercise, and check an answer. These are easy to unit-test. The link format is versioned.
 - Rough size: 2,500 to 4,000 lines including tests. No dependencies beyond the defaults, no Cloudflare services, no media assets.
+- Analytics: `none`. A shared link carries the text in its fragment, and standard analytics reports the page URL; rather than rely on the fragment being stripped from the beacon, the app sends no beacon at all.
 - Privacy class: `local-only`. The teacher's texts stay in their browser and in the links they choose to share. Sharing through a link fragment is the private kind of sharing [PRIVACY_AND_DATA.md](../../docs/PRIVACY_AND_DATA.md#user-generated-content) allows.
+
+**Labs feasibility gate.** Put the criteria and the text cohort on the build brief before running anything ([APP_ACCEPTANCE.md](../../docs/APP_ACCEPTANCE.md#measuring-a-feasibility-gate)). The cohort: at least ten real teaching texts, at least two each in French, Spanish, and German and two ESL, of 80 to 300 words, plus an untouched holdout of five more. For each text, check by hand: every word token is split correctly (elisions, hyphens, apostrophes, numbers); every exercise accepts every correct answer and rejects wrong ones; the shared link opens the same set in Chromium and WebKit; and the link stays under the length limit. Then a timing check: making and sharing the set for one text takes a teacher under two minutes, against at least ten minutes to make the same exercises by hand. Discard if tokenizing errors remain after one fix round, measured on the holdout, or if the timing check fails.
 
 ## Screen results
 
@@ -80,7 +86,7 @@ I opened the best free ones and checked them against the core job, "one text in,
 
 - **No marks come back to the teacher.** Textivate's paid tiers track students. Without a server this app can't, and some teachers will want that for homework.
 - **Link length.** A text in a link is long. A few hundred words compresses to a link of a few thousand characters, which works in browsers but can be cut by some messaging tools. The app must show the limit and refuse texts that won't fit.
-- **Whatever is pasted is shared.** A link carries the teacher's text to whoever has it. The app should say so where the link is made. A teacher could paste a copyrighted textbook passage; the app publishes nothing, and the link only goes where the teacher sends it.
+- **Whatever is pasted is shared.** A link carries the teacher's text to whoever has it, including any messaging app or learning platform it is posted in. The app says so where the link is made. A teacher could paste a copyrighted textbook passage; the app publishes nothing, and the link only goes where the teacher sends it.
 - **Languages without spaces** (Chinese, Japanese, Thai) don't split into words this way. Out of scope, and stated.
 - **Textivate could add a free tier.** If it does, re-run the screen.
 
@@ -95,10 +101,15 @@ None. It runs in the browser, has no accounts, no server, no student data, and n
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+[Critique round 1 by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/31#issuecomment-5932932843), recommending revise. Every finding is accepted; none is dismissed. The proposal is revised as below and goes back to the Critic.
 
 | Severity | Finding | Response |
 |---|---|---|
+| High | The reason to switch is unproven: the cited teacher finds Textivate worth paying for and values its worksheets, projection, sequences, and tracking. | Accepted. The audience is narrowed to teachers who don't subscribe, for whom Textivate's free access does nothing; the proposal no longer aims to win over subscribers. Whether the set saves those teachers time is now a discard condition in a Labs gate: making and sharing one text's set must take under two minutes against ten or more by hand. |
+| Medium | The comparison misses Free Classroom Tools, TeachVid, and Cloze Wizard, though none is a kill. | Accepted; all three are added. Each is partial (one transformation per tool, video-bound with five free resources, or Mac-only worksheets), which is the gap the proposal states. |
+| Medium | "Language-neutral" understates the hardest work: elisions, repeated words, valid word splits, multiplied across five modes. | Accepted. The language claim is narrowed to French, Spanish, German, Italian, and English, with the tricky cases named, and the gate checks tokenizing and answer-checking by hand on real texts with an untouched holdout. |
+| Medium | No personal-data escalation is missing, but a shared link exposes the text to whatever channel carries it, and standard analytics may report the URL. | Accepted. The risk now says the link exposes the text to any channel it passes through, and the app says so where the link is made. `analytics` is set to `none`. |
+| Low | The 2017 frenchteacher.net post couldn't be opened. | The quotation is removed. (It opened for me on 2026-09-30, but a source the Critic can't check shouldn't carry weight.) |
 
 ## Decision
 
