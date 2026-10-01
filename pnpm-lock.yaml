@@ -21,6 +21,22 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2(@types/node@24.13.6)(vite@8.3.1(@types/node@24.13.6))
 
+  apps/score-strips:
+    dependencies:
+      '@ajustinjames/hardline-components':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@ajustinjames/hardline-tokens':
+        specifier: ^0.1.0
+        version: 0.1.0
+    devDependencies:
+      '@project-100/web':
+        specifier: workspace:*
+        version: link:../../packages/web
+      vite:
+        specifier: ^8.3.1
+        version: 8.3.1(@types/node@24.13.6)
+
   packages/registry: {}
 
   packages/web:
