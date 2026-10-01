@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "score-strips",
+  "name": "Score Strips",
+  "status": "candidate",
+  "description": "Open a sheet-music PDF or scan, mark where each line of music is, and read it one enlarged line at a time, moving on with a key, a tap, or a page-turn pedal.",
+  "problem": "Musicians with low vision need printed music much larger than a page allows, so they crop and paste each line by hand or buy an app that exists only for iPad, Android, or Windows; zooming a PDF means scrolling sideways and down mid-piece.",
+  "category": "accessibility",
+  "dates": {
+    "created": "2026-09-30",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "local-only",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
