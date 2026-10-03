@@ -16,14 +16,14 @@
 
 ## Existing alternatives
 
-<!-- What people use now: at least three where they exist, including the non-app default and the best free tool. -->
+<!-- Compare the strongest relevant options, usually two or three, including the non-app default and a credible free tool where one exists. Acknowledge what works well; similar tools are allowed. -->
 
-| Alternative | Link | Does well | Falls short for this audience |
+| Alternative | Link | Does well | Tradeoffs for this audience |
 |---|---|---|---|
 
 ## What this does better
 
-<!-- One or two concrete, checkable differences, not adjectives. SEO, monetization, novelty alone, and use of AI don't count. -->
+<!-- One or two concrete reasons someone would choose this version: execution, thoughtful design and polish, easier access, or useful paid functionality offered free. No exclusive feature is required. Describe planned behavior and how Labs will check the benefit. If alternatives are already free, free alone is not an advantage. SEO, monetization, novelty alone, and use of AI don't count. -->
 
 ## Likely scope and shape
 
@@ -34,8 +34,8 @@
 <!-- One line each: pass/fail and why. -->
 
 - Useful and specific:
-- Not already well solved:
-- Not a thin wrapper / generic generator:
+- Credible practical value despite existing alternatives:
+- Value comes from the software itself, not a thin wrapper:
 - Not justified by SEO, monetization, novelty alone, or use of AI:
 - Runs within baseline budget:
 - No sensitive subject:
