@@ -20,14 +20,15 @@ Any agent (Claude Code, Codex, or another) may take any role. One session may ho
 
 ## Model assignments
 
-Current as of 2026-09-29. Roles stay model-neutral; only this table changes when models change.
+Current as of 2026-10-03. Roles stay model-neutral; model assignments and launch examples are updated together when models change.
 
 | Model | Model ID and effort | Roles | Responsibilities |
 |---|---|---|---|
 | **Opus 5.5** | Claude Code, `claude-opus-5-5` | Originator, Builder (design), final Reviewer, Steward | Generates half of each batch's ideas, screens and researches the whole batch, and selects; frames the product; sets UX/UI direction and architecture; writes the implementation brief; does the final product, UI, and architecture review; decides which findings matter; escalates to the owner only when needed; recommends archives and writes retrospectives. |
 | **Luna 6 Max** | Codex, `gpt-6-luna`, effort `max` | Builder (implementation) | Implements, iterates, writes tests, refactors. |
 | **Sol 6** | Codex, `gpt-6-sol`, effort `high` | Critic, Reviewer, Maintainer | Critiques candidates adversarially before selection; does economical independent review of every build PR; maintains live apps; runs regression and dependency passes. |
-| **Astra** | Codex, `gpt-6-astra`, effort `xhigh`; `medium` for idea generation | Idea generator, Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: the other half of each screening batch's ideas; adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
+| **Sol 6.1** | Codex, `gpt-6.1-sol`, effort `high` | Idea generator | Generates the other half of each screening batch's ideas in a separate session. |
+| **Astra** | Codex, `gpt-6-astra`, effort `xhigh` | Adversarial Reviewer, Arbiter | Strong but expensive, so used only where it matters most: adversarial review before each launch request, of owner-gated changes (the checks, CI, the charter), and of security- or privacy-relevant changes; and arbitration of agent disagreements. |
 
 ### Launching another model
 
@@ -40,13 +41,17 @@ Use `codex exec` directly. It accepts every effort level, and its log header pri
 codex exec -m gpt-6-astra -c model_reasoning_effort='"xhigh"' -c web_search='"live"' -s read-only --ephemeral \
   -o /tmp/review.md "<prompt: what to review, the base ref, the docs to read, the output format>" < /dev/null
 
+# Idea generation (Sol 6.1).
+codex exec -m gpt-6.1-sol -c model_reasoning_effort='"high"' -c web_search='"live"' -s read-only --ephemeral \
+  -o /tmp/ideas.md "<idea-generation prompt from APP_ACCEPTANCE step 1>" < /dev/null
+
 # Implementation (Luna) on its own branch or worktree.
 codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<build brief>" < /dev/null
 ```
 
 - `-s read-only` for reviews, critiques, arbitration, and idea generation. The reviewer reports findings; the author fixes them.
 - `-c web_search='"live"'` lets a Critic or Reviewer open and verify current sources. Keep it for any task that checks external claims or links.
-- **Idea generation (Astra):** use the read-only command above at effort `medium` (`-c model_reasoning_effort='"medium"'`) with live web search, so it can skip ideas that are obviously taken, and write the output to a file outside the repository, such as `/tmp/ideas.md`. The ideas are private Gate 1 material: never commit them, post them, or show them to the owner. What to give it is in [APP_ACCEPTANCE step 1](APP_ACCEPTANCE.md#1-generate-ideas).
+- **Idea generation (Sol 6.1):** use the read-only idea-generation command above with `gpt-6.1-sol` at effort `high` and live web search, so it can inspect alternatives and describe practical benefits without excluding ideas solely for similarity, and write the output to a file outside the repository, such as `/tmp/ideas.md`. The ideas are private Gate 1 material: never commit them, post them, or show them to the owner. What to give it is in [APP_ACCEPTANCE step 1](APP_ACCEPTANCE.md#1-generate-ideas).
 - `< /dev/null` keeps `codex exec` from waiting on stdin when run from another agent.
 - **From Claude Code's Codex plugin** (the `codex:codex-rescue` agent or `codex-companion.mjs`): only its `task` mode takes `--model` and `--effort`, and it accepts efforts only up to `xhigh`, so use `codex exec` for `max`. The plugin's `review` and `adversarial-review` modes take no `--effort`, so don't use them for required reviews. When delegating through the `codex:codex-rescue` agent, put `--model <id> --effort <level>` in the request, because it adds them only when asked.
 - Start the review or critique comment with the role, model ID, and effort, e.g. `Review by Adversarial Reviewer (gpt-6-astra, effort xhigh)`, copied from the log header rather than assumed. The launched model can't see its own model or effort, so its first line may be wrong or vague. The **launching session** checks the `model:` and `reasoning effort:` lines in the log header, and posts them with the verbatim review as the run's evidence. You may also give the header line to the model in the prompt, once you've launched it with the right flags.
@@ -54,7 +59,7 @@ codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<
 
 **Build flow:**
 
-1. Opus and Astra each generate half of a batch's ideas. Opus screens and researches them all. Sol critiques the survivors. Opus selects and records the candidates.
+1. Opus and Sol 6.1 each generate half of a batch's ideas. Opus screens and researches them all. Sol 6 critiques the survivors. Opus selects and records the candidates.
 2. Opus writes the implementation brief as a GitHub issue ("Build brief: `<slug>`"): the problem, UX/UI direction, architecture, and acceptance criteria. Sol reviews the brief before building starts, so Opus's design decisions get an independent check. Durable decisions from it go into `APP.md`.
 3. Luna implements in PRs that reference the brief. Sol reviews each PR.
 4. Before a launch request, and for any security- or privacy-relevant change, Opus does the final review, then Astra does an adversarial review.

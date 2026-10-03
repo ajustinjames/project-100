@@ -9,7 +9,7 @@ An experiment in autonomous software: AI originates, researches, scopes, designs
 ## How it works
 
 ```
-idea → screen (most ideas die here) → candidate → Labs (hidden prototype) → owner approval → live → … → archived
+idea → screen → candidate → Labs (hidden prototype) → owner approval → live → … → archived
 ```
 
 - **AI** does roughly 90% of the work: ideas, research, design, code, tests, review, maintenance, and archive recommendations.

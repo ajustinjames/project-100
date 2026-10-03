@@ -32,7 +32,7 @@ Agents do **not** escalate ordinary implementation decisions. The full decision-
 
 Application ideas must originate from AI. The owner may approve, reject, question, redirect, or add constraints, but does not normally supply ideas. The point is to test AI's judgment about what is worth building.
 
-Agents should generate many more candidates than they build and discard weak ones early and quietly. See [APP_ACCEPTANCE.md](APP_ACCEPTANCE.md).
+Agents should compare a range of ideas before choosing what to build and discard weak ones early and quietly. There is no target rejection rate. See [APP_ACCEPTANCE.md](APP_ACCEPTANCE.md).
 
 ## Product principles
 
@@ -40,20 +40,23 @@ Agents should generate many more candidates than they build and discard weak one
 
 - genuinely useful software that someone would bookmark or come back to
 - creative ideas, clever approaches, underserved problems, unusual niches
+- familiar tools done well: thoughtful design, easier workflows, accessibility, or useful features offered for free
 - small, understandable implementations; low-code when it solves the problem well
 - software a weaker or local AI model could maintain in the future
 
 **Avoid:**
 
 - generic AI slop
-- problems already solved very well, unless there is a real reason to build another
-- generic calculators, converters, formatters, generators, or dashboards without a genuinely useful twist
+- copies with no clear practical value for their intended users
+- calculators, converters, formatters, generators, or dashboards without a useful task and a credible reason for someone to choose them
 - thin wrappers around APIs, and generic AI wrappers
 - SEO-content sites disguised as applications
 - unnecessary architecture or dependencies
 - anything needing manual ongoing operations or constant human content curation
 
 There is no fixed size limit. Scope follows the problem: prefer focused apps, but allow a larger one when that is the natural solution.
+
+Originality is optional. Similarity to an existing app is not a reason to reject an idea. Better execution, a more pleasant or accessible experience, less setup, or making useful paid functionality free can be a real reason to build another. Describe the benefit concretely; a new feature or an underserved niche is not required.
 
 ## Sensitive subjects
 

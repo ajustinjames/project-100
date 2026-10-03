@@ -23,22 +23,23 @@ Ideas come from AI; the owner does not supply them ([charter](PROJECT_CHARTER.md
 
 ## Gate 1: Screen (before anything is recorded)
 
-Steps 1 to 3 happen inside the Originator's own session, apart from the Idea generator's half of step 1. Commit nothing, open no issue or PR, and don't show these ideas to the owner. Most ideas should die here without being written down.
+Steps 1 to 3 happen inside the Originator's own session, apart from the Idea generator's half of step 1. Commit nothing, open no issue or PR, and don't show these ideas to the owner. Drop weak ideas privately; there is no target rejection rate.
 
 ### 1. Generate ideas
 
-Generate a batch of ten or more ideas, expecting most to die. Start from people and situations rather than app types:
+Generate enough ideas to compare promising options; five to ten per app wanted is a useful starting point, not a quota. Start from people and situations, including familiar tasks that could benefit from better execution or a free tool:
 
 - a specific person doing a specific task that recurs (a hobby, a trade, study, household routines, planning)
 - an unusual niche that general-purpose tools serve badly
 - a constraint, representation, or interaction that makes an old problem easier
+- an existing app category where thoughtful design, easier access, or free core functionality would be useful
 
-**Spread the batch.** Left alone, ideas cluster around the last few candidates. The first batches drifted into small calculators and planners for crafts, music, and theatre, where free tools are thickest. Before generating, note the areas and shapes of the recorded candidates and apps, and aim elsewhere:
+**Spread the batch.** Before generating, note the areas and shapes of the recorded candidates and apps. Explore beyond the last few ideas, without ruling out a useful idea just because its category is familiar:
 
-- Cover at least five of these areas, with no area over a quarter of the batch: work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work (writing, music, art, video); accessibility and daily-living aids; files people already have (exports, logs, spreadsheets, standard formats).
+- With no owner focus, sample several areas: work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work (writing, music, art, video); accessibility and daily-living aids; files people already have (exports, logs, spreadsheets, standard formats). There is no per-area quota.
 - Vary the shape, not just the subject: editors, viewers for a file format, trainers that give feedback, references, simulations, and trackers, as well as calculators and planners. Include some larger ideas where the problem calls for one ([charter](PROJECT_CHARTER.md#product-principles)).
 
-**Draw seeds at random.** A model asked for variety returns its favourites, and both models keep landing on the same few niches. So at least half of each generator's ideas start from a random draw that neither model chooses:
+**Use random seeds when ideas repeat.** If generation keeps returning the same tasks, random draws can help either generator explore:
 
 ```bash
 for i in $(seq 1 20); do
@@ -46,21 +47,21 @@ for i in $(seq 1 20); do
 done
 ```
 
-Each line is a person, a moment in what they do, and a twist on the app's shape. Write one idea per line, using the person and at least one of the other two. Don't skip a line because it looks unpromising: an idea forced out of an odd draw is the point. The Originator draws the seeds for both halves and gives the Idea generator its lines. Add to the lists in [`docs/idea-seeds/`](idea-seeds/) when you notice a gap; never prune them to suit a batch.
+Each line is a person, a moment in what they do, and a twist on the app's shape. Use promising combinations as prompts; skip or adapt combinations that do not suggest a useful task. Seeds are optional. When using them, the Originator can draw lines for both halves. Add to the lists in [`docs/idea-seeds/`](idea-seeds/) when you notice a gap; never prune them to suit a batch.
 
 **Split the batch 50/50.** The Originator generates half of the ideas. The [Idea generator](AI_ROLES.md#model-assignments) generates the other half in a separate session, launched as [described there](AI_ROLES.md#launching-another-model). A second model brings ideas the Originator wouldn't think of.
 
-- Split the areas above between the two halves so they don't overlap, and generate your half without reading the other first.
+- Give the two halves different starting areas where useful, and generate your half without reading the other first. Overlap in categories is fine; compare and consolidate ideas for the same task.
 - Give the Idea generator the charter, this step and [step 2](#2-screen), the recorded candidates and apps with their rejection reasons, any focus for the batch, and its areas. Ask for ideas, not verdicts: for each one, a one-line pitch, the person and the recurring task, and why it might pass the screen. It may note tools it already knows do the job. Ask it to build each idea from a real place where practitioners talk (a forum, a mailing list, an association's guide) and to give one link it opened as evidence. Without that, it invents the person and the task, and those ideas die at the screen. The evidence has to be on a page the Originator can open too: Claude Code can't fetch Reddit.
 - Screen and research both halves the same way. Where an idea came from doesn't count for or against it. Record the source of each candidate under "Idea source" in `PROPOSAL.md`, so hit rates can be compared.
 
-Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files and rejection reasons, so you don't propose a recorded idea again. To retry a rejected or archived idea, use [Revival](LIFECYCLE.md#revival), not a new slug.
+Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files and rejection reasons, so you don't propose a recorded idea again. A related category is fine; explain a separate app's value when it overlaps a Project 100 app, and prefer improving that app when the task and audience are the same. To retry a rejected or archived idea, use [Revival](LIFECYCLE.md#revival), not a new slug. A prior rejection for similarity can be reconsidered under the current criteria.
 
 ### 2. Screen
 
 **Kill an idea if any of these is true:**
 
-- The one-line pitch describes a thousand existing sites ("a Pomodoro timer", "a JSON formatter", "an AI chat for X").
+- It has no clear useful task or credible practical benefit for its intended users.
 - Its value comes from an external API or AI model rather than from the software itself.
 - It mostly exists to rank in search or show ads.
 - It needs ongoing human curation, moderation, or manual operation.
@@ -68,13 +69,15 @@ Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files
 - It can't run within the baseline budget and has no realistic path to paying for itself.
 - You can't name who would use it more than once.
 
-**Don't kill an idea at the screen because a tool exists.** You haven't opened that tool yet, and a search result is not evidence that it does this job. Existing tools are judged in [research](#3-research-the-survivors) and in the critique, not here.
+**Don't kill an idea because similar tools exist, even good free ones.** Familiar categories such as timers and formatters are eligible. Better execution, thoughtful design, easier access, or useful free functionality can justify another app. Existing tools inform [research](#3-research-the-survivors) and the critique; their existence is not a kill criterion.
 
 **Promising signs:**
 
 - A specific person with a specific, recurring problem.
 - An unusual niche that general-purpose tools serve badly.
 - A clever angle: a constraint, representation, or interaction that makes an old problem easier.
+- A familiar task done nicely: readable results, fewer steps, good mobile or keyboard use, or less setup.
+- Useful functionality made free where credible alternatives charge for it.
 - Works entirely in the browser, with data kept locally.
 - Small enough to understand in one sitting.
 
@@ -90,23 +93,19 @@ Before screening, run `pnpm p100 list` and skim the existing `PROPOSAL.md` files
 Answer all of these for each survivor before recording anything. Open every page you link and check that it says what you claim; never cite a source from memory. If you can't verify sources (for example, you have no web access), stop here and don't record the idea.
 
 - **Audience and recurrence.** Who exactly has the problem, how often, and what they do about it today. "Everyone" and "developers" are not audiences. Link public evidence that the problem recurs, such as forum threads, repeated community questions, or guides describing a workaround. Link to it; don't copy people's personal details.
-- **Real alternatives.** Name what people actually use now: at least three where they exist, including the non-app default (a spreadsheet, a notes app, paper, a general-purpose tool) and the best free tool. Link each one, and say what it does well and where it falls short for this audience. Search by the job the app does, not only by its category. Check the web, the major app stores, and F-Droid, and don't skip new or little-known tools. Also look at general tools for the wider role, such as a rehearsal manager for a choir task or a club manager for a league task, because a niche feature often sits inside an app whose name doesn't mention the niche: a free tool that does the core job is the most common reason the critique kills a candidate. Then try the best free one: open it and use it for the core job, or read its documentation where you can't. Judge whether it does the job *well* for this audience, not just whether it exists. Many free tools are small, partial, paywalled at the key feature, or limited to one platform.
-- **What this app would do better.** One or two concrete, checkable differences ("keeps the whole list on the device and works offline", "shows X next to Y so you don't have to switch tabs"). An existing tool with a real gap is fair game. These count:
-  - a feature the audience needs that the best free tool lacks, or does badly (show how you checked);
-  - the key feature is paid, or the tool is limited to one platform, one publisher, or one format the audience doesn't all use;
-  - a different representation or interaction that makes the job easier in a way you can describe and check.
+- **Real alternatives.** Compare the strongest relevant options, usually two or three, including the non-app default (a spreadsheet, a notes app, paper, a general-purpose tool) and a credible free tool where one exists. Link each one, and say what it does well and what tradeoffs remain for this audience. Search by the job, including broader tools that may contain the feature. Check app stores or F-Droid when those platforms matter to the audience; exhaustive coverage is not required. Try the strongest relevant tool for the core task, or read its documentation where you can't. Verify pricing before claiming a free advantage, and acknowledge when another tool does the job well.
+- **What this app would do better.** Give one or two concrete reasons someone would choose it. The benefit can be execution, design, access, or price; it need not be an exclusive feature. These count:
+  - a useful feature, representation, or interaction;
+  - useful core functionality offered free when relevant alternatives charge or impose meaningful limits;
+  - thoughtful design and polish: readable results, clear feedback, fewer steps, accessible controls, or a good mobile layout;
+  - less setup, no required account or installation, offline use, or local data handling, with an explanation of how that helps the task.
 
-  These don't count: adjectives such as "simpler", "cleaner", or "modern"; polish; and "the same, but local and without an account", unless you have evidence this audience cares about that.
+  Turn adjectives such as "simpler", "cleaner", or "modern" into planned behavior and acceptance criteria. At candidate stage, a plausible design benefit grounded in the task and inspected alternatives is enough; do not require proof that users will switch before a prototype exists. If other tools are already free, free pricing alone is not an advantage, but good execution can still justify the app.
 - **Shape and escalations.** Whether it can run in the browser with local data, its rough size, and every [escalation](AI_ROLES.md#escalation) it would trigger. If the app would keep text or files the user supplies (a pasted text, an opened document, an imported export), say exactly what is kept and where. If it stays on the device and the app doesn't ask for personal details, it is `local-only` ([PRIVACY_AND_DATA.md](PRIVACY_AND_DATA.md#data-classification)).
 
-**Drop the idea quietly only if** research turns up a kill criterion after all, you find no evidence that the problem recurs, or a free alternative already does the **same** job well for this audience. That last reason needs all of these: you opened the tool; it does this job, not a related one; it is free for the part that matters; and it runs on the devices this audience uses. None of the following is a reason to drop:
+**Drop the idea quietly only if** research turns up a kill criterion, you find no evidence that the problem recurs, or you cannot describe a credible practical reason someone would choose the proposed app after comparing alternatives. A good free alternative is context, not an automatic rejection. Do not invent shortcomings in competitors to justify a candidate.
 
-- a related tool, or a tool for a neighbouring audience
-- a search result or a listing you haven't opened
-- a tool that is paid, limited to one platform, abandoned, or needs an account the audience won't make
-- several tools that each do part of the job
-
-**When something related exists, sharpen the idea before judging it.** Ask what the existing tool makes this person do by hand, and rebuild the idea around that. Narrow the audience, change the interaction, or take the one step the tool leaves out. An existing tool with a gap is the normal case, not a warning sign.
+**When something similar exists, use it to inform the design.** Explain what our version would make pleasant, convenient, accessible, or free. Narrowing the audience or adding a missing step may help, but is not required. Prefer a useful familiar tool over a forced novelty.
 
 **When in doubt, record it.** The early batches screened over a hundred ideas each and recorded almost none, because the Originator dropped anything with a related tool. The critique exists to test the comparison, and a rejected candidate costs little.
 
@@ -126,12 +125,12 @@ From here on, every decision is recorded, because candidates are permanent regis
 
 The Critic critiques the candidate PR. The Critic must be a separate session that did not write the proposal ([independent review](AI_ROLES.md#roles)). Give the Critic the PR, not the Originator's private reasoning.
 
-The Critic's job is to argue against the candidate and try to kill it:
+The Critic's job is to challenge the case for usefulness and find concrete reasons it would fail, using the current criteria rather than requiring originality:
 
 - Re-run the [screen](#2-screen). Say which kill criteria apply, if any, and whether the case rests on anything under "Not reasons to advance".
-- Search independently for alternatives the proposal missed. Check that each linked source exists and says what the proposal claims. For each alternative that matters, say whether it does the core job *well* for this audience, and how you know. An alternative that exists but leaves the proposal's stated gap open is a finding about the comparison, not a kill criterion.
+- Search independently for relevant alternatives the proposal missed. Check that each linked source exists and says what the proposal claims. For each alternative that matters, say whether it does the core job *well* for this audience, and how you know. Similarity, a crowded category, or a good free alternative is not a Critical finding by itself. Assess whether the proposed execution, design, access, or price benefit is credible.
 - Test the audience: is the problem real, specific, and recurring, and is there evidence?
-- Test "what this does better": would this audience actually switch?
+- Test "what this does better": is there a plausible reason someone would choose it, and can the proposed benefit be checked in Labs? Do not demand a unique feature or proof of switching at candidate stage.
 - Look for missed escalations, especially anything near a [sensitive subject](PROJECT_CHARTER.md#sensitive-subjects), personal data, or an external API. Look for scope that is too big to maintain, or that needs ongoing human work.
 
 Post the critique as a single PR comment. All agents use the owner's GitHub account, so begin it with `Critique by <role> (<model ID>, effort <level>)`, launched as described in [Launching another model](AI_ROLES.md#launching-another-model). The Critic must be able to check sources, so give it live web search (for `codex exec`, add `-c web_search='"live"'`). A read-only Critic usually can't post to GitHub. In that case, the session that launched it posts the Critic's final message verbatim and doesn't edit it. Give each finding a severity:
@@ -149,7 +148,7 @@ End with a recommendation: **reject**, **revise**, or **advance**.
 
 The Originator decides which findings matter. In the Critique section of `PROPOSAL.md`, link the critique and record the response to each finding: what changed, or why it was dismissed. Then decide:
 
-- **Reject** if any Critical finding stands, or any High finding can't be answered with evidence. A finding that another tool exists is answered by showing the gap it leaves. If the Critic recommends **revise**, try the revision before rejecting: narrow the candidate to the gap and send it back. Set `status` to `"rejected"` and `rejection` to `{ "date": "YYYY-MM-DD", "reason": "<one sentence>" }`, write the reason under Decision, and merge the PR. The rejected candidate stays in the registry, so the idea isn't proposed again without a [revival](LIFECYCLE.md#revival).
+- **Reject** if any Critical finding stands, or any High finding can't be answered with evidence. A finding that another tool exists is answered by explaining the credible practical value of our version; an exclusive feature is not required. If the Critic recommends **revise**, try the revision before rejecting: clarify or improve the proposed benefit and send it back. Set `status` to `"rejected"` and `rejection` to `{ "date": "YYYY-MM-DD", "reason": "<one sentence>" }`, write the reason under Decision, and merge the PR. The rejected candidate stays in the registry, so the idea isn't proposed again without a [revival](LIFECYCLE.md#revival).
 - **Select** otherwise. Under Decision, write why it deserves Labs and which findings shaped it. Merge the PR with status `candidate`.
 
 Before the final critique round, the Critic checks any material revision to the proposal. Any dismissal of a Critical or High finding must also go back to the Critic, even if the proposal is unchanged. The Critic explicitly records whether they accept each dismissal in a PR comment; silence is not acceptance. Link that response in `PROPOSAL.md`. If the Critic still objects, follow [Disagreements](AI_ROLES.md#disagreements-between-agents) and link the resolved outcome. Don't promote until every such dismissal has the Critic's explicit acceptance or a resolved disagreement outcome that permits advancing.
@@ -220,7 +219,7 @@ Open a "Launch approval" issue (template provided). Keep it concise:
 |---|---|
 | Problem being solved | One paragraph. |
 | Intended audience | Who, specifically. |
-| Why it is worth shipping | What it does that alternatives don't. |
+| Why it is worth shipping | The practical value of this version, including execution, design, access, or price. |
 | Alternatives researched | Named, linked, and briefly compared. |
 | Architecture summary | Rendering, state, persistence, and services. |
 | Dependencies | Third-party packages and shared packages. |
