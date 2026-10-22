@@ -202,25 +202,38 @@ export function renderField(
   let disposed = false;
   let stopWalk = () => {};
 
+  const pageTop = (element: Element) => element.getBoundingClientRect().top + window.scrollY;
+  /** Where the field starts: its title in view. */
+  const fieldStart = () => Math.max(0, pageTop(fortuneTitle) - 16);
+  /** Where the field ends: the closing line in view at the bottom of the screen. */
+  const fieldEnd = () => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const end = pageTop(closing) + closing.offsetHeight + 24 - window.innerHeight;
+    return Math.min(maxScroll, Math.max(fieldStart(), end));
+  };
+  // Move focus to the closing line, so keyboard and screen-reader users arrive there too.
+  const arriveAtEnd = () => {
+    closing.tabIndex = -1;
+    closing.focus({ preventScroll: true });
+  };
+
   walkButton.addEventListener("click", () => {
     stopWalk();
-    const pageTop = (element: Element) => element.getBoundingClientRect().top + window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const start = Math.max(0, pageTop(fortuneTitle) - 16);
-    // End with the closing line in view.
-    const end = Math.min(
-      maxScroll,
-      Math.max(start, pageTop(closing) + closing.offsetHeight + 24 - window.innerHeight),
-    );
-    stopWalk = startWalk({
-      start,
-      end,
-      onArrive: () => {
-        // Move focus to the closing line, so keyboard and screen-reader users arrive there too.
-        closing.tabIndex = -1;
-        closing.focus({ preventScroll: true });
-      },
-    });
+    stopWalk = startWalk({ start: fieldStart(), end: fieldEnd(), onArrive: arriveAtEnd });
+  });
+
+  // With the field focused, End goes to the field's end and Home to its start. The page's own
+  // End would go past the closing line to the footer, out of view on a short screen.
+  field.addEventListener("keydown", (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (event.key === "End") {
+      event.preventDefault();
+      window.scrollTo({ top: fieldEnd(), behavior: "auto" });
+      arriveAtEnd();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      window.scrollTo({ top: fieldStart(), behavior: "auto" });
+    }
   });
 
   const readPositionDots = (): number => {

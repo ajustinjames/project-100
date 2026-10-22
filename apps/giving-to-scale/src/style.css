@@ -519,6 +519,48 @@ select {
   display: none;
 }
 
+/*
+ * Forced colours (Windows contrast themes): the dots keep their pattern but take the user's
+ * palette, with the gift in the highlight colour so it stays distinct from the fortune.
+ */
+@media (forced-colors: active) {
+  :root {
+    --gift-dot: Highlight;
+    --fortune-dot: CanvasText;
+  }
+
+  .field-key-dot {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .gift-block {
+    border-left-color: Highlight;
+  }
+}
+
+/* Print the field's facts instead of its drawing, which can run to dozens of pages. */
+@media print {
+  .dot-field,
+  .field-sticky,
+  .walk-button,
+  .form-controls,
+  .answer-switch,
+  .share-section {
+    display: none;
+  }
+
+  .field-screen-reader-summary {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
 @media (max-width: 480px) {
   .page-shell {
     width: min(100% - 2rem, 75rem);
