@@ -12,15 +12,24 @@ People who read about a large donation and want to know what it amounts to: news
 
 ## Scope
 
-**In scope:**
+The product plan is recorded in [PROPOSAL.md](PROPOSAL.md). The current Labs prototype is PR 1, limited to net-worth mode and US dollars.
+
+**Implemented in PR 1:**
 
 - Three amounts typed by the user: the gift, the giver's fortune, and their own net worth. Amounts accept shorthand ("100M", "$2.4 billion").
 - The answer as numbers first: "The same share of your net worth is $21", with the exact share of the fortune.
-- A true-scale drawing of the fortune with the gift's slice at its real proportion, never widened. A sub-pixel slice is described in words, and an optional control scrolls the whole fortune to it.
-- The reverse: what the giver would have to give to match a given gift of yours.
-- A separately labelled "same percentage of your yearly income" illustration, for people whose net worth is zero or negative.
-- One currency per page, labelled on every field; no conversion.
-- A share link holding the gift and the fortune, never the user's own figure.
+- A true-scale dot field of the fortune with the gift at its real proportion, drawn in bounded canvas tiles.
+- US dollars labelled on the inputs. The zero-or-less net-worth message points to the planned income comparison, which is not in this prototype.
+
+**Planned for later PRs:**
+
+- Income mode and the reverse comparison.
+- Currency selection and a fragment share link holding the gift, fortune, and currency, never the user's own figure.
+- The optional control to scroll through the whole fortune.
+
+**Not planned:**
+
+- Storage of any kind, accounts, external APIs, currency conversion, or any list of named people or shipped fortune figures.
 
 **Explicitly out of scope:**
 
@@ -45,16 +54,20 @@ Full comparison in [PROPOSAL.md](PROPOSAL.md#existing-alternatives). In short:
 - 2026-10-22: `sensitive-subject` approved by the owner ([#47](https://github.com/ajustinjames/project-100/issues/47#issuecomment-6339780374), recorded in [#48](https://github.com/ajustinjames/project-100/pull/48)). Scope of the approval: user-entered figures only, no donor list, factual wording with no judgement or advice.
 - 2026-10-22: Net worth is the main comparison; income is a labelled illustration, never called an equal sacrifice (critique round 1, High finding).
 - 2026-10-22: Untested hypothesis, decided on the prototype: that the true-scale drawing and the design make this worth choosing over Sacrifice Meter. If the working prototype doesn't show that, discard it.
+- 2026-10-22: Implementation of the prototype was started by Luna (`gpt-6-luna`, effort `max`) and finished by Opus (`claude-opus-5-5`) at the owner's request, because Luna's run was taking too long. Luna's work was kept; Opus reviewed it, fixed the dot colours and the end-of-field counter, and drew the gift block.
+- 2026-10-22: Gift dots are orange `#e84700` and fortune dots ink `#1a1a1a`, the strongest pairing that keeps the gift ≥ 3:1 against both the paper and the fortune dots. Hardline's `#ff4f00` falls just short on the paper (2.89:1).
+- 2026-10-22: The gift is drawn as its own near-square block of dots, at field size, when the block fits in 300 CSS px; larger gifts are shown only as the orange start of the field, with a note. Why: the gift's dots are already the first dots of the field, at the same scale. A separate full-size block for a big gift would be a second copy dozens of screens long ($100 billion against $85,000 is about 42 phone screens), and the reader would have to scroll through it before the fortune starts. This changes the brief (issue #50), which asked for the block across the whole range; the brief is amended to match.
+- 2026-10-22: The prototype uses a true-scale dot field. One dot equals the reader's net worth until the field would exceed 2,000,000 dots, then it equals the smallest power-of-ten multiple that keeps the field at or below that cap. Inter Variable and JetBrains Mono are self-hosted from latin subsets under SIL OFL 1.1. Nothing is stored; a planned URL-fragment share link will carry only the gift, fortune, and currency.
 
 ## Architecture
 
-Planned, to be settled in the build brief: a client-only static page. Pure functions parse amounts and compute the share, the equivalents, the reverse, and the drawing's lengths. The share link carries the gift, the fortune, and the currency in the URL; the user's own figure is never put in the URL or stored. Drawing in HTML and CSS. No storage, no Cloudflare services.
+Client-only static Vite page, written in plain TypeScript, HTML, and CSS. Pure functions parse and format amounts, validate the three fields, calculate the share and equivalent, and plan the dot field. Canvas tiles are drawn at runtime from the entered figures; each tile is bounded by device-pixel dimensions and area, with a live budget for off-screen tiles. The current prototype has no storage, link creation, or app-specific service requests.
 
 ## Dependencies
 
 <!-- Each third-party dependency and why a small amount of our own code would not do. See docs/DEPENDENCIES.md. -->
 
-None beyond ajj-design (`hardline`).
+The app uses the required ajj-design (`hardline`) tokens and components. `@fontsource-variable/inter` supplies the variable Inter typeface used for the interface and answer; `@fontsource/jetbrains-mono` supplies JetBrains Mono for technical labels. The two fonts are self-hosted because typography carries the design and the app must not request fonts from a CDN.
 
 ## Shared packages
 
@@ -64,13 +77,16 @@ None beyond ajj-design (`hardline`).
 
 <!-- Every third-party font, icon set, image, or sound: source, license, and where it is used. AI must not generate media. -->
 
-None.
+| Asset | Source | License | Attribution | Use |
+|---|---|---|---|---|
+| Inter Variable, latin subset | [Fontsource Inter](https://fontsource.org/fonts/inter), package `@fontsource-variable/inter` 5.3.0 | SIL Open Font License 1.1 | None required | Interface text and the answer amount |
+| JetBrains Mono, latin subset | [Fontsource JetBrains Mono](https://fontsource.org/fonts/jetbrains-mono), package `@fontsource/jetbrains-mono` 5.3.0 | SIL Open Font License 1.1 | None required | Technical labels and field summaries |
 
 ## Tradeoffs and known limitations
 
 - Results are only as good as the figures the user enters; a fortune is an estimate and mostly not cash, and a pledge may be paid over years.
 - One currency per page; no conversion.
-- A gift's true-scale slice is often less than a pixel; the numbers and words carry the answer, and the drawing supports it.
+- A gift's true-scale dot is often only partially filled; the numbers and words carry the answer, and the drawing supports it.
 
 ## Launch packet
 
