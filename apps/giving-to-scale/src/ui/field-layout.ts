@@ -1,46 +1,13 @@
 export const DOT_SIZE = 2;
 export const DOT_GAP = 1;
 export const DOT_PITCH = DOT_SIZE + DOT_GAP;
-export const MAX_CANVAS_DIMENSION = 4_096;
-export const MAX_CANVAS_AREA = 4_194_304;
-export const LIVE_CANVAS_BUDGET = 25_165_824;
-
-export interface FieldTile {
-  index: number;
-  top: number;
-  cssHeight: number;
-  backingWidth: number;
-  backingHeight: number;
-  devicePixelArea: number;
-  dotStart: number;
-  dotCapacity: number;
-}
 
 export interface FieldLayout {
   cssWidth: number;
   dots: number;
-  dpr: number;
   columns: number;
   rows: number;
   totalHeight: number;
-  tileHeight: number;
-  backingWidth: number;
-  tiles: FieldTile[];
-}
-
-export interface LiveTileSelection {
-  visibleIndices: number[];
-  selectedIndices: number[];
-  visibleDevicePixelArea: number;
-  selectedDevicePixelArea: number;
-}
-
-export interface TileDotRanges {
-  start: number;
-  end: number;
-  giftStart: number;
-  giftEnd: number;
-  fortuneEnd: number;
 }
 
 function assertPositiveFinite(value: number, name: string): void {
@@ -48,137 +15,14 @@ function assertPositiveFinite(value: number, name: string): void {
     throw new RangeError(`${name} must be a positive finite number`);
 }
 
-function getTileHeight(cssWidth: number, dpr: number, backingWidth: number): number {
-  let height =
-    Math.floor(
-      Math.min(MAX_CANVAS_DIMENSION / dpr, MAX_CANVAS_AREA / (backingWidth * dpr)) / DOT_PITCH,
-    ) * DOT_PITCH;
-
-  const fits = (cssHeight: number) => {
-    const backingHeight = Math.round(cssHeight * dpr);
-    return backingHeight <= MAX_CANVAS_DIMENSION && backingWidth * backingHeight <= MAX_CANVAS_AREA;
-  };
-
-  while (height > 0 && !fits(height)) {
-    height -= DOT_PITCH;
-  }
-  while (fits(height + DOT_PITCH)) {
-    height += DOT_PITCH;
-  }
-
-  if (height > 0) return height;
-  throw new RangeError(`The canvas width ${cssWidth} is too large for a bounded tile`);
-}
-
-/** Calculate a CSS-pixel layout and its device-pixel-bounded canvas tiles. */
-export function calculateFieldLayout(cssWidth: number, dots: number, dpr: number): FieldLayout {
+/** Lay out a field of dots in rows across a width in CSS pixels. */
+export function calculateFieldLayout(cssWidth: number, dots: number): FieldLayout {
   assertPositiveFinite(cssWidth, "Field width");
   assertPositiveFinite(dots, "Dot count");
-  assertPositiveFinite(dpr, "Device pixel ratio");
 
   const columns = Math.max(1, Math.floor(cssWidth / DOT_PITCH));
   const rows = Math.ceil(dots / columns);
-  const totalHeight = rows * DOT_PITCH;
-  const backingWidth = Math.max(1, Math.round(cssWidth * dpr));
-  if (backingWidth > MAX_CANVAS_DIMENSION)
-    throw new RangeError("The field backing width exceeds the canvas limit");
-  const tileHeight = getTileHeight(cssWidth, dpr, backingWidth);
-  const tileCount = Math.ceil(totalHeight / tileHeight);
-  const tileRows = tileHeight / DOT_PITCH;
-  const tiles = Array.from({ length: tileCount }, (_, index) => {
-    const top = index * tileHeight;
-    const cssHeight = Math.min(tileHeight, totalHeight - top);
-    const backingHeight = Math.round(cssHeight * dpr);
-    return {
-      index,
-      top,
-      cssHeight,
-      backingWidth,
-      backingHeight,
-      devicePixelArea: backingWidth * backingHeight,
-      dotStart: index * tileRows * columns,
-      dotCapacity: Math.ceil(cssHeight / DOT_PITCH) * columns,
-    };
-  });
-
-  return { cssWidth, dots, dpr, columns, rows, totalHeight, tileHeight, backingWidth, tiles };
-}
-
-function tileIntersectsViewport(
-  tile: FieldTile,
-  scrollTop: number,
-  viewportHeight: number,
-): boolean {
-  const tileBottom = tile.top + tile.cssHeight;
-  const viewportBottom = scrollTop + viewportHeight;
-  return tileBottom > scrollTop && tile.top < viewportBottom;
-}
-
-/** Select visible tiles first, then nearest off-screen tiles within one viewport per side and the live budget. */
-export function selectLiveTiles(
-  layout: FieldLayout,
-  scrollTop: number,
-  viewportHeight: number,
-  budget = LIVE_CANVAS_BUDGET,
-): LiveTileSelection {
-  if (!Number.isFinite(scrollTop)) throw new RangeError("Scroll position must be finite");
-  assertPositiveFinite(viewportHeight, "Viewport height");
-  assertPositiveFinite(budget, "Canvas budget");
-
-  const boundedScrollTop = Math.min(scrollTop, layout.totalHeight);
-  const visibleTiles = layout.tiles.filter((tile) =>
-    tileIntersectsViewport(tile, boundedScrollTop, viewportHeight),
-  );
-  const visibleIndices = visibleTiles.map((tile) => tile.index);
-  const selected = new Set(visibleIndices);
-  let selectedDevicePixelArea = visibleTiles.reduce((area, tile) => area + tile.devicePixelArea, 0);
-  const visibleDevicePixelArea = selectedDevicePixelArea;
-
-  if (selectedDevicePixelArea <= budget && visibleTiles.length > 0) {
-    const firstVisibleTile = visibleTiles[0];
-    const lastVisibleTile = visibleTiles[visibleTiles.length - 1];
-    if (firstVisibleTile === undefined || lastVisibleTile === undefined) {
-      return {
-        visibleIndices,
-        selectedIndices: [...selected].sort((left, right) => left - right),
-        visibleDevicePixelArea,
-        selectedDevicePixelArea,
-      };
-    }
-    const firstVisible = firstVisibleTile.index;
-    const lastVisible = lastVisibleTile.index;
-    const viewportBottom = boundedScrollTop + viewportHeight;
-    const below = layout.tiles
-      .slice(lastVisible + 1)
-      .filter((tile) => tile.top < viewportBottom + viewportHeight);
-    const above = layout.tiles
-      .slice(0, firstVisible)
-      .reverse()
-      .filter((tile) => tile.top + tile.cssHeight > boundedScrollTop - viewportHeight);
-
-    const candidates: FieldTile[] = [];
-    const candidateCount = Math.max(below.length, above.length);
-    for (let distance = 0; distance < candidateCount; distance += 1) {
-      const belowTile = below[distance];
-      const aboveTile = above[distance];
-      if (belowTile !== undefined) candidates.push(belowTile);
-      if (aboveTile !== undefined) candidates.push(aboveTile);
-    }
-
-    for (const tile of candidates) {
-      if (selectedDevicePixelArea + tile.devicePixelArea <= budget) {
-        selected.add(tile.index);
-        selectedDevicePixelArea += tile.devicePixelArea;
-      }
-    }
-  }
-
-  return {
-    visibleIndices,
-    selectedIndices: [...selected].sort((left, right) => left - right),
-    visibleDevicePixelArea,
-    selectedDevicePixelArea,
-  };
+  return { cssWidth, dots, columns, rows, totalHeight: rows * DOT_PITCH };
 }
 
 export const GIFT_BLOCK_MAX_CSS_HEIGHT = 300;
@@ -206,35 +50,99 @@ export function calculateGiftBlock(giftDots: number, maxColumns: number): GiftBl
   return { columns, rows, cssWidth: columns * DOT_PITCH, cssHeight };
 }
 
-/** Return the fractional dot ranges drawn by one tile. */
-export function getTileDotRanges(
-  tileStart: number,
-  tileCapacity: number,
+/**
+ * The field is drawn as a few bands, not one element or canvas per dot: runs of full rows are
+ * painted with a repeating CSS dot pattern, and a row where the gift or the fortune ends is
+ * drawn as segments. So the page holds a handful of elements whatever the fortune's size.
+ */
+export type DotColor = "gift" | "fortune";
+
+export type DotSegment =
+  /** Whole dots of one colour, side by side. */
+  | { kind: "dots"; color: DotColor; count: number }
+  /** One dot cell filled from the left: first the gift's share of the dot, then the fortune's. */
+  | { kind: "partial"; gift: number; fortune: number };
+
+export type DotBand =
+  /** Whole rows of one colour. */
+  | { kind: "rows"; color: DotColor; rows: number }
+  /** One row where the gift or the fortune ends. */
+  | { kind: "row"; segments: DotSegment[] };
+
+function rowSegments(
+  rowStart: number,
+  columns: number,
   giftDots: number,
   fortuneDots: number,
-): TileDotRanges {
-  if (![tileStart, tileCapacity, giftDots, fortuneDots].every(Number.isFinite)) {
-    throw new RangeError("Dot ranges must use finite numbers");
-  }
-  if (
-    tileStart < 0 ||
-    tileCapacity <= 0 ||
-    giftDots < 0 ||
-    fortuneDots < 0 ||
-    giftDots > fortuneDots
-  ) {
-    throw new RangeError("Dot ranges must be ordered and non-negative");
+): DotSegment[] {
+  const rowEnd = rowStart + columns;
+  const segments: DotSegment[] = [];
+  let position = rowStart;
+
+  const giftFullEnd = Math.min(Math.floor(giftDots), rowEnd);
+  if (giftFullEnd > position) {
+    segments.push({ kind: "dots", color: "gift", count: giftFullEnd - position });
+    position = giftFullEnd;
   }
 
-  const start = tileStart;
-  const end = tileStart + tileCapacity;
-  const giftStart = start;
-  const giftEnd = Math.max(start, Math.min(end, giftDots));
-  return {
-    start,
-    end: Math.min(end, fortuneDots),
-    giftStart,
-    giftEnd,
-    fortuneEnd: Math.min(end, fortuneDots),
-  };
+  if (position < rowEnd && giftDots > position) {
+    // The gift ends partway through this dot; the fortune may fill the rest of it.
+    const gift = giftDots - position;
+    const fortune = Math.min(1, fortuneDots - position) - gift;
+    segments.push({ kind: "partial", gift, fortune });
+    position += 1;
+  }
+
+  const fortuneFullEnd = Math.min(Math.floor(fortuneDots), rowEnd);
+  if (fortuneFullEnd > position) {
+    segments.push({ kind: "dots", color: "fortune", count: fortuneFullEnd - position });
+    position = fortuneFullEnd;
+  }
+
+  if (position < rowEnd && fortuneDots > position) {
+    segments.push({ kind: "partial", gift: 0, fortune: fortuneDots - position });
+  }
+  return segments;
+}
+
+/**
+ * Plan the bands for a field whose first `giftDots` dots are the gift, out of `fortuneDots`.
+ * Partial dots are filled from the left in proportion, at the gift's end and the fortune's end.
+ */
+export function planDotBands(columns: number, giftDots: number, fortuneDots: number): DotBand[] {
+  assertPositiveFinite(columns, "Columns");
+  assertPositiveFinite(fortuneDots, "Fortune dot count");
+  if (!Number.isFinite(giftDots) || giftDots < 0 || giftDots > fortuneDots)
+    throw new RangeError("The gift must be between zero and the fortune");
+
+  const bands: DotBand[] = [];
+  let row = 0;
+
+  const fullGiftRows = Math.floor(giftDots / columns);
+  if (fullGiftRows > 0) {
+    bands.push({ kind: "rows", color: "gift", rows: fullGiftRows });
+    row = fullGiftRows;
+  }
+
+  if (giftDots > row * columns) {
+    bands.push({
+      kind: "row",
+      segments: rowSegments(row * columns, columns, giftDots, fortuneDots),
+    });
+    row += 1;
+  }
+
+  const fullFortuneRows = Math.floor(fortuneDots / columns);
+  if (fullFortuneRows > row) {
+    bands.push({ kind: "rows", color: "fortune", rows: fullFortuneRows - row });
+    row = fullFortuneRows;
+  }
+
+  if (fortuneDots > row * columns) {
+    bands.push({
+      kind: "row",
+      segments: rowSegments(row * columns, columns, giftDots, fortuneDots),
+    });
+  }
+  return bands;
 }

@@ -3,133 +3,166 @@ import {
   calculateFieldLayout,
   calculateGiftBlock,
   DOT_PITCH,
+  type DotBand,
   GIFT_BLOCK_MAX_CSS_HEIGHT,
-  getTileDotRanges,
-  LIVE_CANVAS_BUDGET,
-  MAX_CANVAS_AREA,
-  MAX_CANVAS_DIMENSION,
-  selectLiveTiles,
+  planDotBands,
 } from "./field-layout.ts";
+
+/** Count the dots a plan draws, by colour, to check that nothing is lost or doubled. */
+function countDots(bands: DotBand[], columns: number) {
+  let gift = 0;
+  let fortune = 0;
+  let rows = 0;
+  for (const band of bands) {
+    if (band.kind === "rows") {
+      rows += band.rows;
+      if (band.color === "gift") gift += band.rows * columns;
+      else fortune += band.rows * columns;
+      continue;
+    }
+    rows += 1;
+    for (const segment of band.segments) {
+      if (segment.kind === "dots") {
+        if (segment.color === "gift") gift += segment.count;
+        else fortune += segment.count;
+      } else {
+        gift += segment.gift;
+        fortune += segment.fortune;
+      }
+    }
+  }
+  return { gift, fortune, rows };
+}
 
 describe("calculateFieldLayout", () => {
   it.each([
-    [360, 1, 4095],
-    [360, 2, 2046],
-    [360, 3, 1293],
-    [1200, 1, 3495],
-    [1200, 2, 873],
-    [1200, 3, 387],
-  ])("bounds 2,000,000 dots at %s CSS px and dpr %s", (width, dpr, expectedTileHeight) => {
-    const layout = calculateFieldLayout(width, 2_000_000, dpr);
-
-    expect(layout.columns).toBe(Math.floor(width / DOT_PITCH));
-    expect(layout.totalHeight).toBe(Math.ceil(2_000_000 / layout.columns) * DOT_PITCH);
-    expect(layout.tileHeight).toBe(expectedTileHeight);
-    expect(layout.tiles.length).toBe(Math.ceil(layout.totalHeight / expectedTileHeight));
-    for (const tile of layout.tiles) {
-      expect(tile.backingWidth).toBeLessThanOrEqual(MAX_CANVAS_DIMENSION);
-      expect(tile.backingHeight).toBeLessThanOrEqual(MAX_CANVAS_DIMENSION);
-      expect(tile.devicePixelArea).toBeLessThanOrEqual(MAX_CANVAS_AREA);
-    }
+    [360, 120],
+    [1200, 400],
+  ])("lays 2,000,000 dots across %s CSS px", (width, columns) => {
+    const layout = calculateFieldLayout(width, 2_000_000);
+    expect(layout.columns).toBe(columns);
+    expect(layout.rows).toBe(Math.ceil(2_000_000 / columns));
+    expect(layout.totalHeight).toBe(layout.rows * DOT_PITCH);
   });
 
   it("uses one column for widths below one pitch", () => {
-    const layout = calculateFieldLayout(2, 4, 1);
+    const layout = calculateFieldLayout(2, 4);
     expect(layout.columns).toBe(1);
     expect(layout.rows).toBe(4);
     expect(layout.totalHeight).toBe(12);
   });
 
-  it("rejects invalid widths, dot counts, and device pixel ratios", () => {
-    expect(() => calculateFieldLayout(0, 1, 1)).toThrow(RangeError);
-    expect(() => calculateFieldLayout(360, 0, 1)).toThrow(RangeError);
-    expect(() => calculateFieldLayout(360, 1, 0)).toThrow(RangeError);
-    expect(() => calculateFieldLayout(2000, 1, 3)).toThrow(RangeError);
+  it("rejects invalid widths and dot counts", () => {
+    expect(() => calculateFieldLayout(0, 1)).toThrow(RangeError);
+    expect(() => calculateFieldLayout(360, 0)).toThrow(RangeError);
   });
 });
 
-describe("selectLiveTiles", () => {
-  it("draws the visible tiles and adds nearby off-screen tiles within the live budget", () => {
-    const layout = calculateFieldLayout(360, 2_000_000, 3);
-    const selection = selectLiveTiles(layout, 5_000, 844);
-
-    expect(selection.visibleIndices.length).toBeGreaterThan(0);
-    expect(
-      selection.visibleIndices.every((index) => selection.selectedIndices.includes(index)),
-    ).toBe(true);
-    expect(selection.selectedIndices.length).toBeGreaterThan(selection.visibleIndices.length);
-    expect(selection.selectedDevicePixelArea).toBeLessThanOrEqual(LIVE_CANVAS_BUDGET);
-    expect(selection.selectedIndices.length).toBeLessThan(layout.tiles.length);
+describe("planDotBands", () => {
+  // Rows of 4 dots: [0, 4), [4, 8), [8, 12), ...
+  it("draws a gift inside one row with a partial dot, then the fortune", () => {
+    expect(planDotBands(4, 3.5, 20)).toEqual([
+      {
+        kind: "row",
+        segments: [
+          { kind: "dots", color: "gift", count: 3 },
+          { kind: "partial", gift: 0.5, fortune: 0.5 },
+        ],
+      },
+      { kind: "rows", color: "fortune", rows: 4 },
+    ]);
   });
 
-  it("draws every visible tile when visible tiles alone exceed the budget", () => {
-    const layout = calculateFieldLayout(1200, 2_000_000, 3);
-    const selection = selectLiveTiles(layout, 0, 3_000);
-
-    expect(selection.visibleIndices).toHaveLength(8);
-    expect(selection.visibleDevicePixelArea).toBeGreaterThan(LIVE_CANVAS_BUDGET);
-    expect(selection.selectedIndices).toEqual(selection.visibleIndices);
-    expect(selection.selectedDevicePixelArea).toBe(selection.visibleDevicePixelArea);
+  it("draws a gift spanning rows as full gift rows, then the row where it ends", () => {
+    expect(planDotBands(4, 9.25, 20)).toEqual([
+      { kind: "rows", color: "gift", rows: 2 },
+      {
+        kind: "row",
+        segments: [
+          { kind: "dots", color: "gift", count: 1 },
+          { kind: "partial", gift: 0.25, fortune: 0.75 },
+          { kind: "dots", color: "fortune", count: 2 },
+        ],
+      },
+      { kind: "rows", color: "fortune", rows: 2 },
+    ]);
   });
 
-  it("leaves all off-screen tiles unselected when no visible tile intersects the viewport", () => {
-    const layout = calculateFieldLayout(360, 100_000, 2);
-    expect(selectLiveTiles(layout, layout.totalHeight + 100, 800).selectedIndices).toEqual([]);
-    expect(selectLiveTiles(layout, -1_500, 800).selectedIndices).toEqual([]);
+  it("starts the fortune on a fresh row when the gift ends on a row boundary", () => {
+    expect(planDotBands(4, 8, 20)).toEqual([
+      { kind: "rows", color: "gift", rows: 2 },
+      { kind: "rows", color: "fortune", rows: 3 },
+    ]);
   });
 
-  it("treats a field partly below the viewport as visible", () => {
-    const layout = calculateFieldLayout(360, 100_000, 2);
-    const selection = selectLiveTiles(layout, -100, 800);
-    expect(selection.visibleIndices[0]).toBe(0);
+  it("supports a gift equal to the fortune, with a partial final dot", () => {
+    expect(planDotBands(4, 4.5, 4.5)).toEqual([
+      { kind: "rows", color: "gift", rows: 1 },
+      { kind: "row", segments: [{ kind: "partial", gift: 0.5, fortune: 0 }] },
+    ]);
   });
-});
 
-describe("getTileDotRanges", () => {
-  it("places a gift wholly inside one tile", () => {
-    expect(getTileDotRanges(0, 10, 3.5, 20)).toEqual({
-      start: 0,
-      end: 10,
-      giftStart: 0,
-      giftEnd: 3.5,
-      fortuneEnd: 10,
+  it("ends the fortune with a partial dot in its last row", () => {
+    expect(planDotBands(4, 2, 10.25)).toEqual([
+      {
+        kind: "row",
+        segments: [
+          { kind: "dots", color: "gift", count: 2 },
+          { kind: "dots", color: "fortune", count: 2 },
+        ],
+      },
+      { kind: "rows", color: "fortune", rows: 1 },
+      {
+        kind: "row",
+        segments: [
+          { kind: "dots", color: "fortune", count: 2 },
+          { kind: "partial", gift: 0, fortune: 0.25 },
+        ],
+      },
+    ]);
+  });
+
+  it("draws a gift under one dot as one partially filled dot", () => {
+    expect(planDotBands(4, 0.03, 4)[0]).toEqual({
+      kind: "row",
+      segments: [
+        { kind: "partial", gift: 0.03, fortune: 0.97 },
+        { kind: "dots", color: "fortune", count: 3 },
+      ],
     });
   });
 
-  it("finds the gift overlap across two tiles", () => {
-    expect(getTileDotRanges(0, 4, 6.5, 20)).toMatchObject({ giftStart: 0, giftEnd: 4 });
-    expect(getTileDotRanges(4, 4, 6.5, 20)).toMatchObject({ giftStart: 4, giftEnd: 6.5 });
+  it("handles the gift and the fortune ending in the same row", () => {
+    expect(planDotBands(4, 1.5, 2.75)).toEqual([
+      {
+        kind: "row",
+        segments: [
+          { kind: "dots", color: "gift", count: 1 },
+          { kind: "partial", gift: 0.5, fortune: 0.5 },
+          { kind: "partial", gift: 0, fortune: 0.75 },
+        ],
+      },
+    ]);
   });
 
-  it("finds the gift overlap in a third tile", () => {
-    expect(getTileDotRanges(0, 4, 9.25, 20)).toMatchObject({ giftStart: 0, giftEnd: 4 });
-    expect(getTileDotRanges(4, 4, 9.25, 20)).toMatchObject({ giftStart: 4, giftEnd: 8 });
-    expect(getTileDotRanges(8, 4, 9.25, 20)).toMatchObject({ giftStart: 8, giftEnd: 9.25 });
-  });
-
-  it("leaves the next tile unaccented when a gift ends on a tile boundary", () => {
-    expect(getTileDotRanges(0, 4, 4, 20).giftEnd).toBe(4);
-    expect(getTileDotRanges(4, 4, 4, 20).giftStart).toBe(4);
-    expect(getTileDotRanges(4, 4, 4, 20).giftEnd).toBe(4);
-  });
-
-  it("supports a gift equal to the fortune, including a partial final dot", () => {
-    const lastTile = getTileDotRanges(4, 4, 4.5, 4.5);
-    expect(lastTile).toEqual({ start: 4, end: 4.5, giftStart: 4, giftEnd: 4.5, fortuneEnd: 4.5 });
-  });
-
-  it("keeps the fortune's partial final dot in the last tile", () => {
-    expect(getTileDotRanges(4, 4, 2, 4.25)).toEqual({
-      start: 4,
-      end: 4.25,
-      giftStart: 4,
-      giftEnd: 4,
-      fortuneEnd: 4.25,
-    });
+  it.each([
+    [120, 117.647_058_823_529_4, 282_352.941_176_470_6],
+    [400, 117.647_058_823_529_4, 282_352.941_176_470_6],
+    [120, 1_176_470.588, 2_000_000],
+    [7, 3, 3],
+    [1, 0.4, 2.5],
+  ])("draws every dot once at %s columns (gift %s, fortune %s)", (columns, gift, fortune) => {
+    const bands = planDotBands(columns, gift, fortune);
+    const counted = countDots(bands, columns);
+    expect(counted.gift).toBeCloseTo(gift, 6);
+    expect(counted.gift + counted.fortune).toBeCloseTo(fortune, 6);
+    expect(counted.rows).toBe(Math.ceil(fortune / columns));
+    // A handful of elements, whatever the size: at most two whole-row bands and two ragged rows.
+    expect(bands.length).toBeLessThanOrEqual(4);
   });
 
   it("rejects a gift larger than the fortune", () => {
-    expect(() => getTileDotRanges(0, 4, 5, 4)).toThrow(RangeError);
+    expect(() => planDotBands(4, 5, 4)).toThrow(RangeError);
   });
 });
 

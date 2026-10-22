@@ -18,15 +18,14 @@ The product plan is recorded in [PROPOSAL.md](PROPOSAL.md); the build plan is th
 
 - Three amounts typed by the user: the gift, the giver's fortune, and their own net worth or yearly income. Amounts accept shorthand ("100M", "$2.4 billion"). Inputs widen to fit long figures.
 - The answer as numbers first: "The same share of your net worth is $21", with the exact share of the fortune. In income mode: "The same percentage of your yearly income is".
-- A true-scale dot field of the fortune with the gift at its real proportion, drawn in bounded canvas tiles.
+- A true-scale dot field of the fortune with the gift at its real proportion, painted as a few bands of a repeating CSS dot pattern.
+- "Walk the fortune": a 20-second constant-speed scroll through the field, stopped by any key, wheel, or touch; with reduced motion it jumps to the end.
 - A net worth of zero or less explains that the same share comes to nothing, and offers the income comparison.
 - The reverse: "If I gave 50, the same share of their fortune would be $141 million."
 - One currency per page, chosen from USD, CAD, AUD, EUR, GBP, INR, and JPY, with no conversion.
 - "Share this gift": a link in the URL fragment holding the gift, fortune, and currency, never the user's own figure. Opening such a link fills those three and asks for the reader's figure.
 
-**Planned for later PRs:**
-
-- "Walk the fortune", the optional control to scroll through the whole field, with reduced motion; the final accessibility pass.
+**Before launch:** capture the live Cloudflare beacon's payload on a shared link and record it in PRIVACY.md (launch readiness, issue #50).
 
 **Not planned:**
 
@@ -60,11 +59,12 @@ Full comparison in [PROPOSAL.md](PROPOSAL.md#existing-alternatives). In short:
 - 2026-10-22: The gift is drawn as its own near-square block of dots, at field size, when the block fits in 300 CSS px; larger gifts are shown only as the orange start of the field, with a note. Why: the gift's dots are already the first dots of the field, at the same scale. A separate full-size block for a big gift would be a second copy dozens of screens long ($100 billion against $85,000 is about 42 phone screens), and the reader would have to scroll through it before the fortune starts. This changes the brief (issue #50), which asked for the block across the whole range; the brief is amended to match.
 - 2026-10-22: Checkpoint after PR 1 (Opus): continue. With three cases from the news, the dot field made the scale felt better than Sacrifice Meter's bar ([verdict on #50](https://github.com/ajustinjames/project-100/issues/50#issuecomment-6353134066)).
 - 2026-10-22: PR 3 was built by Opus (`claude-opus-5-5`), continuing at the owner's request. Inputs widen to fit what's typed, because the checkpoint found long figures cut off on a phone. A share link writes amounts back into the inputs with comma grouping ("240,000,000,000"), which is exact and parses in every locale. The reverse amount is shown even when it exceeds the fortune: the sum is still the same share. Net worth and yearly income are kept as separate values, so switching modes never treats one as the other (review round 1, High finding); the income field starts empty.
+- 2026-10-22: PR 4 (Opus) paints the field with a repeating CSS dot pattern instead of the brief's canvas tiles. Measured in Chromium with 4x CPU throttling on a 2,000,000-dot field: canvas tiles gave long tasks of 200–1,000 ms while scrolling at the walk's speed, and still 50–60 ms per frame after drawing rows instead of dots and shrinking tiles to 1 Mpx, because handing canvases to the compositor costs time in proportion to their area. A plain page of pre-drawn canvases stalled the same way, so no canvas layout could meet the brief's 50 ms budget there. The CSS pattern gave no long tasks at all, scrolling or walking, at 1280 px (dpr 1 and 2) and 412 px (dpr 3), and draws the same 2 px dots on a 3 px pitch. It also makes the tile bounds and live budget unnecessary. The brief (#50) is amended to match before this PR merges (review round 1, Low finding).
 - 2026-10-22: The prototype uses a true-scale dot field. One dot equals the reader's net worth until the field would exceed 2,000,000 dots, then it equals the smallest power-of-ten multiple that keeps the field at or below that cap. Inter Variable and JetBrains Mono are self-hosted from latin subsets under SIL OFL 1.1. Nothing is stored. The URL-fragment share link (PR 3) carries the gift, fortune, and currency, and nothing else.
 
 ## Architecture
 
-Client-only static Vite page, written in plain TypeScript, HTML, and CSS. Pure functions parse and format amounts, validate the three fields, calculate the share and equivalent, and plan the dot field. Canvas tiles are drawn at runtime from the entered figures; each tile is bounded by device-pixel dimensions and area, with a live budget for off-screen tiles. The app has no storage and no app-specific service requests. The Share button builds a URL-fragment link (`src/core/share-link.ts`); the page reads a fragment on open but never writes one.
+Client-only static Vite page, written in plain TypeScript, HTML, and CSS. Pure functions parse and format amounts, validate the three fields, calculate the share and equivalent, and plan the dot field. The dot field is a few elements painted with a repeating CSS pattern (`planDotBands`), drawn at runtime from the entered figures. The app has no storage and no app-specific service requests. The Share button builds a URL-fragment link (`src/core/share-link.ts`); the page reads a fragment on open but never writes one.
 
 ## Dependencies
 
