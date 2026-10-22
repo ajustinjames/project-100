@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": null,
+  "slug": "killed-by-ea",
+  "name": "Killed by EA",
+  "status": "candidate",
+  "description": "A searchable graveyard of the studios, games' online services, and projects Electronic Arts has closed, retired, or cancelled, with dates, a source for every entry, and the shutdowns still to come.",
+  "problem": "When an EA studio closes or a game's online services are retired, the record is scattered across years of news posts; EA's own service-updates page no longer lists games, so players can't easily check what has gone dark, what is about to, or what came before.",
+  "category": "games",
+  "dates": {
+    "created": "2026-10-22",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": null
+  },
+  "dependencies": [],
+  "sharedPackages": [],
+  "privacy": "none",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
