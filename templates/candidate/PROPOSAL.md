@@ -25,15 +25,13 @@
 
 ## What this does better
 
-<!-- One or two concrete reasons someone would choose this version, as planned behavior Labs can check. Utility track: at least two checked advantages from docs/APP_ACCEPTANCE.md#3-research-the-survivors (no ads or tracking, no upload, no account, fewer steps, phone or keyboard use, accessibility, paid functionality free). If alternatives are already free, free alone is not an advantage. SEO, monetization, novelty alone, and use of AI don't count. -->
+<!-- One or two concrete reasons someone would choose this version, as planned behavior Labs can check. Utility track: at least one checked advantage, preferably two, from docs/APP_ACCEPTANCE.md#3-research-the-survivors (no ads or tracking, no upload, no account, fewer steps, phone or keyboard use, accessibility, paid functionality free). If alternatives are already free, free alone is not an advantage. SEO, monetization, novelty alone, and use of AI don't count. -->
 
 ## Likely scope and shape
 
 <!-- Client-only? Local storage? Any Cloudflare service? Rough size. Privacy class. -->
 
 ## Screen results
-
-<!-- One line each: pass/fail and why. -->
 
 <!-- One line each: which kill criteria were checked and why none applies (docs/APP_ACCEPTANCE.md#2-screen). -->
 
@@ -68,4 +66,4 @@ None.
 
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ...", "YYYY-MM-DD: Benched: ranked below the cut (total N/20)", or "YYYY-MM-DD: Rejected because ...". A benched candidate selected later gets a second dated line. -->
+<!-- Step 6, dated lines; the latest one is the candidate's state (docs/APP_ACCEPTANCE.md#6-select-or-reject): "YYYY-MM-DD: Selected for Labs because ...", "YYYY-MM-DD: Blocked: awaiting <approval kind> (<link>)", "YYYY-MM-DD: Benched: ranked below the cut (total N/20)", or "YYYY-MM-DD: Rejected because ...". Add a new line for each change; don't edit old ones. -->

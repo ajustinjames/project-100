@@ -49,7 +49,7 @@ Each generator produces **about 20 ideas in a single response**, as one list. On
 Both halves follow the same rules:
 
 - **Start from real material, not memory.** Build each idea from something that exists: a file format people already have (exports, logs, GPX, SRT, CSV, ChordPro, ICS), a paid tool's free-tier limits, a "what do you use for X" thread, a printed form or wall chart people use, a standard or notation, an association's how-to guide. Give one link you opened for each idea. Claude Code can't fetch Reddit, so prefer pages the Originator can open too.
-- **Spread by quota.** In each half: at least a third utility track; no more than three ideas in any one area; at least six different shapes. The areas are work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work; accessibility and daily-living aids; files people already have. The shapes are editors, viewers, trainers, references, simulations, trackers, calculators, planners, printables, and checkers. Include a few larger ideas where the problem calls for one.
+- **Spread by quota.** In each half: at least a third utility track; no more than three ideas in any one area; at least six different shapes. When the batch has an owner focus, the focus replaces the area list: name the sub-areas or audiences inside it, and put no more than three ideas in any one of them. The areas are work and trades; household and family logistics; learning and teaching; community, volunteer, and club organizing; hobbies, games, and crafts; travel and the outdoors; creative work; accessibility and daily-living aids; files people already have. The shapes are editors, viewers, trainers, references, simulations, trackers, calculators, planners, printables, and checkers. Include a few larger ideas where the problem calls for one.
 - **Sample the tails.** Tag each idea `typical` (an idea most generators would produce for that area) or `unusual`. At least a third must be `unusual`. When ideas still come out alike, draw [random seeds](#random-seeds) for the unusual ones.
 - **Calibrate on the [examples](#examples-of-ideas-that-would-pass), don't copy them.** No variants of the examples.
 
@@ -112,7 +112,7 @@ Open every page you link and check that it says what you claim; never cite a sou
 - **What this app would do better.** One or two concrete reasons someone would choose it, written as planned behavior that Labs can check. Turn adjectives like "simpler" into steps, times, or features. Don't invent shortcomings in competitors.
 - **Shape and escalations.** Whether it runs in the browser with local data, its rough size, and every [escalation](AI_ROLES.md#escalation) it would trigger. If it keeps text or files the user supplies, say what is kept and where. If that stays on the device and the app doesn't ask for personal details, it is `local-only` ([PRIVACY_AND_DATA.md](PRIVACY_AND_DATA.md#data-classification)).
 
-**Utility track:** name the audience plainly ("people who rent out a holiday flat"), not "everyone". Recurrence needs no evidence when the task obviously recurs. The advantage must include **at least two** of these, each checked against the strongest free alternatives you opened: no ads or tracking; no upload (works offline or on-device); no account or install; fewer steps or less time to the result; a good phone or keyboard experience; accessible controls; useful functionality that the alternatives charge for.
+**Utility track:** name the audience plainly ("people who rent out a holiday flat"), not "everyone". Recurrence needs no evidence when the task obviously recurs. The advantage must include **at least one** of these, checked against the strongest free alternatives you opened, and preferably two: no ads or tracking; no upload (works offline or on-device); no account or install; fewer steps or less time to the result; a good phone or keyboard experience; accessible controls; useful functionality that the alternatives charge for.
 
 **Niche track:** say who exactly has the problem, how often, and what they do today, and link public evidence that it recurs (forum threads, repeated questions, guides describing a workaround). Don't copy people's personal details.
 
@@ -166,17 +166,21 @@ In the Critique section of `PROPOSAL.md`, link the critique, copy its scores, an
 
 If the Critic recommends **revise**, make the revision (or adopt its "strongest version") once, and have the Critic re-score the revised proposal. That is the only revise round. After it, decide on the scores you have.
 
+Scores belong to the proposal version the Critic reviewed. Any other material change to the proposal (audience, scope, track, or the claimed advantage) also needs a re-score, and uses the same one round. If that round is already used, bench the candidate; a later batch re-scores it before it can be selected.
+
 Then decide every candidate in the batch together:
 
 - **Reject** a candidate if a Critical finding stands, or if its total score is below 10 (out of 20), or if any score is 1. Set `status` to `"rejected"` and `rejection` to `{ "date": "YYYY-MM-DD", "reason": "<one sentence>" }`, and write the reason under Decision.
-- **Select** the N candidates with the highest totals among the rest. Under Decision, write why it was chosen and which findings shaped it.
+- **Select** up to N candidates with the highest totals among the rest. If fewer than N qualify, select those and report the shortfall; don't lower the bar. Under Decision, write why it was chosen and which findings shaped it.
 - **Bench** the others. They keep status `candidate` and are eligible for a later batch's selection without a new critique, unless the proposal changes materially. Under Decision, write "Benched: ranked below the cut", with the date.
 
-Prefer candidates that need no escalation when totals tie. Merge every candidate PR.
+Break ties in this order: needs no escalation; higher Usefulness; higher Advantage; then the Originator's judgment, with the reason under Decision. Merge every candidate PR.
+
+A candidate's state is its **latest** dated Decision line: `Selected for Labs`, `Blocked: awaiting <approval kind> (<link>)`, `Benched`, or `Rejected`. A selected candidate that needs an escalation gets a `Blocked` line when the approval request opens, and stops counting toward the batch's N, so the next-ranked candidate can be selected in its place. Once its approval is recorded, add a new `Selected for Labs` line and promote it; it counts toward the batch in which it is promoted.
 
 Dismissing a Critical finding needs the Critic's explicit acceptance in a PR comment (silence is not acceptance), linked in `PROPOSAL.md`. If the Critic still objects, follow [Disagreements](AI_ROLES.md#disagreements-between-agents), and don't promote until it is resolved in favor of advancing.
 
-At the start of a batch, benched candidates compete with the new ones for selection: rank them on their recorded scores.
+At the start of a batch, benched candidates (latest Decision line `Benched`) compete with the new ones for selection: rank them on their recorded scores. Blocked candidates don't compete; they wait for their approval.
 
 ## Gate 3: Entering Labs
 

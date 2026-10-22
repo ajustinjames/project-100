@@ -76,7 +76,7 @@ The rule is about advice and claims, not whole areas of life. These are **not** 
 - arithmetic the user drives, with no recommendation: a loan amortization table, splitting a bill, a savings-goal schedule
 - timers, logs, and reminders the user sets up: an interval timer for exercise, a reminder at times the user enters, a habit tracker
 - displaying, converting, or reorganizing the user's own documents and files, including for accessibility
-- reference material copied from an authoritative published source and linked to it (unit tables, standard sizes), with no interpretation
+- low-stakes reference material copied from an authoritative published source and linked to it (unit tables, paper and screw sizes, needle sizes), with no interpretation. This never covers health, medicine, money, law, or safety references (dosages, clinical reference ranges, tax rates, load or exposure limits), however well sourced.
 
 These remain sensitive and need approval: anything that tells a person what they should do about their health, money, legal position, or safety; anything that interprets symptoms, results, or rules for them; and anything about political candidates, parties, or elections. Escalate a case these lists don't cover.
 

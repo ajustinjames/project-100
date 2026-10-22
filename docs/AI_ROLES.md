@@ -67,7 +67,7 @@ codex exec -m gpt-6-luna -c model_reasoning_effort='"max"' -s workspace-write "<
 
 **Maintenance:** Sol handles it. Routine dependency updates that pass CI need no further review. Other maintenance PRs by Sol are reviewed by a separate session (Luna by default, or Opus for security- or privacy-relevant changes). Non-trivial fixes go to Luna, and archive questions go to Opus. If Sol struggles to maintain an app, flag the app as too complex: it is failing the [maintainability test](PROJECT_CHARTER.md#maintainability-test).
 
-**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds. If the last round leaves only Medium or Low findings with a clear fix, the author may make that fix and Opus verifies it as final Reviewer instead of opening a third round: Opus runs the reviewer's failing inputs against the fix, and records the check and its result on the PR. Anything else left after two rounds, including any unresolved High or Critical finding, follows [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it becomes a [disagreement](#disagreements-between-agents) for Astra to arbitrate.
+**Handoff limits:** each author-and-reviewer pair gets at most two review-and-fix rounds. If the last round leaves only Medium or Low findings with a clear fix, the author may make that fix and Opus verifies it as final Reviewer instead of opening a third round: Opus runs the reviewer's failing inputs against the fix, and records the check and its result on the PR. Anything else left after two rounds, including any unresolved High or Critical finding, follows [When stuck](#when-stuck). Opus decides which findings matter, but if Opus dismisses a reviewer's High or Critical finding and the reviewer still objects, it becomes a [disagreement](#disagreements-between-agents) for Astra to arbitrate. These limits cover briefs, build PRs, and other reviews. Candidate critiques follow [APP_ACCEPTANCE step 6](APP_ACCEPTANCE.md#6-select-or-reject) instead: one revise round, a standing High finding lowers the score rather than blocking, and only a dismissed Critical finding that the Critic still disputes becomes a disagreement.
 
 ## Decision rights
 
@@ -88,7 +88,7 @@ Get explicit owner approval **before** implementing any of these. Use the "Owner
 
 | Trigger | Approval kind |
 |---|---|
-| Anything near medicine, health, politics, elections, misinformation-sensitive, or other high-stakes factual domains | `sensitive-subject` |
+| Anything near medicine, health, politics, elections, misinformation-sensitive, or other high-stakes factual domains ([the charter](PROJECT_CHARTER.md#sensitive-subjects) lists what does and doesn't count) | `sensitive-subject` |
 | A third-party API becoming a meaningful dependency | `external-api` |
 | Handling any personal data | `personal-data` |
 | Accounts or login | `accounts` |
