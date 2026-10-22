@@ -20,7 +20,7 @@ People who read about a large donation and want to know what it amounts to: news
 
 One page, three numbers, typed by the user: the gift, the giver's fortune, and your own net worth or, in income mode, your yearly income.
 
-1. **The answer first, as numbers.** One large sentence: "For you, that's like giving **$21**." The exact share of the fortune beneath it. The answer never depends on the drawing being visible.
+1. **The answer first, as numbers.** One large sentence: "The same share of your net worth is **$21**." The exact share of the fortune beneath it. The answer never depends on the drawing being visible.
 2. **True scale, in support.** The fortune drawn as a long scrolling bar, with the gift as a slice in it at its real proportion, never widened to a minimum. Your equivalent is drawn alongside at the same proportion of your own figure. When the gift's slice is under a pixel, the page says so in words ("the gift is 1/20,000 of their fortune: to show it as one pixel, the bar would be 20,000 pixels long, about 25 phone screens"), and an optional "walk the fortune" control scrolls the whole length to the slice.
 3. **The reverse.** "To give the same share as you giving $500, they would have to give $2.4B."
 4. **Same percentage of your yearly income.** A second, explicitly labelled illustration for people whose net worth is zero or negative, where a share of it means nothing. It is worded as "the same percentage of your yearly income", never as an equal sacrifice, because a share of wealth and a share of income are different measures. Net worth stays the main comparison.
@@ -78,7 +78,7 @@ Also: no donor list, so nothing goes out of date and no figures about named peop
 
 ## Open questions
 
-- Currency: is one currency (no conversion) enough for the prototype? Proposed: yes; the arithmetic doesn't depend on the currency, and the symbol can be chosen.
+- Currency: settled after critique. All amounts are entered in one currency, chosen once for the whole page and labelled on every field; there is no conversion. Mixing currencies would give a wrong share.
 - How long should the "walk the fortune" scroll be on a phone? Proposed: decide on the prototype; the numeric answer doesn't depend on it.
 
 ## Escalations needed
@@ -94,6 +94,7 @@ Round 1: [Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajusti
 | Round | Usefulness | Advantage | Feasibility | Upkeep | Total |
 |---|---|---|---|---|---|
 | 1 | 3 | 2 | 4 | 4 | 13/20 |
+| 2 (after revision) | 3 | 3 | 4 | 4 | 14/20 |
 
 | Severity | Finding | Response |
 |---|---|---|
@@ -104,6 +105,19 @@ Round 1: [Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajusti
 
 The owner also set a design boundary after round 1: none of Sacrifice Meter's features (see Proposed solution). That removed the everyday-price comparison.
 
+Round 2: [Re-score by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/46#issuecomment-6339658011), recommending advance. It found the High, the second Medium, and the Low resolved. It marked the first Medium partly resolved, because neither page opened for the Critic; that stays a verification limit, and the case doesn't rest on it alone. It raised two new findings:
+
+| Severity | Finding | Response |
+|---|---|---|
+| Medium | Gift and fortune must be entered in the same currency; a selectable symbol alone would allow a wrong share. | Accepted. One currency for the whole page, labelled on every field, no conversion (Open questions). |
+| Low | Headline "that's like giving $21" is less precise than the explanation. | Accepted. The headline is now "The same share of your net worth is $21". |
+
+Neither change alters the audience, scope, track, or claimed advantage, so no further re-score is needed.
+
 ## Decision
 
 <!-- Step 6, dated lines; the latest one is the candidate's state (docs/APP_ACCEPTANCE.md#6-select-or-reject): "YYYY-MM-DD: Selected for Labs because ...", "YYYY-MM-DD: Blocked: awaiting <approval kind> (<link>)", "YYYY-MM-DD: Benched: ranked below the cut (total N/20)", or "YYYY-MM-DD: Rejected because ...". Add a new line for each change; don't edit old ones. -->
+
+2026-10-22: Selected for Labs because it scored 14/20 after the revise round with no Critical finding, it is the only eligible candidate (no benched candidates are waiting), and the critique shaped it: net worth leads, income is a labelled illustration, the numeric answer never depends on the drawing, and one currency per page.
+
+2026-10-22: Blocked: awaiting sensitive-subject ([#47](https://github.com/ajustinjames/project-100/issues/47))
