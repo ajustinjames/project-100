@@ -520,13 +520,22 @@ select {
 }
 
 /*
- * Forced colours (Windows contrast themes): the dots keep their pattern but take the user's
- * palette, with the gift in the highlight colour so it stays distinct from the fortune.
+ * Forced colours (Windows contrast themes): only the user's two main colours are safe to rely on,
+ * so the gift is drawn inverted: background-coloured dots on a text-coloured band, against the
+ * fortune's text-coloured dots on the background. That holds the brief's 3:1 in every palette.
  */
 @media (forced-colors: active) {
   :root {
-    --gift-dot: Highlight;
+    --gift-dot: Canvas;
     --fortune-dot: CanvasText;
+  }
+
+  .dots-gift {
+    background-color: CanvasText;
+  }
+
+  .dot-part-gift {
+    background: CanvasText;
   }
 
   .field-key-dot {
@@ -535,7 +544,7 @@ select {
   }
 
   .gift-block {
-    border-left-color: Highlight;
+    border-left-color: CanvasText;
   }
 }
 
