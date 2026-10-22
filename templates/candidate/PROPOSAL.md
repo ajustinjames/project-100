@@ -2,11 +2,13 @@
 
 <!-- Keep it short. Follow the workflow in docs/APP_ACCEPTANCE.md (steps 4 to 6). Link evidence, and only link pages you have opened and checked. -->
 
-**Idea source:** <!-- Originator or Idea generator, with the model (docs/APP_ACCEPTANCE.md#1-generate-ideas). -->
+**Idea source:** <!-- Originator or Idea generator, with the model, and whether it was tagged typical or unusual (docs/APP_ACCEPTANCE.md#1-generate-ideas). -->
+
+**Track:** <!-- utility or niche (docs/APP_ACCEPTANCE.md#two-tracks). -->
 
 ## Problem
 
-<!-- The recurring problem in plain language: how often it happens, how painful it is, and what people do about it today. Link evidence that it recurs. -->
+<!-- The task in plain language and what people do about it today. Niche track: how often it happens, with linked evidence that it recurs. Utility track: evidence is optional when the task obviously recurs. -->
 
 ## Audience
 
@@ -23,7 +25,7 @@
 
 ## What this does better
 
-<!-- One or two concrete reasons someone would choose this version: execution, thoughtful design and polish, easier access, or useful paid functionality offered free. No exclusive feature is required. Describe planned behavior and how Labs will check the benefit. If alternatives are already free, free alone is not an advantage. SEO, monetization, novelty alone, and use of AI don't count. -->
+<!-- One or two concrete reasons someone would choose this version, as planned behavior Labs can check. Utility track: at least one checked advantage, preferably two, from docs/APP_ACCEPTANCE.md#3-research-the-survivors (no ads or tracking, no upload, no account, fewer steps, phone or keyboard use, accessibility, paid functionality free). If alternatives are already free, free alone is not an advantage. SEO, monetization, novelty alone, and use of AI don't count. -->
 
 ## Likely scope and shape
 
@@ -31,16 +33,15 @@
 
 ## Screen results
 
-<!-- One line each: pass/fail and why. -->
+<!-- One line each: which kill criteria were checked and why none applies (docs/APP_ACCEPTANCE.md#2-screen). -->
 
-- Useful and specific:
-- Credible practical value despite existing alternatives:
-- Value comes from the software itself, not a thin wrapper:
-- Not justified by SEO, monetization, novelty alone, or use of AI:
+- Useful task, used more than once:
+- Value comes from the software itself, not an API or AI model:
+- Not for search traffic, ads, novelty alone, or use of AI:
+- No ongoing human curation or moderation:
 - Runs within baseline budget:
 - No sensitive subject:
 - No accounts / personal data / UGC / external API (or approval requested):
-- Maintainable by a weaker model:
 
 ## Risks
 
@@ -54,11 +55,15 @@ None.
 
 ## Critique
 
-<!-- Step 6: link the Critic's PR comment, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical or High finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. -->
+<!-- Step 6: link the Critic's PR comment, copy its scores, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. If there was a revise round, give both sets of scores. -->
+
+| Usefulness | Advantage | Feasibility | Upkeep | Total |
+|---|---|---|---|---|
+| | | | | /20 |
 
 | Severity | Finding | Response |
 |---|---|---|
 
 ## Decision
 
-<!-- Step 6, one dated line: "YYYY-MM-DD: Selected for Labs because ..." or "YYYY-MM-DD: Rejected because ..." -->
+<!-- Step 6, dated lines; the latest one is the candidate's state (docs/APP_ACCEPTANCE.md#6-select-or-reject): "YYYY-MM-DD: Selected for Labs because ...", "YYYY-MM-DD: Blocked: awaiting <approval kind> (<link>)", "YYYY-MM-DD: Benched: ranked below the cut (total N/20)", or "YYYY-MM-DD: Rejected because ...". Add a new line for each change; don't edit old ones. -->

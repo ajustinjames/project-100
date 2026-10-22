@@ -47,8 +47,9 @@ pnpm p100 promote <slug>              # turn a candidate into a Labs app
 | Document | Covers |
 |---|---|
 | [Project Charter](docs/PROJECT_CHARTER.md) | Mission, principles, and hard rules (canonical) |
-| [App Acceptance](docs/APP_ACCEPTANCE.md) | The idea-to-Labs workflow (generate, screen, research, critique, promote), launch readiness, and the launch packet |
+| [App Acceptance](docs/APP_ACCEPTANCE.md) | The idea-to-Labs workflow (two tracks; generate, screen and rank, research, score, select, promote), launch readiness, and the launch packet |
 | [AI Roles](docs/AI_ROLES.md) | Roles, decision rights, escalation, disagreements, and getting unstuck |
+| [Batches](docs/BATCHES.md) | The funnel counts for each screening batch |
 | [Lifecycle](docs/LIFECYCLE.md) | Statuses, transitions, Labs, launching, archiving, and revival |
 | [Architecture](docs/ARCHITECTURE.md) | Repository layout, toolchain, app anatomy, `app.json`, registry, and SEO |
 | [Cloudflare](docs/CLOUDFLARE.md) | Deployment model, routing, bindings, env vars, analytics, robots, and sitemap |
