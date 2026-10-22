@@ -11,3 +11,5 @@ coverage/
 .DS_Store
 .p100.lock
 apps/size-sieve/.feasibility/
+# Private Gate 1 idea ledger (docs/APP_ACCEPTANCE.md#the-idea-ledger). Never commit it.
+.ideas/

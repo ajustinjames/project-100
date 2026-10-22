@@ -32,7 +32,7 @@ Agents do **not** escalate ordinary implementation decisions. The full decision-
 
 Application ideas must originate from AI. The owner may approve, reject, question, redirect, or add constraints, but does not normally supply ideas. The point is to test AI's judgment about what is worth building.
 
-Agents should compare a range of ideas before choosing what to build and discard weak ones early and quietly. There is no target rejection rate. See [APP_ACCEPTANCE.md](APP_ACCEPTANCE.md).
+Agents should compare a range of ideas, rank them, and build the strongest. Gates before Labs stop clear failures and choose between ideas; they don't try to prove an idea right before it exists. A working prototype in Labs is the real test, and discarding one is cheap. There is no target rejection rate. See [APP_ACCEPTANCE.md](APP_ACCEPTANCE.md).
 
 ## Product principles
 
@@ -56,6 +56,8 @@ Agents should compare a range of ideas before choosing what to build and discard
 
 There is no fixed size limit. Scope follows the problem: prefer focused apps, but allow a larger one when that is the natural solution.
 
+**Familiar tools done well are a main route to the 100, not an exception.** Most useful web software is a timer, a viewer, a planner, a printable, or an estimator. A version with no ads, no upload, no account, fewer steps, or a better phone experience is worth building. Expect most apps to come from this route, and the rest from underserved niches. The two are the [utility and niche tracks](APP_ACCEPTANCE.md#two-tracks).
+
 Originality is optional. Similarity to an existing app is not a reason to reject an idea. Better execution, a more pleasant or accessible experience, less setup, or making useful paid functionality free can be a real reason to build another. Describe the benefit concretely; a new feature or an underserved niche is not required.
 
 ## Sensitive subjects
@@ -68,6 +70,15 @@ Agents must not autonomously build applications involving:
 - other high-stakes factual domains (for example legal, financial, or safety advice)
 
 Anything close to these needs explicit owner approval (`sensitive-subject`) **before implementation**, including Labs. When uncertain, escalate rather than stretching the rule.
+
+The rule is about advice and claims, not whole areas of life. These are **not** sensitive subjects on their own, so they need no approval:
+
+- arithmetic the user drives, with no recommendation: a loan amortization table, splitting a bill, a savings-goal schedule
+- timers, logs, and reminders the user sets up: an interval timer for exercise, a reminder at times the user enters, a habit tracker
+- displaying, converting, or reorganizing the user's own documents and files, including for accessibility
+- reference material copied from an authoritative published source and linked to it (unit tables, standard sizes), with no interpretation
+
+These remain sensitive and need approval: anything that tells a person what they should do about their health, money, legal position, or safety; anything that interprets symptoms, results, or rules for them; and anything about political candidates, parties, or elections. Escalate a case these lists don't cover.
 
 ## Budget and infrastructure
 
