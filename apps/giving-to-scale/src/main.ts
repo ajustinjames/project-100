@@ -55,6 +55,8 @@ const shareView = createShareView({
 const locale = navigator.language || "en-US";
 const textInputs = [giftInput, fortuneInput, unitInput, reverseInput];
 let mode: Mode = "net-worth";
+/** Net worth and yearly income are different figures, so each mode keeps its own. */
+const unitValues: Record<Mode, string> = { "net-worth": "", income: "" };
 let currency: Currency = "USD";
 /** True after the page opened from a share link; the answer area then prompts for the reader's figure. */
 let openedFromLink = false;
@@ -190,7 +192,9 @@ function render(): void {
 }
 
 function setMode(nextMode: Mode): void {
+  unitValues[mode] = unitInput.value;
   mode = nextMode;
+  unitInput.value = unitValues[mode];
   const text = modeText[mode];
   unitLabelText.textContent = text.unitLabel;
   unitInput.placeholder = text.unitPlaceholder;
