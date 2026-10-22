@@ -24,14 +24,18 @@ People who follow games history: enthusiasts, preservationists, and writers who 
 
 ## Proposed solution
 
-A single fast page with the feel of Killed by Google, as an **archive with a stated cutoff date** ("Record up to 22 October 2026"). It doesn't promise to track new events.
+A single fast page with the feel of Killed by Google, as an **archive with a fixed cutoff date, 22 October 2026** ("Record up to 22 October 2026"). Events dated after the cutoff are left out, even when EA's pages already list them. It doesn't promise to track new events.
 
 1. **Four kinds of entry,** filterable: *studio* (closed, or merged, shown separately and never counted as closed), *online service* (a game's servers retired, by platform), *cancelled* (an announced game that was cancelled), and *product* (a service or product EA ended).
-2. **Each entry** gives its name, kind, dates (or "before 2013" where EA gives no date), its age at the end, one neutral past-tense sentence, the platforms where relevant, and **at least one source link plus an archived copy** (Wayback Machine), so it still checks out if the source moves.
+2. **Each entry** gives its name, kind, dates, its age at the end (left out when there is no meaningful start date, as with most cancellations), one neutral past-tense sentence, the platforms where relevant, and **at least one source link plus an archived copy** (Wayback Machine), so it still checks out if the source moves.
 3. **One timeline:** newest first, with search over names and series, and filters for kind, year or decade, and platform. Filters live in the URL so a view can be shared ("everything EA retired in 2025").
-4. **Online services from EA's own lists,** taken once at the cutoff from the three A–Z pages, with each entry linking back to the page it came from. EA Play catalog removals are left out, because a game leaving a subscription isn't a shutdown. The page says so.
+4. **Online services from EA's own lists,** taken once at the cutoff from the three A–Z pages, with each entry linking back to the page it came from. The rules for what goes in:
+   - *Online service* means a game's online play or online services ended on a platform.
+   - *Feature closure* is its own label, for a partial change where other online features stayed up (for example DiRT Rally 2.0's website and Racenet Clubs).
+   - Left out: EA Play and other catalog removals, and demo or store removals (for example a demo removed from the EA app), because a game leaving a store or subscription isn't a shutdown. The page states these rules.
 5. **Summary counts** by kind and year, as plain numbers with an optional small bar chart.
-6. **Only events on or before the cutoff.** There are no countdowns and no "is it still up?" claims; the page points players to EA's own lists for current status.
+6. **Unknown dates.** Where EA gives only "Pre 2013", or a source gives only a year, the entry shows exactly that ("before 2013", "2004"). Year filters place it in its known year, or in a separate "before 2013, date unknown" group, and the counts show that group separately rather than guessing.
+7. **Only events on or before the cutoff.** There are no countdowns and no "is it still up?" claims; the page points players to EA's own lists for current status.
 
 The data is one versioned JSON file, validated by tests: required fields, real dates, end after start, a source and archived copy on every entry, an allowed status, and no duplicates.
 
@@ -45,14 +49,16 @@ Not included: no logos, box art, or screenshots, because they're EA's and its st
 | EA Graveyard, published as Game Studio Graveyard (the strongest for studios) | [wiredlain.com](https://wiredlain.com/), [repo](https://github.com/Somesingman/ea-graveyard) | Active (last pushed 2026-01-26), MIT-licensed, studio logos and statuses (closed, revived, declining), search, and a link check in CI. | Studios only. Now includes studios from other publishers (Clover, Ensemble, Lionhead). Loads a third-party script from a Netlify host. Its README says it's "still under construction". |
 | Shelf-Life (found by the Critic) | [gameshelflife.com](https://gameshelflife.com/publishers/electronic-arts/) | Ad-free, sourced shutdown dates, including an upcoming one. | Six EA entries, and it says it "isn't a full history"; no studios. |
 | Wikipedia | [List of acquisitions by EA](https://en.wikipedia.org/wiki/List_of_acquisitions_by_Electronic_Arts) | Thorough and referenced, with defunct and merged acquisitions marked. | A table of acquisitions, not a timeline; many closure years missing; no services. |
+| EA server lifespan spreadsheet (found by the Critic) | [Google Sheet](https://docs.google.com/spreadsheets/d/1bmODuO3efhIab0zZhAcI1b_BeqTpu6MjmVfHs_p3_mI/edit) | About 157 games with platforms, release and closure dates, and days online, including closures before 2013 that EA's pages leave undated. | A spreadsheet: no search beyond the sheet's own tools, no sources per row, and no studios, cancellations, or products. |
+| Games That Weren't (found by the Critic) | [gamesthatwerent.com](https://www.gamesthatwerent.com/cancelled-games/) | A long-running archive of cancelled and unreleased games, since 1999, indexed by platform. | Cancellations only, with no publisher filter, so EA's cancellations can't be listed together. |
 | Killed by EA (Huskynarr) | [repo](https://github.com/Huskynarr/killed-by-electronicarts) | The same idea, MIT-licensed. | Last pushed 2022-09-18. Its homepage (killedbyea.info) didn't connect on 2026-10-22. 12 studio entries with the opening and closing dates swapped. Abandoned. |
 
-The Critic also found a community spreadsheet of EA shutdowns (a Google Sheet). I couldn't open it as a page, so I don't rely on it. I read the wiredlain HTML, the Huskynarr data, and both repositories' metadata through the GitHub API on 2026-10-22.
+I read the spreadsheet through its CSV export, and the wiredlain HTML, the Huskynarr data, and both repositories' metadata through the GitHub API on 2026-10-22.
 
 ## What this does better
 
 1. **One timeline across kinds.** Studios, server retirements, cancellations, and products in one dated, searchable list. EA covers only servers and EA Graveyard only studios. Checkable: filtering to 2013 shows both the studio closures and the server retirements of that year, each with a source.
-2. **EA's server list made searchable by year, with subscription removals separated.** Checkable: filtering to *online service* and a year gives every retirement EA lists for that year, across all three of EA's pages, with no EA Play removals, and each entry links back to EA's page.
+2. **EA's server list made searchable by year, under stated rules.** Checkable: filtering to *online service* and a year gives every entry on EA's three pages for that year that meets the inclusion rules above (online play or services ended), with feature closures labelled separately and catalog, demo, and store removals left out. Each entry links back to EA's page.
 
 Also: no ads and no third-party scripts beyond the project's standard analytics, works offline once loaded, and every source has an archived copy.
 
@@ -84,11 +90,11 @@ Also: no ads and no third-party scripts beyond the project's standard analytics,
 ## Open questions
 
 - Keep the name "Killed by EA", or use a more neutral one such as "EA Graveyard"? Proposed: keep it, and the owner confirms it with the approval.
-- Cutoff date: proposed as the date the dataset is finished in Labs, shown on the page.
+- Cutoff date: settled after the re-score as 22 October 2026, fixed before the dataset is assembled.
 
 ## Escalations needed
 
-- `sensitive-subject`: every entry is a factual claim about a named company, under a critical title. Approval will be requested only if the candidate is selected.
+- `sensitive-subject`: every entry is a factual claim about a named company, under a critical title. Requested in [#53](https://github.com/ajustinjames/project-100/issues/53).
 
 ## Critique
 
@@ -99,6 +105,7 @@ Round 1: [Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajusti
 | Round | Usefulness | Advantage | Feasibility | Upkeep | Total |
 |---|---|---|---|---|---|
 | 1 | 3 | 2 | 3 | 1 | 9/20 |
+| 2 (after revision) | 3 | 3 | 3 | 4 | 13/20 |
 
 | Severity | Finding | Response |
 |---|---|---|
@@ -108,6 +115,23 @@ Round 1: [Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajusti
 | Medium | The data model must separate server retirement from catalog removal, closure from merger, and state completeness limits. | Accepted. Catalog removals are left out and the page says so, merged is its own status, "before 2013" is shown where EA gives no date, and the cutoff is stated. |
 | Low | Some cited pages couldn't be checked by the Critic (GameRant, TheGamer, wiredlain). | I opened GameRant and TheGamer on 2026-10-22. The GameRant link is removed, since EA's own lists replace it. TheGamer stays as an example of a listicle. wiredlain's scope is confirmed from its repository. |
 
+Round 2: [Re-score by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/51#issuecomment-6353144957), recommending **advance**. The Critic explicitly accepts that the revision resolves the Critical finding, and found the High resolved. It marked both Mediums and the Low partly resolved, and raised these:
+
+| Severity | Finding | Response |
+|---|---|---|
+| Medium (round 1, partly resolved) | The spreadsheet deserves a direct comparison. | Accepted. I opened it through its CSV export (about 157 games with release and closure dates) and added it to the table. |
+| Medium (round 1, partly resolved) | Event distinctions and completeness limits. | Covered by the three new findings below. |
+| Low (round 1, partly resolved) | TheGamer and wiredlain couldn't be read by the Critic. | TheGamer opened for me on 2026-10-22, and wiredlain's scope is confirmed from its repository. No claim rests on them alone. |
+| High | "Every retirement EA lists for that year" is too broad: EA's pages include feature closures (DiRT Rally 2.0's website and Racenet Clubs) and demo removals. | Accepted. Inclusion rules are now stated (Proposed solution, item 4): online play or services ended counts; partial changes get a *feature closure* label; catalog, demo, and store removals are left out. The advantage claim is narrowed to those rules. |
+| Medium | The date model needs an unknown-date path. | Accepted. Item 6: unknown dates are shown as given, age is left out without a meaningful start date, and undated entries are grouped and counted separately. |
+| Medium | Fix the cutoff before assembling the dataset. | Accepted. The cutoff is 22 October 2026, and later events on EA's pages are left out. |
+
+The Critic also found Games That Weren't, which is now in the table. These responses clarify rules and narrow a claim, without changing the audience, scope, track, or kind of advantage, so no further re-score is needed (and the one round is used). The build brief carries the classification, unknown-date, and cutoff rules, and gates the prototype on a hand-checked sample.
+
 ## Decision
 
 <!-- Step 6, dated lines; the latest one is the candidate's state (docs/APP_ACCEPTANCE.md#6-select-or-reject): "YYYY-MM-DD: Selected for Labs because ...", "YYYY-MM-DD: Blocked: awaiting <approval kind> (<link>)", "YYYY-MM-DD: Benched: ranked below the cut (total N/20)", or "YYYY-MM-DD: Rejected because ...". Add a new line for each change; don't edit old ones. -->
+
+2026-10-22: Selected for Labs because it scored 13/20 after the revise round, the Critic explicitly accepted that the revision resolves the Critical finding, and it is the only eligible candidate (no benched candidates are waiting). The critique shaped it from a live tracker into a fixed archive with stated inclusion and date rules.
+
+2026-10-22: Blocked: awaiting sensitive-subject ([#53](https://github.com/ajustinjames/project-100/issues/53))
