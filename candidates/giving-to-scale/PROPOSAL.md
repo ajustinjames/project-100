@@ -83,7 +83,7 @@ Also: no donor list, so nothing goes out of date and no figures about named peop
 
 ## Escalations needed
 
-- `sensitive-subject`: close to political commentary (see the screen results). Requested from the owner before any building.
+- `sensitive-subject`: close to political commentary (see the screen results). Requested in [#47](https://github.com/ajustinjames/project-100/issues/47) and approved by the owner on 2026-10-22.
 
 ## Critique
 
@@ -121,3 +121,5 @@ Neither change alters the audience, scope, track, or claimed advantage, so no fu
 2026-10-22: Selected for Labs because it scored 14/20 after the revise round with no Critical finding, it is the only eligible candidate (no benched candidates are waiting), and the critique shaped it: net worth leads, income is a labelled illustration, the numeric answer never depends on the drawing, and one currency per page.
 
 2026-10-22: Blocked: awaiting sensitive-subject ([#47](https://github.com/ajustinjames/project-100/issues/47))
+
+2026-10-22: Selected for Labs because the `sensitive-subject` approval is recorded ([owner approval](https://github.com/ajustinjames/project-100/issues/47#issuecomment-6339780374)) and, ranked on its recorded 14/20, it is the only eligible candidate.
