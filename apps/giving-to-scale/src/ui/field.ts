@@ -48,19 +48,16 @@ function screenReaderSummary(result: DrawableResult, locale: string): string {
   ].join(" ");
 }
 
-function renderSmallFortune(
-  root: HTMLElement,
-  result: Extract<CompareResult, { kind: "small-fortune" }>,
-  locale: string,
-): void {
+type SmallFortuneResult = Extract<CompareResult, { kind: "small-fortune" }>;
+
+/** Both multiples are against the reader's own figure, so both sentences say so. */
+export function smallFortuneText(result: SmallFortuneResult, locale: string): string {
+  return `Their whole fortune is ${multipleText(result.fortuneMultiple, locale)}. The gift is ${multipleText(result.giftMultiple, locale)}.`;
+}
+
+function renderSmallFortune(root: HTMLElement, result: SmallFortuneResult, locale: string): void {
   root.replaceChildren();
-  root.append(
-    createElement(
-      "p",
-      "small-fortune-note",
-      `Their whole fortune is ${formatMultiple(result.fortuneMultiple, locale)} of everything you own. The gift is ${formatMultiple(result.giftMultiple, locale)} of it.`,
-    ),
-  );
+  root.append(createElement("p", "small-fortune-note", smallFortuneText(result, locale)));
 }
 
 function drawTile(
@@ -242,11 +239,8 @@ export function renderField(root: HTMLElement, result: CompareResult, locale: st
 
   const updateSticky = () => {
     if (layout === undefined) return;
-    // Count the dots that have come into view: everything above the viewport's bottom edge.
-    const top = canvasHost.getBoundingClientRect().top + window.scrollY;
-    const viewportBottom = window.scrollY + window.innerHeight;
-    const dotsInView = Math.ceil(Math.max(0, viewportBottom - top) / DOT_PITCH) * layout.columns;
-    const currentAmount = Math.min(result.fortune, dotsInView * result.dotValue);
+    // Count the dots scrolled past the top of the viewport; the closing line gives the full total.
+    const currentAmount = Math.min(result.fortune, readPositionDots() * result.dotValue);
     stickyText.textContent = `${formatAmount(currentAmount, "USD", locale)} of ${formatAmount(result.fortune, "USD", locale)}`;
   };
 
