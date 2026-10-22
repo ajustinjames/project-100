@@ -1,0 +1,201 @@
+import { describe, expect, it } from "vitest";
+import { parseAmount } from "./amount.ts";
+import type { CompareResult } from "./compare.ts";
+import { compare, fieldMessages } from "./compare.ts";
+
+function parsed(input: string) {
+  return parseAmount(input);
+}
+
+function expectIncomplete(result: CompareResult) {
+  expect(result.kind).toBe("incomplete");
+  if (result.kind !== "incomplete") throw new Error("Expected incomplete comparison");
+  return result;
+}
+
+describe("compare field rules", () => {
+  it("accepts a positive gift no larger than a positive fortune and a positive net worth", () => {
+    const result = compare({
+      gift: parsed("10M"),
+      fortune: parsed("200B"),
+      netWorth: parsed("150K"),
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.share).toBe(0.00005);
+    expect(result.equivalent).toBe(7.5);
+  });
+
+  it("shows the gift's own rule when the gift is zero or negative", () => {
+    for (const gift of ["0", "-12K"]) {
+      const result = compare({
+        gift: parsed(gift),
+        fortune: parsed("240B"),
+        netWorth: parsed("85K"),
+      });
+      expect(expectIncomplete(result).errors.gift).toBe(fieldMessages.giftPositive);
+    }
+  });
+
+  it("shows the fortune's own rule when the fortune is zero or negative", () => {
+    for (const fortune of ["0", "-12K"]) {
+      const result = compare({
+        gift: parsed("100M"),
+        fortune: parsed(fortune),
+        netWorth: parsed("85K"),
+      });
+      expect(expectIncomplete(result).errors.fortune).toBe(fieldMessages.fortunePositive);
+    }
+  });
+
+  it("puts the gift-over-fortune error on the gift only", () => {
+    const result = compare({
+      gift: parsed("241B"),
+      fortune: parsed("240B"),
+      netWorth: parsed("85K"),
+    });
+
+    expect(expectIncomplete(result).errors).toEqual({ gift: fieldMessages.giftOverFortune });
+  });
+
+  it("keeps a parse error ahead of that field's numeric rule", () => {
+    const result = compare({
+      gift: parsed("€100M"),
+      fortune: parsed("240B"),
+      netWorth: parsed("85K"),
+    });
+
+    expect(expectIncomplete(result).errors.gift).toContain("US dollars");
+  });
+
+  it("returns the net-worth message for a zero or negative net worth without a field error", () => {
+    for (const netWorth of ["0", "-12K"]) {
+      const result = compare({
+        gift: parsed("100M"),
+        fortune: parsed("240B"),
+        netWorth: parsed(netWorth),
+      });
+      expect(result).toEqual({
+        kind: "net-worth-zero",
+        errors: {},
+        message: fieldMessages.netWorthZero,
+      });
+    }
+  });
+
+  it("does not show the zero-net-worth message while another field is missing or invalid", () => {
+    expect(compare({ gift: parsed(""), fortune: parsed("240B"), netWorth: parsed("0") })).toEqual({
+      kind: "incomplete",
+      errors: {},
+    });
+    expect(
+      compare({ gift: parsed("100M"), fortune: parsed("abc"), netWorth: parsed("0") }),
+    ).toEqual({
+      kind: "incomplete",
+      errors: { fortune: expect.any(String) },
+    });
+  });
+
+  it("keeps empty fields message-free and incomplete", () => {
+    expect(compare({ gift: parsed(""), fortune: parsed("240B"), netWorth: parsed("85K") })).toEqual(
+      {
+        kind: "incomplete",
+        errors: {},
+      },
+    );
+  });
+});
+
+describe("compare results and dot plan", () => {
+  it("matches the $100M, $240B, $85K example and applies the ten-times cap", () => {
+    const result = compare({
+      gift: parsed("100M"),
+      fortune: parsed("240B"),
+      netWorth: parsed("85K"),
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.share).toBeCloseTo(0.0004166666666666667);
+    expect(result.equivalent).toBeCloseTo(35.41666666666667);
+    expect(result.giftMultiple).toBeCloseTo(1176.4705882352941);
+    expect(result.fortuneMultiple).toBeCloseTo(2_823_529.411764706);
+    expect(result.dotValue).toBe(850_000);
+    expect(result.dotScale).toBe(10);
+    expect(result.giftDots).toBeCloseTo(117.6470588235294);
+    expect(result.fortuneDots).toBeCloseTo(282_352.9411764706);
+    expect(result.giftFullDots).toBe(117);
+    expect(result.giftPartialDot).toBeCloseTo(0.6470588235294);
+    expect(result.giftDrawnCount).toBe(118);
+    expect(result.fortuneDrawnCount).toBe(282_353);
+  });
+
+  it("matches the $10M, $200B, $150K example", () => {
+    const result = compare({
+      gift: parsed("10M"),
+      fortune: parsed("200B"),
+      netWorth: parsed("150K"),
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.equivalent).toBe(7.5);
+    expect(result.share).toBe(0.00005);
+    expect(result.dotScale).toBe(1);
+  });
+
+  it("uses one dot per net worth below the cap and tracks a partial gift dot", () => {
+    const result = compare({
+      gift: parsed("250"),
+      fortune: parsed("5,000"),
+      netWorth: parsed("1,000"),
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.dotValue).toBe(1_000);
+    expect(result.giftDots).toBe(0.25);
+    expect(result.giftFullDots).toBe(0);
+    expect(result.giftPartialDot).toBe(0.25);
+    expect(result.giftDrawnCount).toBe(1);
+    expect(result.fortuneDrawnCount).toBe(5);
+  });
+
+  it("uses the smallest power-of-ten dot value needed to stay under two million dots", () => {
+    const result = compare({
+      gift: parsed("1"),
+      fortune: parsed("20,000,001"),
+      netWorth: parsed("1"),
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.dotScale).toBe(100);
+    expect(result.dotValue).toBe(100);
+    expect(result.fortuneDots).toBeLessThanOrEqual(2_000_000);
+    expect(20_000_001 / (result.dotValue / 10)).toBeGreaterThan(2_000_000);
+  });
+
+  it("returns text-only figures when the fortune is smaller than the reader's net worth", () => {
+    const result = compare({
+      gift: parsed("1,700"),
+      fortune: parsed("400,000"),
+      netWorth: parsed("1,000,000"),
+    });
+
+    expect(result).toEqual({
+      kind: "small-fortune",
+      gift: 1_700,
+      fortune: 400_000,
+      netWorth: 1_000_000,
+      share: 0.00425,
+      equivalent: 4_250,
+      giftMultiple: 0.0017,
+      fortuneMultiple: 0.4,
+      dotValue: 1_000_000,
+      giftDots: 0.0017,
+      fortuneDots: 0.4,
+    });
+  });
+});

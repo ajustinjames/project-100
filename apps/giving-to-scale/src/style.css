@@ -1,23 +1,421 @@
-/* ajj-design tokens first, then app styles. */
 @import "@ajustinjames/hardline-tokens/css";
+
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* Gift orange: 3.45:1 on the paper and 4.42:1 against the fortune dots (see README). */
+  --hl-global-color-accent: #e84700;
+  --gift-dot: var(--hl-global-color-accent);
+  --fortune-dot: var(--hl-global-color-ink, #1a1a1a);
+  --paper: var(--hl-global-color-bg, #f0f0ec);
+  --ink: var(--hl-alias-text-main, #1a1a1a);
+  --muted: var(--hl-alias-text-muted, #666666);
+  --field-rule: #c8c8c1;
+}
+
+html {
+  scroll-behavior: auto;
+  background: var(--paper);
+}
 
 body {
   margin: 0;
-  background: var(--hl-alias-surface-bg-alt, #f0f0ec);
-  color: var(--hl-alias-text-main, #1a1a1a);
-  font-family: var(--hl-alias-font-ui, system-ui, sans-serif);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter Variable", Inter, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
 }
 
-main {
-  max-width: 40rem;
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.page-shell {
+  width: min(100% - 2.5rem, 75rem);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: clamp(2rem, 7vw, 5.5rem) 0 4rem;
+}
+
+.technical-copy,
+.eyebrow,
+.currency-help,
+.answer-label,
+.field-sticky,
+.gift-block-title {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.015em;
+  line-height: 1.5;
+}
+
+.eyebrow {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.page-header {
+  max-width: 54rem;
+  margin-bottom: clamp(2.5rem, 6vw, 4.75rem);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(2.7rem, 8vw, 5rem);
+  font-weight: 740;
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+}
+
+.page-deck {
+  max-width: 32rem;
+  margin: 1.25rem 0 0;
+  color: var(--muted);
+  font-size: clamp(1.05rem, 2.1vw, 1.35rem);
+}
+
+.amount-form {
+  max-width: 68rem;
+  padding: 1.35rem 0 1.15rem;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--field-rule);
+}
+
+.amount-sentence {
+  margin: 0;
+  font-size: clamp(1.3rem, 3.4vw, 2.15rem);
+  font-weight: 470;
+  letter-spacing: -0.035em;
+  line-height: 1.8;
+}
+
+.sentence-fragment {
+  display: inline;
+}
+
+.amount-part {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 0.38em;
+  margin: 0.15em 0.28em 0.15em 0;
+  vertical-align: baseline;
+}
+
+.amount-part label {
+  cursor: text;
+}
+
+.amount-part input {
+  width: 6.5ch;
+  min-width: 6.5ch;
+  min-height: 48px;
+  padding: 0.25rem 0.45rem;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font-size: 0.82em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 680;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+
+.amount-part input#fortune {
+  width: 7.5ch;
+  min-width: 7.5ch;
+}
+
+.amount-part input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.field-error {
+  grid-column: 1 / -1;
+  min-height: 0;
+  max-width: 22rem;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.field-error:not(:empty) {
+  margin-top: 0.55rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--ink);
+}
+
+.currency-help {
+  margin: 1rem 0 0;
+  color: var(--muted);
+}
+
+.answer-section {
+  max-width: 64rem;
+  margin: clamp(3rem, 8vw, 6rem) 0 2.8rem;
+}
+
+.answer-label {
+  margin: 0 0 0.15rem;
+  color: var(--muted);
+}
+
+.answer-amount {
+  margin: 0;
+  font-size: clamp(4.25rem, 16vw, 10.5rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 770;
+  letter-spacing: -0.085em;
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+}
+
+.answer-summary {
+  max-width: 50rem;
+  margin: 1.1rem 0 0;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  letter-spacing: -0.025em;
+}
+
+.answer-message {
+  max-width: 46rem;
+  margin: 0;
+  font-size: clamp(1.2rem, 3vw, 1.65rem);
+  line-height: 1.4;
+}
+
+.field-section {
+  max-width: 75rem;
+  margin: 3.5rem auto 0;
+}
+
+.field-key {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--field-rule);
+}
+
+.field-key-dots {
+  display: inline-flex;
+  flex: 0 0 3.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  min-height: 2rem;
+}
+
+.field-key-dot {
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  background: var(--fortune-dot);
+}
+
+.field-key-dot-magnified {
+  transform: scale(6);
+}
+
+.field-key-copy {
+  margin: 0;
+  color: var(--muted);
+}
+
+.field-title {
+  margin: 1.8rem 0 0.5rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.gift-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 0.4rem 0 1.2rem;
+  padding: 0.8rem 0 0.8rem 1rem;
+  border-left: 3px solid var(--hl-global-color-accent);
+}
+
+.gift-block-dots {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.gift-block-copy p {
+  margin: 0;
+}
+
+.gift-block-title {
+  color: var(--muted);
+}
+
+.gift-block-amount {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 690;
+  letter-spacing: -0.045em;
+}
+
+.gift-block-detail {
+  margin-top: 0.15rem;
+  color: var(--muted);
+}
+
+.field-sticky {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.65rem;
+  border-top: 1px solid var(--field-rule);
+  border-bottom: 1px solid var(--field-rule);
+  background: var(--paper);
+  color: var(--muted);
+}
+
+.dot-field {
+  position: relative;
+  width: 100%;
+  max-width: 75rem;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.dot-field-tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+}
+
+.dot-field:focus-visible {
+  outline-offset: 3px;
+}
+
+.field-closing-line {
+  margin: 1.2rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--field-rule);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.7;
+}
+
+.small-fortune-note {
+  max-width: 48rem;
+  margin: 0;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--field-rule);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.5;
+}
+
+.notes {
+  max-width: 52rem;
+  margin: clamp(3.5rem, 8vw, 6rem) 0 0;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--field-rule);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.notes p {
+  margin: 0.55rem 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .p100-footer {
-  max-width: 40rem;
+  width: min(100% - 2.5rem, 75rem);
   margin: 0 auto;
-  padding: 1rem;
-  color: var(--hl-alias-text-muted, #666666);
+  padding: 1rem 0 2.5rem;
+  color: var(--muted);
   font-size: 0.8rem;
+}
+
+[hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .page-shell {
+    width: min(100% - 2rem, 75rem);
+    padding-top: 2.25rem;
+  }
+
+  .page-header {
+    margin-bottom: 2.4rem;
+  }
+
+  .amount-sentence {
+    font-size: clamp(1.25rem, 6vw, 1.55rem);
+    line-height: 1.85;
+  }
+
+  .amount-part {
+    column-gap: 0.3em;
+    margin-right: 0.15em;
+  }
+
+  .amount-part input {
+    min-height: 46px;
+    padding-right: 0.3rem;
+    padding-left: 0.35rem;
+  }
+
+  .answer-amount {
+    font-size: clamp(4rem, 17vw, 6rem);
+    letter-spacing: -0.08em;
+  }
+
+  .field-section {
+    margin-top: 2.5rem;
+  }
+
+  .gift-block {
+    align-items: flex-start;
+  }
+
+  .p100-footer {
+    width: min(100% - 2rem, 75rem);
+  }
 }

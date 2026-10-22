@@ -7,11 +7,50 @@
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <main>
-      <h1>Giving to Scale</h1>
-      <p>Replace this page with the application.</p>
-      <!-- ajj-design components are visual shells: slot a native control inside them. -->
-      <hl-btn variant="primary"><button type="button">ajj-design is wired up</button></hl-btn>
+    <main class="page-shell">
+      <header class="page-header">
+        <p class="eyebrow technical-copy">A true-scale comparison</p>
+        <h1>Giving to Scale</h1>
+        <p class="page-deck">See a gift as the same share of what you have.</p>
+      </header>
+
+      <form id="amount-form" class="amount-form" novalidate aria-label="Enter the gift, fortune, and your net worth">
+        <p class="amount-sentence">
+          <span class="amount-part">
+            <label for="gift">A gift of <span class="visually-hidden">in US dollars</span></label>
+            <input id="gift" name="gift" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="100M" aria-describedby="currency-help gift-error" aria-invalid="false" />
+            <span class="field-error" id="gift-error"></span>
+          </span>
+          <span class="sentence-fragment">from</span>
+          <span class="amount-part">
+            <label for="fortune">a fortune of <span class="visually-hidden">in US dollars</span></label>
+            <input id="fortune" name="fortune" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="240B" aria-describedby="currency-help fortune-error" aria-invalid="false" />
+            <span class="field-error" id="fortune-error"></span>
+          </span>
+          <span class="sentence-fragment">.</span>
+          <span class="amount-part">
+            <label for="net-worth">My net worth is <span class="visually-hidden">in US dollars</span></label>
+            <input id="net-worth" name="net-worth" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="85K" aria-describedby="currency-help net-worth-error" aria-invalid="false" />
+            <span class="field-error" id="net-worth-error"></span>
+          </span>
+          <span class="sentence-fragment">.</span>
+        </p>
+        <p class="currency-help technical-copy" id="currency-help">All amounts are in US dollars.</p>
+      </form>
+
+      <section id="answer" class="answer-section" aria-live="polite" aria-atomic="true" hidden>
+        <p id="answer-label" class="answer-label"></p>
+        <p id="answer-amount" class="answer-amount"></p>
+        <p id="answer-summary" class="answer-summary"></p>
+        <p id="answer-message" class="answer-message"></p>
+      </section>
+
+      <section id="field-section" class="field-section" aria-label="Fortune and gift shown at scale" hidden></section>
+
+      <aside class="notes" aria-label="Notes">
+        <p>Fortunes are estimates, and mostly not cash. Pledges may be paid over years. These results use the figures you entered.</p>
+        <p>Nothing you enter is saved or sent. Your figures stay on this page.</p>
+      </aside>
     </main>
     <!-- p100:footer -->
   </body>

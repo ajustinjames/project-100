@@ -4,7 +4,7 @@
   "slug": "giving-to-scale",
   "name": "Giving to Scale",
   "status": "labs",
-  "description": "Type in a gift a very rich person made, their fortune, and your own net worth or yearly income, and see what the same share would mean for you, drawn to true scale.",
+  "description": "Type a gift, a fortune, and your net worth to see the same share in your money and the fortune drawn to scale.",
   "problem": "News of a billionaire's donation gives a dollar figure that is hard to judge; seeing it as a share of their fortune, applied to your own money, means doing the division by hand, and the size of a fortune is hard to picture at all.",
   "category": "money",
   "dates": {
@@ -15,7 +15,10 @@
   "design": {
     "system": "hardline"
   },
-  "dependencies": [],
+  "dependencies": [
+    "@fontsource-variable/inter",
+    "@fontsource/jetbrains-mono"
+  ],
   "sharedPackages": [
     "@project-100/web"
   ],
