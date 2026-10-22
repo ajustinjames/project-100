@@ -291,10 +291,27 @@ select {
   color: var(--muted);
 }
 
+.field-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 1.5rem;
+  margin: 1.8rem 0 0.25rem;
+}
+
 .field-title {
-  margin: 1.8rem 0 0.5rem;
+  margin: 0;
   color: var(--muted);
   text-transform: uppercase;
+}
+
+.field-closing-line:focus {
+  outline: none;
+}
+
+.field-closing-line:focus-visible {
+  outline: 2px solid var(--ink);
 }
 
 .gift-block {
@@ -354,12 +371,51 @@ select {
   overflow: hidden;
 }
 
-.dot-field-tile {
-  position: absolute;
-  top: 0;
-  left: 0;
+/*
+ * Dots are painted with a repeating pattern: a 2 px square in each 3 px cell (conic-gradient's
+ * top-left quarter around the point 2px, 2px). Whole rows are one element; see planDotBands.
+ */
+.dots {
   display: block;
-  width: 100%;
+  flex: none;
+  background: conic-gradient(at 2px 2px, transparent 270deg, var(--dot-color) 270deg) 0 0 / 3px 3px;
+  forced-color-adjust: none;
+  print-color-adjust: exact;
+}
+
+.dots-gift {
+  --dot-color: var(--gift-dot);
+}
+
+.dots-fortune {
+  --dot-color: var(--fortune-dot);
+}
+
+.dot-row {
+  display: flex;
+  height: 3px;
+}
+
+.dot-cell {
+  display: flex;
+  flex: none;
+  width: 3px;
+  height: 2px;
+}
+
+.dot-part {
+  flex: none;
+  height: 2px;
+  forced-color-adjust: none;
+  print-color-adjust: exact;
+}
+
+.dot-part-gift {
+  background: var(--gift-dot);
+}
+
+.dot-part-fortune {
+  background: var(--fortune-dot);
 }
 
 .dot-field:focus-visible {

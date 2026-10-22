@@ -1,14 +1,14 @@
 import { type Currency, formatAmount, formatDotCount, formatMultiple } from "../core/amount.ts";
 import type { CompareResult, Mode } from "../core/compare.ts";
-import type { FieldLayout, FieldTile } from "./field-layout.ts";
+import type { DotBand, DotColor, DotSegment, FieldLayout } from "./field-layout.ts";
 import {
   calculateFieldLayout,
   calculateGiftBlock,
   DOT_PITCH,
   DOT_SIZE,
-  getTileDotRanges,
-  selectLiveTiles,
+  planDotBands,
 } from "./field-layout.ts";
+import { startWalk } from "./walk.ts";
 
 type DrawableResult = Extract<CompareResult, { kind: "result" }>;
 
@@ -73,90 +73,43 @@ function renderSmallFortune(root: HTMLElement, result: SmallFortuneResult, local
   root.append(createElement("p", "small-fortune-note", smallFortuneText(result, locale)));
 }
 
-function drawTile(
-  canvas: HTMLCanvasElement,
-  tile: FieldTile,
-  layout: FieldLayout,
-  result: DrawableResult,
-  mutedColor: string,
-  accentColor: string,
-): void {
-  canvas.width = tile.backingWidth;
-  canvas.height = tile.backingHeight;
-  canvas.style.height = `${tile.cssHeight}px`;
-  const context = canvas.getContext("2d");
-  if (context === null) return;
-
-  context.setTransform(
-    tile.backingWidth / layout.cssWidth,
-    0,
-    0,
-    tile.backingHeight / tile.cssHeight,
-    0,
-    0,
-  );
-  const ranges = getTileDotRanges(
-    tile.dotStart,
-    tile.dotCapacity,
-    result.giftDots,
-    result.fortuneDots,
-  );
-  const firstDot = Math.floor(ranges.start);
-  const lastDot = Math.ceil(ranges.fortuneEnd);
-
-  for (let dotIndex = firstDot; dotIndex < lastDot; dotIndex += 1) {
-    const fortuneFill = Math.max(0, Math.min(1, ranges.fortuneEnd - dotIndex));
-    if (fortuneFill === 0) continue;
-
-    const x = (dotIndex % layout.columns) * DOT_PITCH;
-    const y = Math.floor(dotIndex / layout.columns) * DOT_PITCH - tile.top;
-    const dotWidth = 2 * fortuneFill;
-    const giftFill = Math.max(0, Math.min(fortuneFill, ranges.giftEnd - dotIndex));
-    if (giftFill > 0) {
-      context.fillStyle = accentColor;
-      context.fillRect(x, y, 2 * giftFill, 2);
-    }
-    if (giftFill < fortuneFill) {
-      context.fillStyle = mutedColor;
-      context.fillRect(x + 2 * giftFill, y, dotWidth - 2 * giftFill, 2);
-    }
-  }
+function dotsElement(color: DotColor, count: number, rows = 1): HTMLElement {
+  const element = createElement("span", `dots dots-${color}`);
+  element.style.width = `${count * DOT_PITCH}px`;
+  element.style.height = `${rows * DOT_PITCH}px`;
+  return element;
 }
 
-/** Draw the gift's dots as a block; hide the canvas when the block is too large to show. */
-function drawGiftBlock(
-  canvas: HTMLCanvasElement,
-  note: HTMLElement,
-  giftDots: number,
-  maxColumns: number,
-  dpr: number,
-  accentColor: string,
-): void {
-  const block = calculateGiftBlock(giftDots, maxColumns);
-  canvas.hidden = block === null;
-  note.hidden = block !== null;
-  if (block === null) return;
-
-  canvas.width = Math.round(block.cssWidth * dpr);
-  canvas.height = Math.round(block.cssHeight * dpr);
-  canvas.style.width = `${block.cssWidth}px`;
-  canvas.style.height = `${block.cssHeight}px`;
-  const context = canvas.getContext("2d");
-  if (context === null) return;
-  context.setTransform(dpr, 0, 0, dpr, 0, 0);
-  context.fillStyle = accentColor;
-  for (let dotIndex = 0; dotIndex < Math.ceil(giftDots); dotIndex += 1) {
-    const fill = Math.min(1, giftDots - dotIndex);
-    const x = (dotIndex % block.columns) * DOT_PITCH;
-    const y = Math.floor(dotIndex / block.columns) * DOT_PITCH;
-    context.fillRect(x, y, DOT_SIZE * fill, DOT_SIZE);
+function partialDotElement(segment: Extract<DotSegment, { kind: "partial" }>): HTMLElement {
+  const cell = createElement("span", "dot-cell");
+  for (const [color, fill] of [
+    ["gift", segment.gift],
+    ["fortune", segment.fortune],
+  ] as const) {
+    if (fill <= 0) continue;
+    const part = createElement("span", `dot-part dot-part-${color}`);
+    part.style.width = `${DOT_SIZE * fill}px`;
+    cell.append(part);
   }
+  return cell;
 }
 
-function freeTile(canvas: HTMLCanvasElement): void {
-  canvas.width = 0;
-  canvas.height = 0;
-  canvas.style.height = "0px";
+/** Build a dot field from its bands: full rows as a repeating CSS pattern, ragged rows as segments. */
+function renderBands(container: HTMLElement, bands: DotBand[], columns: number): void {
+  container.replaceChildren(
+    ...bands.map((band) => {
+      if (band.kind === "rows") return dotsElement(band.color, columns, band.rows);
+      const row = createElement("span", "dot-row");
+      for (const segment of band.segments) {
+        row.append(
+          segment.kind === "dots"
+            ? dotsElement(segment.color, segment.count)
+            : partialDotElement(segment),
+        );
+      }
+      return row;
+    }),
+  );
 }
 
 /** Render the key and true-scale dot field. Returns a cleanup function for its observers and listeners. */
@@ -202,20 +155,33 @@ export function renderField(
   );
   giftNote.hidden = true;
   giftCopy.append(giftNote);
-  const giftCanvas = createElement("canvas", "gift-block-dots");
-  giftCanvas.setAttribute("aria-hidden", "true");
-  gift.append(giftCopy, giftCanvas);
+  const giftDots = createElement("div", "gift-block-dots");
+  giftDots.setAttribute("aria-hidden", "true");
+  gift.append(giftCopy, giftDots);
 
   const sticky = createElement("div", "field-sticky technical-copy");
   sticky.setAttribute("aria-hidden", "true");
   const stickyText = createElement("span", "field-sticky-text");
   sticky.append(stickyText);
 
-  const canvasHost = createElement("div", "dot-field");
-  canvasHost.setAttribute("role", "region");
-  canvasHost.setAttribute("aria-label", "Fortune dot field");
-  canvasHost.tabIndex = 0;
-  const fortuneTitle = createElement("p", "field-title technical-copy", "Their fortune");
+  const field = createElement("div", "dot-field");
+  field.setAttribute("role", "region");
+  field.setAttribute("aria-label", "Fortune dot field");
+  field.tabIndex = 0;
+  const fieldDots = createElement("div", "dot-field-dots");
+  fieldDots.setAttribute("aria-hidden", "true");
+  field.append(fieldDots);
+  const fortuneTitle = createElement("div", "field-title-row");
+  const walkButton = createElement(
+    "button",
+    "text-button walk-button technical-copy",
+    "Walk the fortune",
+  );
+  walkButton.type = "button";
+  fortuneTitle.append(
+    createElement("p", "field-title technical-copy", "Their fortune"),
+    walkButton,
+  );
   const closing = createElement(
     "p",
     "field-closing-line",
@@ -227,29 +193,39 @@ export function renderField(
     screenReaderSummary(result, format),
   );
   summary.id = "field-screen-reader-summary";
-  canvasHost.setAttribute("aria-describedby", summary.id);
+  field.setAttribute("aria-describedby", summary.id);
 
-  root.append(key, gift, fortuneTitle, sticky, canvasHost, closing, summary);
-  const rootStyle = getComputedStyle(document.documentElement);
-  const accentColor = rootStyle.getPropertyValue("--gift-dot").trim() || "#e84700";
-  const mutedColor = rootStyle.getPropertyValue("--fortune-dot").trim() || "#1a1a1a";
+  root.append(key, gift, fortuneTitle, sticky, field, closing, summary);
 
   let layout: FieldLayout | undefined;
-  let canvases: HTMLCanvasElement[] = [];
-  let liveIndices = new Set<number>();
   let frame = 0;
   let disposed = false;
+  let stopWalk = () => {};
 
-  const clearCanvases = () => {
-    for (const canvas of canvases) freeTile(canvas);
-    canvases = [];
-    liveIndices = new Set();
-    canvasHost.replaceChildren();
-  };
+  walkButton.addEventListener("click", () => {
+    stopWalk();
+    const pageTop = (element: Element) => element.getBoundingClientRect().top + window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const start = Math.max(0, pageTop(fortuneTitle) - 16);
+    // End with the closing line in view.
+    const end = Math.min(
+      maxScroll,
+      Math.max(start, pageTop(closing) + closing.offsetHeight + 24 - window.innerHeight),
+    );
+    stopWalk = startWalk({
+      start,
+      end,
+      onArrive: () => {
+        // Move focus to the closing line, so keyboard and screen-reader users arrive there too.
+        closing.tabIndex = -1;
+        closing.focus({ preventScroll: true });
+      },
+    });
+  });
 
   const readPositionDots = (): number => {
     if (layout === undefined) return 0;
-    const top = canvasHost.getBoundingClientRect().top + window.scrollY;
+    const top = field.getBoundingClientRect().top + window.scrollY;
     const dotsScrolledPast =
       Math.floor(Math.max(0, window.scrollY - top) / DOT_PITCH) * layout.columns;
     return Math.min(result.fortuneDots, dotsScrolledPast);
@@ -262,67 +238,45 @@ export function renderField(
     stickyText.textContent = `${formatAmount(currentAmount, currency, locale)} of ${formatAmount(result.fortune, currency, locale)}`;
   };
 
-  const updateLiveTiles = () => {
-    if (layout === undefined || disposed) return;
-    const fieldTop = canvasHost.getBoundingClientRect().top + window.scrollY;
-    const localScrollTop = window.scrollY - fieldTop;
-    const selection = selectLiveTiles(layout, localScrollTop, Math.max(1, window.innerHeight));
-    const nextLiveIndices = new Set(selection.selectedIndices);
-
-    for (const tile of layout.tiles) {
-      const canvas = canvases[tile.index];
-      if (canvas === undefined) continue;
-      if (nextLiveIndices.has(tile.index)) {
-        if (!liveIndices.has(tile.index))
-          drawTile(canvas, tile, layout, result, mutedColor, accentColor);
-      } else if (liveIndices.has(tile.index) || canvas.width !== 0 || canvas.height !== 0) {
-        freeTile(canvas);
-      }
-    }
-    liveIndices = nextLiveIndices;
-    updateSticky();
-  };
-
   const rebuildLayout = () => {
     if (disposed) return;
-    const cssWidth = canvasHost.getBoundingClientRect().width;
+    const cssWidth = field.getBoundingClientRect().width;
     if (cssWidth <= 0) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    const nextLayout = calculateFieldLayout(cssWidth, result.fortuneDots, dpr);
-    const unchanged =
-      layout !== undefined &&
-      layout.cssWidth === nextLayout.cssWidth &&
-      layout.dpr === nextLayout.dpr &&
-      layout.totalHeight === nextLayout.totalHeight;
-
-    if (unchanged) {
-      updateLiveTiles();
+    const nextLayout = calculateFieldLayout(cssWidth, result.fortuneDots);
+    if (layout !== undefined && layout.columns === nextLayout.columns) {
+      updateSticky();
       return;
     }
 
+    // Keep the reader's place, in dots, when the number of columns changes.
     const dotsAtPosition = readPositionDots();
-    const oldTotalHeight = layout?.totalHeight;
+    const hadLayout = layout !== undefined;
     layout = nextLayout;
-    canvasHost.style.height = `${layout.totalHeight}px`;
-    clearCanvases();
-    canvases = layout.tiles.map((tile) => {
-      const canvas = document.createElement("canvas");
-      canvas.className = "dot-field-tile";
-      canvas.setAttribute("aria-hidden", "true");
-      canvas.style.top = `${tile.top}px`;
-      canvas.style.height = "0px";
-      return canvas;
-    });
-    canvasHost.append(...canvases);
-    drawGiftBlock(giftCanvas, giftNote, result.giftDots, layout.columns, dpr, accentColor);
+    field.style.height = `${layout.totalHeight}px`;
+    renderBands(
+      fieldDots,
+      planDotBands(layout.columns, result.giftDots, result.fortuneDots),
+      layout.columns,
+    );
 
-    if (oldTotalHeight !== undefined && dotsAtPosition > 0) {
-      const fieldTop = canvasHost.getBoundingClientRect().top + window.scrollY;
-      const row = Math.floor(dotsAtPosition / layout.columns);
-      const maxRow = layout.rows - 1;
-      window.scrollTo({ top: fieldTop + Math.min(row, maxRow) * DOT_PITCH, behavior: "auto" });
+    const block = calculateGiftBlock(result.giftDots, layout.columns);
+    giftDots.hidden = block === null;
+    giftNote.hidden = block !== null;
+    if (block !== null) {
+      giftDots.style.width = `${block.cssWidth}px`;
+      renderBands(
+        giftDots,
+        planDotBands(block.columns, result.giftDots, result.giftDots),
+        block.columns,
+      );
     }
-    updateLiveTiles();
+
+    if (hadLayout && dotsAtPosition > 0) {
+      const fieldTop = field.getBoundingClientRect().top + window.scrollY;
+      const row = Math.min(Math.floor(dotsAtPosition / layout.columns), layout.rows - 1);
+      window.scrollTo({ top: fieldTop + row * DOT_PITCH, behavior: "auto" });
+    }
+    updateSticky();
   };
 
   const scheduleLayout = () => {
@@ -334,18 +288,18 @@ export function renderField(
   };
 
   const resizeObserver = new ResizeObserver(scheduleLayout);
-  resizeObserver.observe(canvasHost);
+  resizeObserver.observe(field);
   window.addEventListener("scroll", scheduleLayout, { passive: true });
   window.addEventListener("resize", scheduleLayout, { passive: true });
   scheduleLayout();
 
   return () => {
     disposed = true;
+    stopWalk();
     resizeObserver.disconnect();
     window.removeEventListener("scroll", scheduleLayout);
     window.removeEventListener("resize", scheduleLayout);
     if (frame !== 0) window.cancelAnimationFrame(frame);
-    clearCanvases();
     root.replaceChildren();
   };
 }
