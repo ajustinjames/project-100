@@ -17,9 +17,9 @@
     "verify": "biome ci . && pnpm typecheck && pnpm test && pnpm p100 validate && pnpm build:site && pnpm p100 check-builds"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.14",
-    "@types/node": "^24.0.0",
+    "@biomejs/biome": "^2.5.15",
+    "@types/node": "^26.6.5",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.4"
   }
 }
