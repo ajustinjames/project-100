@@ -12,20 +12,21 @@ People who read about a large donation and want to know what it amounts to: news
 
 ## Scope
 
-The product plan is recorded in [PROPOSAL.md](PROPOSAL.md). The current Labs prototype is PR 1, limited to net-worth mode and US dollars.
+The product plan is recorded in [PROPOSAL.md](PROPOSAL.md); the build plan is the brief, issue #50.
 
-**Implemented in PR 1:**
+**Implemented (PR 1, prototype; PR 3, modes and sharing):**
 
-- Three amounts typed by the user: the gift, the giver's fortune, and their own net worth. Amounts accept shorthand ("100M", "$2.4 billion").
-- The answer as numbers first: "The same share of your net worth is $21", with the exact share of the fortune.
+- Three amounts typed by the user: the gift, the giver's fortune, and their own net worth or yearly income. Amounts accept shorthand ("100M", "$2.4 billion"). Inputs widen to fit long figures.
+- The answer as numbers first: "The same share of your net worth is $21", with the exact share of the fortune. In income mode: "The same percentage of your yearly income is".
 - A true-scale dot field of the fortune with the gift at its real proportion, drawn in bounded canvas tiles.
-- US dollars labelled on the inputs. The zero-or-less net-worth message points to the planned income comparison, which is not in this prototype.
+- A net worth of zero or less explains that the same share comes to nothing, and offers the income comparison.
+- The reverse: "If I gave 50, the same share of their fortune would be $141 million."
+- One currency per page, chosen from USD, CAD, AUD, EUR, GBP, INR, and JPY, with no conversion.
+- "Share this gift": a link in the URL fragment holding the gift, fortune, and currency, never the user's own figure. Opening such a link fills those three and asks for the reader's figure.
 
 **Planned for later PRs:**
 
-- Income mode and the reverse comparison.
-- Currency selection and a fragment share link holding the gift, fortune, and currency, never the user's own figure.
-- The optional control to scroll through the whole fortune.
+- "Walk the fortune", the optional control to scroll through the whole field, with reduced motion; the final accessibility pass.
 
 **Not planned:**
 
@@ -57,11 +58,13 @@ Full comparison in [PROPOSAL.md](PROPOSAL.md#existing-alternatives). In short:
 - 2026-10-22: Implementation of the prototype was started by Luna (`gpt-6-luna`, effort `max`) and finished by Opus (`claude-opus-5-5`) at the owner's request, because Luna's run was taking too long. Luna's work was kept; Opus reviewed it, fixed the dot colours and the end-of-field counter, and drew the gift block.
 - 2026-10-22: Gift dots are orange `#e84700` and fortune dots ink `#1a1a1a`, the strongest pairing that keeps the gift ≥ 3:1 against both the paper and the fortune dots. Hardline's `#ff4f00` falls just short on the paper (2.89:1).
 - 2026-10-22: The gift is drawn as its own near-square block of dots, at field size, when the block fits in 300 CSS px; larger gifts are shown only as the orange start of the field, with a note. Why: the gift's dots are already the first dots of the field, at the same scale. A separate full-size block for a big gift would be a second copy dozens of screens long ($100 billion against $85,000 is about 42 phone screens), and the reader would have to scroll through it before the fortune starts. This changes the brief (issue #50), which asked for the block across the whole range; the brief is amended to match.
-- 2026-10-22: The prototype uses a true-scale dot field. One dot equals the reader's net worth until the field would exceed 2,000,000 dots, then it equals the smallest power-of-ten multiple that keeps the field at or below that cap. Inter Variable and JetBrains Mono are self-hosted from latin subsets under SIL OFL 1.1. Nothing is stored; a planned URL-fragment share link will carry only the gift, fortune, and currency.
+- 2026-10-22: Checkpoint after PR 1 (Opus): continue. With three cases from the news, the dot field made the scale felt better than Sacrifice Meter's bar ([verdict on #50](https://github.com/ajustinjames/project-100/issues/50#issuecomment-6353134066)).
+- 2026-10-22: PR 3 was built by Opus (`claude-opus-5-5`), continuing at the owner's request. Inputs widen to fit what's typed, because the checkpoint found long figures cut off on a phone. A share link writes amounts back into the inputs with comma grouping ("240,000,000,000"), which is exact and parses in every locale. The reverse amount is shown even when it exceeds the fortune: the sum is still the same share. Net worth and yearly income are kept as separate values, so switching modes never treats one as the other (review round 1, High finding); the income field starts empty.
+- 2026-10-22: The prototype uses a true-scale dot field. One dot equals the reader's net worth until the field would exceed 2,000,000 dots, then it equals the smallest power-of-ten multiple that keeps the field at or below that cap. Inter Variable and JetBrains Mono are self-hosted from latin subsets under SIL OFL 1.1. Nothing is stored. The URL-fragment share link (PR 3) carries the gift, fortune, and currency, and nothing else.
 
 ## Architecture
 
-Client-only static Vite page, written in plain TypeScript, HTML, and CSS. Pure functions parse and format amounts, validate the three fields, calculate the share and equivalent, and plan the dot field. Canvas tiles are drawn at runtime from the entered figures; each tile is bounded by device-pixel dimensions and area, with a live budget for off-screen tiles. The current prototype has no storage, link creation, or app-specific service requests.
+Client-only static Vite page, written in plain TypeScript, HTML, and CSS. Pure functions parse and format amounts, validate the three fields, calculate the share and equivalent, and plan the dot field. Canvas tiles are drawn at runtime from the entered figures; each tile is bounded by device-pixel dimensions and area, with a live budget for off-screen tiles. The app has no storage and no app-specific service requests. The Share button builds a URL-fragment link (`src/core/share-link.ts`); the page reads a fragment on open but never writes one.
 
 ## Dependencies
 
