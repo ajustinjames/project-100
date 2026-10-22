@@ -6,101 +6,107 @@
 
 **Track:** niche.
 
+**Revised 2026-10-22, after round 1 of the critique:** the live tracker became a finite archive with a stated cutoff date (see Critique). The owner chose this revision instead of accepting the rejection. Because the Critic recommended reject rather than revise, allowing this one revise round is itself part of the owner's exception.
+
 ## Problem
 
-Electronic Arts regularly retires the online services of its older games, often several in a month, and over four decades it has closed or absorbed a long list of studios it acquired. Players who own one of those games want to know whether its multiplayer still works and when it will stop. People who follow the industry want the record: which studios went, when, and what they made.
+Over four decades Electronic Arts has closed or merged a long line of studios it acquired, cancelled announced games, ended products such as Playfish's Facebook games, and retired the online services of hundreds of games. That history comes up whenever another studio closes, and the record is split up:
 
-That record is scattered. Each retirement is a short news item at the time, for example [GameRant, 13 June 2026](https://gamerant.com/ea-game-shutting-down-grid-legends-servers/) (Battlefield Hardline on consoles, Plants vs. Zombies HD, Madden NFL 23, Apex Legends on Switch, NHL 22 and 23, and GRID Legends on consoles, all in one article) and [VGC, October 2022](https://www.videogameschronicle.com/news/ea-is-ending-online-services-for-mirrors-edge-onrush-and-more) (Army of Two, Mercenaries 2, Red Alert 3, Onrush, Mirror's Edge, and more). VGC cited EA's own [service-updates page](https://www.ea.com/service-updates) as the list. When I opened that page on 2026-10-22, it only gave the general policy (games are retired when players fall to "fewer than 1% of all peak online players across all EA titles") and listed no games. So the official list is no longer public in one place. Studio closures are summarised in listicles such as [TheGamer (2019)](https://www.thegamer.com/ea-game-developer-shut-down/). Wikipedia's [list of EA acquisitions](https://en.wikipedia.org/wiki/List_of_acquisitions_by_Electronic_Arts) marks the defunct studios with a dagger but gives no closure year for many of them.
+- **EA's own shutdown lists** cover online services only, on three alphabetical pages ([A–H](https://www.ea.com/legal/service-updates/a-h), [I–Q](https://www.ea.com/legal/service-updates/i-q), [R–Z](https://www.ea.com/legal/service-updates/r-z)). When I opened them on 2026-10-22, they were grouped by title with no search or filter, dated from 2013 with older entries marked "Pre 2013", and mixed in EA Play catalog removals alongside server retirements. They name no studios and no cancellations.
+- **Studio closures** are in Wikipedia's [list of EA acquisitions](https://en.wikipedia.org/wiki/List_of_acquisitions_by_Electronic_Arts), which marks 22 acquisitions defunct but gives no closure year for many of them, and in listicles such as [TheGamer (2019)](https://www.thegamer.com/ea-game-developer-shut-down/).
+- **Cancellations** are in one-off news, such as EA closing Cliffhanger Games and cancelling its Black Panther game in May 2025 ([GamingOnLinux](https://www.gamingonlinux.com/2025/05/another-dev-gone-ea-cancels-black-panther-and-closes-cliffhanger-games)).
 
-Recurrence: new retirements are announced throughout the year (GameRant says EA shuts games down "pretty much every single month"), and studio closures and cancellations keep coming. For example, EA closed Cliffhanger Games and cancelled its Black Panther game in May 2025 ([GamingOnLinux](https://www.gamingonlinux.com/2025/05/another-dev-gone-ea-cancels-black-panther-and-closes-cliffhanger-games)).
+So there is no single dated timeline to answer "what did EA close in 2013?", "what happened to the studios behind my old games?", or "which of the games I played lost their servers, and when?", or to cite in a discussion.
 
 ## Audience
 
-- **Players of older EA games** who want to know whether a game's online play still works, or when it ends, before they buy a used copy or plan a last session with friends. They come back when a new wave is announced.
-- **People who follow the games industry**, such as enthusiasts, preservationists, and writers, who want a dated, sourced record of what EA closed and when, to settle a discussion or to cite.
-
-It's a reference people come back to occasionally, not a daily tool.
+People who follow games history: enthusiasts, preservationists, and writers who want a dated, sourced record of what EA closed and when. Players of older EA games looking back at what happened to a series or studio they cared about. They come back when another EA closure is in the news and the history gets discussed again. It's a reference, used occasionally.
 
 ## Proposed solution
 
-A single fast page in the style of Killed by Google: a graveyard list, newest first, with upcoming shutdowns pinned to the top.
+A single fast page with the feel of Killed by Google, as an **archive with a stated cutoff date** ("Record up to 22 October 2026"). It doesn't promise to track new events.
 
-1. **Four kinds of entry,** filterable: *studio* (closed, or merged into another EA studio), *online service* (a game's servers retired, by platform), *cancelled* (an announced game that was cancelled), and *product* (a service or other product EA ended, such as Playfish's Facebook games).
-2. **Each entry** gives its name, kind, start and end dates, a computed age ("closed 9 years ago, aged 12"), one neutral past-tense sentence, the platforms where relevant, and **at least one source link** to a page that states the fact. Entries with an upcoming date show a countdown.
-3. **Search and filters:** text search over names and series, plus filters for kind, decade or year, and platform. The filters live in the URL, so a filtered view can be shared ("everything EA retired in 2025").
-4. **Summary counts** at the top (studios closed, games retired, by year), shown as plain numbers with an optional small year-by-year bar chart.
-5. **"Data as of <date>"** shown plainly, so a stale list never reads as current.
+1. **Four kinds of entry,** filterable: *studio* (closed, or merged, shown separately and never counted as closed), *online service* (a game's servers retired, by platform), *cancelled* (an announced game that was cancelled), and *product* (a service or product EA ended).
+2. **Each entry** gives its name, kind, dates (or "before 2013" where EA gives no date), its age at the end, one neutral past-tense sentence, the platforms where relevant, and **at least one source link plus an archived copy** (Wayback Machine), so it still checks out if the source moves.
+3. **One timeline:** newest first, with search over names and series, and filters for kind, year or decade, and platform. Filters live in the URL so a view can be shared ("everything EA retired in 2025").
+4. **Online services from EA's own lists,** taken once at the cutoff from the three A–Z pages, with each entry linking back to the page it came from. EA Play catalog removals are left out, because a game leaving a subscription isn't a shutdown. The page says so.
+5. **Summary counts** by kind and year, as plain numbers with an optional small bar chart.
+6. **Only events on or before the cutoff.** There are no countdowns and no "is it still up?" claims; the page points players to EA's own lists for current status.
 
-The data is one versioned JSON file in the repository, validated by tests: required fields, real dates, end after start, a source on every entry, and no duplicates.
+The data is one versioned JSON file, validated by tests: required fields, real dates, end after start, a source and archived copy on every entry, an allowed status, and no duplicates.
 
-Not included: no logos, box art, or screenshots, because they're EA's and its studios' trademarks and fall under the [asset policy](../../docs/DESIGN_AND_ASSETS.md). Each kind gets a text symbol instead. There are no public submissions on the site; corrections go through GitHub issues.
+Not included: no logos, box art, or screenshots, because they're EA's and its studios' trademarks and fall under the [asset policy](../../docs/DESIGN_AND_ASSETS.md); each kind gets a text symbol instead. No public submissions on the site; corrections go through GitHub issues.
 
 ## Existing alternatives
 
 | Alternative | Link | Does well | Tradeoffs for this audience |
 |---|---|---|---|
-| News search and EA's help pages (the default) | [GameRant](https://gamerant.com/ea-game-shutting-down-grid-legends-servers/), [EA service updates](https://www.ea.com/service-updates) | Current and authoritative when each wave is announced. | One wave per article, nothing cumulative. EA's page listed no games when I opened it on 2026-10-22. |
-| Killed by EA (Huskynarr) | [GitHub repo](https://github.com/Huskynarr/killed-by-electronicarts), homepage killedbyea.info | The same idea, built on the Killed by Google format, MIT-licensed. | Last pushed 2022-09-18. The homepage didn't connect on 2026-10-22. Its `graveyard.json` has 12 entries, all studios, with the opening and closing dates swapped (Bullfrog: `dateOpen` 2004, `dateClose` 1987), and its Victory Games entry links to Westwood's Wikipedia page. In practice it's abandoned. |
-| EA Graveyard, published as Game Studio Graveyard (the strongest) | [wiredlain.com](https://wiredlain.com/), [repo](https://github.com/Somesingman/ea-graveyard) | Active (last pushed 2026-01-26), MIT-licensed, with studio logos, statuses (closed, revived, declining), search and filters, and a link check in CI. | Studios only: no online service retirements and no cancelled games. It now includes studios from other publishers (Clover, Ensemble, Lionhead), so it's no longer an EA-only record. It loads a third-party script from a Netlify host. Its README says it's "still under construction". |
-| Wikipedia | [List of acquisitions by EA](https://en.wikipedia.org/wiki/List_of_acquisitions_by_Electronic_Arts) | Thorough and referenced: 48 acquisitions, with the defunct and merged ones marked. | A table of acquisitions, not a graveyard. Many defunct rows give no closure year, and service retirements aren't covered. |
-| Killed by Google (the model) | [killedbygoogle.com](https://killedbygoogle.com/) | The format people know: tombstones, ages, and filters across 308 entries. | Google only. It shows an advertisement slot. |
+| EA's online services shutdown lists (the strongest for servers) | [A–H](https://www.ea.com/legal/service-updates/a-h), [I–Q](https://www.ea.com/legal/service-updates/i-q), [R–Z](https://www.ea.com/legal/service-updates/r-z) | Authoritative, current, and dated by platform, back to 2013. The right place to check whether a game is still online. | Three alphabetical pages with no search or year view; EA Play removals mixed in; no studios, cancellations, or products. |
+| EA Graveyard, published as Game Studio Graveyard (the strongest for studios) | [wiredlain.com](https://wiredlain.com/), [repo](https://github.com/Somesingman/ea-graveyard) | Active (last pushed 2026-01-26), MIT-licensed, studio logos and statuses (closed, revived, declining), search, and a link check in CI. | Studios only. Now includes studios from other publishers (Clover, Ensemble, Lionhead). Loads a third-party script from a Netlify host. Its README says it's "still under construction". |
+| Shelf-Life (found by the Critic) | [gameshelflife.com](https://gameshelflife.com/publishers/electronic-arts/) | Ad-free, sourced shutdown dates, including an upcoming one. | Six EA entries, and it says it "isn't a full history"; no studios. |
+| Wikipedia | [List of acquisitions by EA](https://en.wikipedia.org/wiki/List_of_acquisitions_by_Electronic_Arts) | Thorough and referenced, with defunct and merged acquisitions marked. | A table of acquisitions, not a timeline; many closure years missing; no services. |
+| Killed by EA (Huskynarr) | [repo](https://github.com/Huskynarr/killed-by-electronicarts) | The same idea, MIT-licensed. | Last pushed 2022-09-18. Its homepage (killedbyea.info) didn't connect on 2026-10-22. 12 studio entries with the opening and closing dates swapped. Abandoned. |
 
-I read the HTML of the wiredlain site, the Huskynarr data file, and both repositories' metadata through the GitHub API on 2026-10-22.
+The Critic also found a community spreadsheet of EA shutdowns (a Google Sheet). I couldn't open it as a page, so I don't rely on it. I read the wiredlain HTML, the Huskynarr data, and both repositories' metadata through the GitHub API on 2026-10-22.
 
 ## What this does better
 
-Checked against EA Graveyard, the strongest:
+1. **One timeline across kinds.** Studios, server retirements, cancellations, and products in one dated, searchable list. EA covers only servers and EA Graveyard only studios. Checkable: filtering to 2013 shows both the studio closures and the server retirements of that year, each with a source.
+2. **EA's server list made searchable by year, with subscription removals separated.** Checkable: filtering to *online service* and a year gives every retirement EA lists for that year, across all three of EA's pages, with no EA Play removals, and each entry links back to EA's page.
 
-1. **One record across kinds.** Studios, online service retirements, cancellations, and products in one filterable list, where EA Graveyard covers studios only. Checkable: filtering to *online service* and 2025 lists that year's retirements, and every entry links a source.
-2. **Upcoming shutdowns first, with dates.** This answers "does my game's online play still work?", which a studio-only list can't. Checkable: an entry with a future end date appears above the graveyard with a countdown.
-
-Also: no ads, no third-party scripts beyond the project's standard analytics, works offline once loaded, and the "data as of" date is visible.
+Also: no ads and no third-party scripts beyond the project's standard analytics, works offline once loaded, and every source has an archived copy.
 
 ## Likely scope and shape
 
-- Client-only static page. The data is a JSON file bundled at build time. No Cloudflare services and no external API at runtime.
-- Pure, testable core: the data schema and validator, age and countdown calculations, filtering and URL state, and the summary counts.
-- Rough size: 800 to 1,500 lines of code including tests, plus the dataset. **The dataset is the main work:** a first version of roughly 100 to 200 entries, each checked against a source I opened.
+- Client-only static page. The data is a JSON file bundled at build time. No Cloudflare services and no runtime API.
+- Pure, testable core: the data schema and validator, date and age calculations, filtering and URL state, and the counts.
+- Rough size: 800 to 1,500 lines of code including tests, plus the dataset. **The dataset is the main work,** a one-time job: roughly 40 to 60 studio, cancellation, and product entries sourced by hand, plus the server retirements on EA's three pages (several hundred), each classified as server retirement or catalog removal.
 - Privacy class: `none`.
 
 ## Screen results
 
-- Useful task, used more than once: yes. People check a game's online status before an announced date and use the list as a reference. Use is occasional.
-- Value comes from the software itself, not an API or AI model: mostly yes. The value is in the sourced dataset and how it's presented. There's no runtime API, and sources are opened by hand while the data is assembled.
-- Not for search traffic, ads, novelty alone, or use of AI: yes. The case is a cumulative, sourced record, which EA no longer publishes in one place.
-- No ongoing human curation or moderation: **not cleanly.** The historical record is complete as of its date and doesn't become *wrong*, only out of date. Staying current means adding entries when EA announces retirements, several times a year. Each update would be a small data-only PR by the Maintainer, with every new entry's source opened and checked by the schema tests. That is ongoing curation, though light. I'm stating it rather than arguing it away; the Critic should weigh it under Upkeep.
+- Useful task, used more than once: yes, as a reference that comes up again with each new closure. Occasional.
+- Value comes from the software itself, not an API or AI model: yes. The value is in a sourced dataset and a searchable timeline. There's no runtime API, and sources are checked by hand while the data is assembled.
+- Not for search traffic, ads, novelty alone, or use of AI: yes.
+- No ongoing human curation or moderation: yes, after the revision. The archive is complete and correct as of its stated cutoff, and it says so. It makes no claims about current status or upcoming events, so it doesn't go wrong when EA announces more. A later dated edition is optional, never needed for the page to stay correct. Remaining upkeep is source links breaking, which the archived copies cover.
 - Runs within baseline budget: yes, a static page.
-- No sensitive subject: **close to one.** Every entry is a factual claim about a real company, and the title "Killed by" frames those facts critically. That's close to misinformation-sensitive, so I'm escalating rather than arguing it doesn't apply.
-- No accounts / personal data / UGC / external API (or approval requested): yes. There are no submissions on the site; corrections go through GitHub issues.
+- No sensitive subject: **close to one.** Every entry is a factual claim about a named company, under a critical title. That's close to misinformation-sensitive, so I'm escalating.
+- No accounts / personal data / UGC / external API (or approval requested): yes.
 
 ## Risks
 
-- **Accuracy about a real company.** A wrong date or a misattributed closure is a factual error about EA. Mitigations: a source on every entry, neutral wording ("closed", "online services retired"), "killed" used only in the title as the genre's convention, a "data as of" date, and a corrections link.
-- **The name.** "Killed by EA" uses EA's name and frames it critically. It's descriptive use, as with Killed by Google, and there are no logos. The owner should confirm they're comfortable with it (see Open questions).
-- **Staleness.** If the Maintainer stops adding retirements, the upcoming section empties and the record falls behind. The "data as of" date keeps that honest.
-- **Closed, merged, or rebranded.** Bullfrog merging into EA UK, or DreamWorks Interactive becoming DICE LA, must be shown accurately, not all counted as kills.
-- **Dataset effort.** Sourcing well over 100 entries is real work, and sources disagree; dates for Bullfrog and Westwood differ between MobyGames, TheGamer, and Wikipedia.
+- **Accuracy about a real company.** Mitigations: a source and an archived copy on every entry, neutral wording ("closed", "merged", "online services retired"), "killed" used only in the title as the genre's convention, and a corrections link.
+- **Classification errors.** Telling a server retirement apart from a catalog removal, or a closure from a merger, is the hard part, and errors here are factual errors. The schema requires a status, and the build brief should gate the prototype on a hand-checked sample.
+- **The name.** "Killed by EA" uses EA's name critically. It's descriptive use, as with Killed by Google, and there are no logos. The owner should confirm it with the sensitive-subject approval.
+- **A frozen archive ages.** Players may expect it to be current. The cutoff is shown at the top, and the page points them to EA's lists for current status.
+- **Dataset effort.** Sources disagree on some dates (Bullfrog, Westwood). Where they do, the entry gives the best-supported date and says the sources differ.
 
 ## Open questions
 
-- Keep the name "Killed by EA", or use a more neutral one such as "EA Graveyard"? Proposed: keep it. It's what the owner asked for, and the genre name is familiar. The owner should confirm it along with the sensitive-subject approval.
-- Do merged or rebranded studios count? Proposed: include them with a separate "merged" status, never shown as closed.
-- How far back should online service retirements go? Proposed: start with retirements announced from 2010, the earliest waves found in coverage, and show that start date on the page.
+- Keep the name "Killed by EA", or use a more neutral one such as "EA Graveyard"? Proposed: keep it, and the owner confirms it with the approval.
+- Cutoff date: proposed as the date the dataset is finished in Labs, shown on the page.
 
 ## Escalations needed
 
-- `sensitive-subject`: every entry is a factual claim about a named company, under a critical title (see the screen results). Approval will be requested after the critique if the candidate is selected.
+- `sensitive-subject`: every entry is a factual claim about a named company, under a critical title. Approval will be requested only if the candidate is selected.
 
 ## Critique
 
 <!-- Step 6: link the Critic's PR comment, copy its scores, then respond to every finding: what changed, or why it was dismissed. For each dismissed Critical finding, also link the Critic's explicit acceptance or the resolved disagreement outcome that permits advancing. If there was a revise round, give both sets of scores. -->
 
-| Usefulness | Advantage | Feasibility | Upkeep | Total |
-|---|---|---|---|---|
-| | | | | /20 |
+Round 1: [Critique by Critic (gpt-6-sol, effort high)](https://github.com/ajustinjames/project-100/pull/51#issuecomment-6341348400), recommending **reject**. The owner chose one revise round toward the Critic's "strongest version" instead of accepting it. Every finding is accepted; none is dismissed.
+
+| Round | Usefulness | Advantage | Feasibility | Upkeep | Total |
+|---|---|---|---|---|---|
+| 1 | 3 | 2 | 3 | 1 | 9/20 |
 
 | Severity | Finding | Response |
 |---|---|---|
+| Critical | The live tracker (current status, upcoming shutdowns) needs ongoing manual curation, a kill criterion. | Accepted. It's now a finite archive with a stated cutoff, as the Critic's strongest version proposed. Countdowns, upcoming shutdowns, and current-status claims are removed, and the page points players to EA's own lists. The Critic needs to accept that this resolves the Critical finding in the re-score. |
+| High | EA still publishes dated, platform-specific shutdown lists (A–H, I–Q, R–Z), and the proposal wrongly said the official list was gone. | Accepted, and my error. I had opened only the policy landing page. I opened all three pages on 2026-10-22: alphabetical, no search, from 2013, with EA Play removals mixed in. They are now the main alternative for servers, and the advantage is a year-searchable view across them with removals separated, plus the kinds EA doesn't cover. |
+| Medium | Missed alternatives: Shelf-Life and an EA shutdown spreadsheet. | Accepted. Shelf-Life is in the table (opened: six EA entries, "isn't a full history"). The spreadsheet is noted but not relied on, because I couldn't open it. |
+| Medium | The data model must separate server retirement from catalog removal, closure from merger, and state completeness limits. | Accepted. Catalog removals are left out and the page says so, merged is its own status, "before 2013" is shown where EA gives no date, and the cutoff is stated. |
+| Low | Some cited pages couldn't be checked by the Critic (GameRant, TheGamer, wiredlain). | I opened GameRant and TheGamer on 2026-10-22. The GameRant link is removed, since EA's own lists replace it. TheGamer stays as an example of a listicle. wiredlain's scope is confirmed from its repository. |
 
 ## Decision
 

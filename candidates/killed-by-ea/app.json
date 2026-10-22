@@ -4,8 +4,8 @@
   "slug": "killed-by-ea",
   "name": "Killed by EA",
   "status": "candidate",
-  "description": "A searchable graveyard of the studios, games' online services, and projects Electronic Arts has closed, retired, or cancelled, with dates, a source for every entry, and the shutdowns still to come.",
-  "problem": "When an EA studio closes or a game's online services are retired, the record is scattered across years of news posts; EA's own service-updates page no longer lists games, so players can't easily check what has gone dark, what is about to, or what came before.",
+  "description": "A dated, sourced archive of what Electronic Arts closed, merged, cancelled, or retired: studios, games' online services, cancelled games, and ended products, searchable on one timeline up to a stated cutoff.",
+  "problem": "The record of EA's closures is split across EA's three alphabetical shutdown pages (which mix in EA Play catalog removals and cover no studios or cancellations), Wikipedia tables without closure years, and years of one-off news posts, so there is no single dated timeline to search or cite.",
   "category": "games",
   "dates": {
     "created": "2026-10-22",
