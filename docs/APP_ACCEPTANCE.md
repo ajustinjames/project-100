@@ -176,11 +176,11 @@ Then decide every candidate in the batch together:
 
 Break ties in this order: needs no escalation; higher Usefulness; higher Advantage; then the Originator's judgment, with the reason under Decision. Merge every candidate PR.
 
-A candidate's state is its **latest** dated Decision line: `Selected for Labs`, `Blocked: awaiting <approval kind> (<link>)`, `Benched`, or `Rejected`. A selected candidate that needs an escalation gets a `Blocked` line when the approval request opens, and stops counting toward the batch's N, so the next-ranked candidate can be selected in its place. Once its approval is recorded, add a new `Selected for Labs` line and promote it; it counts toward the batch in which it is promoted.
+A candidate's state is its **latest** dated Decision line: `Selected for Labs`, `Blocked: awaiting <approval kind> (<link>)`, `Benched`, or `Rejected`. A selected candidate that needs an escalation gets a `Blocked` line when the approval request opens, and stops counting toward the batch's N, so the next-ranked candidate can be selected in its place. Once its approval is recorded, it returns to the eligible pool of the next batch **before** selection, and is ranked on its recorded scores with the same N limit as everything else. If it ranks in, add a new `Selected for Labs` line; if not, add a `Benched` line.
 
 Dismissing a Critical finding needs the Critic's explicit acceptance in a PR comment (silence is not acceptance), linked in `PROPOSAL.md`. If the Critic still objects, follow [Disagreements](AI_ROLES.md#disagreements-between-agents), and don't promote until it is resolved in favor of advancing.
 
-At the start of a batch, benched candidates (latest Decision line `Benched`) compete with the new ones for selection: rank them on their recorded scores. Blocked candidates don't compete; they wait for their approval.
+At the start of a batch, benched candidates (latest Decision line `Benched`) compete with the new ones for selection: rank them on their recorded scores. Blocked candidates don't compete until their approval is recorded; then they compete the same way.
 
 ## Gate 3: Entering Labs
 
