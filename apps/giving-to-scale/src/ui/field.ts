@@ -1,5 +1,5 @@
-import { formatAmount, formatDotCount, formatMultiple } from "../core/amount.ts";
-import type { CompareResult } from "../core/compare.ts";
+import { type Currency, formatAmount, formatDotCount, formatMultiple } from "../core/amount.ts";
+import type { CompareResult, Mode } from "../core/compare.ts";
 import type { FieldLayout, FieldTile } from "./field-layout.ts";
 import {
   calculateFieldLayout,
@@ -23,15 +23,27 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   return element;
 }
 
-function dotValueText(result: DrawableResult, locale: string): string {
-  const scaleText = result.dotScale > 1 ? `${formatMultiple(result.dotScale, locale)} times ` : "";
-  return `One dot: ${scaleText}everything you own, ${formatAmount(result.dotValue, "USD", locale)}`;
+/** How amounts are written: the browser locale and the page currency. */
+export interface FormatContext {
+  locale: string;
+  currency: Currency;
+}
+
+/** What one unit of the reader's own figure is called. */
+export function ownText(mode: Mode): string {
+  return mode === "income" ? "a year of your income" : "everything you own";
+}
+
+function dotValueText(result: DrawableResult, format: FormatContext): string {
+  const scaleText =
+    result.dotScale > 1 ? `${formatMultiple(result.dotScale, format.locale)} times ` : "";
+  return `One dot: ${scaleText}${ownText(result.mode)}, ${formatAmount(result.dotValue, format.currency, format.locale)}`;
 }
 
 /** "1,176 times everything you own", or "0.0059 of everything you own" below one. */
-function multipleText(multiple: number, locale: string): string {
+function multipleText(multiple: number, mode: Mode, locale: string): string {
   const joiner = multiple < 1 ? "of" : "times";
-  return `${formatMultiple(multiple, locale)} ${joiner} everything you own`;
+  return `${formatMultiple(multiple, locale)} ${joiner} ${ownText(mode)}`;
 }
 
 function giftDotText(giftDots: number, locale: string): string {
@@ -39,12 +51,13 @@ function giftDotText(giftDots: number, locale: string): string {
   return giftDots < 1 ? `${count} of one dot` : `${count} dots`;
 }
 
-function screenReaderSummary(result: DrawableResult, locale: string): string {
+function screenReaderSummary(result: DrawableResult, format: FormatContext): string {
+  const { locale, currency } = format;
   const scaleText = result.dotScale > 1 ? `${formatMultiple(result.dotScale, locale)} times ` : "";
   return [
-    `Each dot is ${scaleText}everything you own, ${formatAmount(result.dotValue, "USD", locale)}.`,
-    `The gift, ${formatAmount(result.gift, "USD", locale)}, is ${multipleText(result.giftMultiple, locale)}, drawn as ${giftDotText(result.giftDots, locale)}.`,
-    `The fortune, ${formatAmount(result.fortune, "USD", locale)}, is ${multipleText(result.fortuneMultiple, locale)}, drawn as ${formatDotCount(result.fortuneDots, locale)} dots.`,
+    `Each dot is ${scaleText}${ownText(result.mode)}, ${formatAmount(result.dotValue, currency, locale)}.`,
+    `The gift, ${formatAmount(result.gift, currency, locale)}, is ${multipleText(result.giftMultiple, result.mode, locale)}, drawn as ${giftDotText(result.giftDots, locale)}.`,
+    `The fortune, ${formatAmount(result.fortune, currency, locale)}, is ${multipleText(result.fortuneMultiple, result.mode, locale)}, drawn as ${formatDotCount(result.fortuneDots, locale)} dots.`,
   ].join(" ");
 }
 
@@ -52,7 +65,7 @@ type SmallFortuneResult = Extract<CompareResult, { kind: "small-fortune" }>;
 
 /** Both multiples are against the reader's own figure, so both sentences say so. */
 export function smallFortuneText(result: SmallFortuneResult, locale: string): string {
-  return `Their whole fortune is ${multipleText(result.fortuneMultiple, locale)}. The gift is ${multipleText(result.giftMultiple, locale)}.`;
+  return `Their whole fortune is ${multipleText(result.fortuneMultiple, result.mode, locale)}. The gift is ${multipleText(result.giftMultiple, result.mode, locale)}.`;
 }
 
 function renderSmallFortune(root: HTMLElement, result: SmallFortuneResult, locale: string): void {
@@ -147,7 +160,12 @@ function freeTile(canvas: HTMLCanvasElement): void {
 }
 
 /** Render the key and true-scale dot field. Returns a cleanup function for its observers and listeners. */
-export function renderField(root: HTMLElement, result: CompareResult, locale: string): () => void {
+export function renderField(
+  root: HTMLElement,
+  result: CompareResult,
+  format: FormatContext,
+): () => void {
+  const { locale, currency } = format;
   root.replaceChildren();
   if (result.kind === "small-fortune") {
     renderSmallFortune(root, result, locale);
@@ -163,18 +181,18 @@ export function renderField(root: HTMLElement, result: CompareResult, locale: st
   keyDots.append(fieldSizeDot, magnifiedDot);
   key.append(
     keyDots,
-    createElement("p", "field-key-copy technical-copy", dotValueText(result, locale)),
+    createElement("p", "field-key-copy technical-copy", dotValueText(result, format)),
   );
 
   const gift = createElement("div", "gift-block");
   const giftCopy = createElement("div", "gift-block-copy");
   giftCopy.append(
     createElement("p", "gift-block-title", "Their gift"),
-    createElement("p", "gift-block-amount", formatAmount(result.gift, "USD", locale)),
+    createElement("p", "gift-block-amount", formatAmount(result.gift, currency, locale)),
     createElement(
       "p",
       "gift-block-detail technical-copy",
-      `${multipleText(result.giftMultiple, locale)} · ${giftDotText(result.giftDots, locale)}`,
+      `${multipleText(result.giftMultiple, result.mode, locale)} · ${giftDotText(result.giftDots, locale)}`,
     ),
   );
   const giftNote = createElement(
@@ -201,12 +219,12 @@ export function renderField(root: HTMLElement, result: CompareResult, locale: st
   const closing = createElement(
     "p",
     "field-closing-line",
-    `That was ${formatAmount(result.fortune, "USD", locale)}: ${multipleText(result.fortuneMultiple, locale)} · ${formatDotCount(result.fortuneDots, locale)} dots.`,
+    `That was ${formatAmount(result.fortune, currency, locale)}: ${multipleText(result.fortuneMultiple, result.mode, locale)} · ${formatDotCount(result.fortuneDots, locale)} dots.`,
   );
   const summary = createElement(
     "p",
     "visually-hidden field-screen-reader-summary",
-    screenReaderSummary(result, locale),
+    screenReaderSummary(result, format),
   );
   summary.id = "field-screen-reader-summary";
   canvasHost.setAttribute("aria-describedby", summary.id);
@@ -241,7 +259,7 @@ export function renderField(root: HTMLElement, result: CompareResult, locale: st
     if (layout === undefined) return;
     // Count the dots scrolled past the top of the viewport; the closing line gives the full total.
     const currentAmount = Math.min(result.fortune, readPositionDots() * result.dotValue);
-    stickyText.textContent = `${formatAmount(currentAmount, "USD", locale)} of ${formatAmount(result.fortune, "USD", locale)}`;
+    stickyText.textContent = `${formatAmount(currentAmount, currency, locale)} of ${formatAmount(result.fortune, currency, locale)}`;
   };
 
   const updateLiveTiles = () => {

@@ -45,12 +45,38 @@ describe("parseAmount", () => {
     expect(parseAmount(input)).toEqual({ kind: "ok", value });
   });
 
-  it("reports a currency symbol that does not match the USD page", () => {
+  it("reports a currency symbol that does not match the page currency", () => {
     expect(parseAmount("€100M")).toEqual({
       kind: "invalid",
-      message: amountMessages.currency("€"),
+      message: "This page is set to US dollars. Change the currency above, or remove the €.",
+    });
+    expect(parseAmount("$100M", "EUR")).toEqual({
+      kind: "invalid",
+      message: amountMessages.currency("EUR", "$"),
+    });
+    expect(amountMessages.currency("EUR", "$")).toBe(
+      "This page is set to euros. Change the currency above, or remove the $.",
+    );
+    expect(parseAmount("¥100M", "INR")).toEqual({
+      kind: "invalid",
+      message: "This page is set to Indian rupees. Change the currency above, or remove the ¥.",
     });
   });
+
+  it.each([
+    ["$100M", "CAD"],
+    ["$100M", "AUD"],
+    ["€100M", "EUR"],
+    ["£100M", "GBP"],
+    ["₹100M", "INR"],
+    ["¥100M", "JPY"],
+    ["100M", "JPY"],
+  ] as const)(
+    "ignores a leading symbol matching the page currency: %s on %s",
+    (input, currency) => {
+      expect(parseAmount(input, currency)).toEqual({ kind: "ok", value: 100_000_000 });
+    },
+  );
 
   it.each(["1,5", "1,50", "12,3456", "1.234.567"])(
     'asks for a point for invalid decimal grouping in "%s"',
@@ -103,6 +129,21 @@ describe("formatAmount", () => {
     [1e15, "$1 quadrillion"],
   ])("formats %s as %s", (value, expected) => {
     expect(formatAmount(value, "USD", "en-US")).toBe(expected);
+  });
+
+  it.each([
+    [0, "EUR", "€0"],
+    [0.001, "GBP", "less than £0.01"],
+    [2_400_000_000, "EUR", "€2.4 billion"],
+    [85_000, "INR", "₹85,000"],
+    [85_000, "CAD", "CA$85,000"],
+    [0, "JPY", "¥0"],
+    [0.5, "JPY", "less than ¥1"],
+    [21.37, "JPY", "¥21"],
+    [85_000, "JPY", "¥85,000"],
+    [2_400_000_000, "JPY", "¥2.4 billion"],
+  ] as const)("formats %s %s as %s", (value, currency, expected) => {
+    expect(formatAmount(value, currency, "en-US")).toBe(expected);
   });
 
   it("uses the locale's currency placement and grouping", () => {

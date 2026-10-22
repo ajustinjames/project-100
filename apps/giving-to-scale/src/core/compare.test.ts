@@ -18,7 +18,7 @@ describe("compare field rules", () => {
     const result = compare({
       gift: parsed("10M"),
       fortune: parsed("200B"),
-      netWorth: parsed("150K"),
+      unit: parsed("150K"),
     });
 
     expect(result.kind).toBe("result");
@@ -32,7 +32,7 @@ describe("compare field rules", () => {
       const result = compare({
         gift: parsed(gift),
         fortune: parsed("240B"),
-        netWorth: parsed("85K"),
+        unit: parsed("85K"),
       });
       expect(expectIncomplete(result).errors.gift).toBe(fieldMessages.giftPositive);
     }
@@ -43,7 +43,7 @@ describe("compare field rules", () => {
       const result = compare({
         gift: parsed("100M"),
         fortune: parsed(fortune),
-        netWorth: parsed("85K"),
+        unit: parsed("85K"),
       });
       expect(expectIncomplete(result).errors.fortune).toBe(fieldMessages.fortunePositive);
     }
@@ -53,7 +53,7 @@ describe("compare field rules", () => {
     const result = compare({
       gift: parsed("241B"),
       fortune: parsed("240B"),
-      netWorth: parsed("85K"),
+      unit: parsed("85K"),
     });
 
     expect(expectIncomplete(result).errors).toEqual({ gift: fieldMessages.giftOverFortune });
@@ -63,7 +63,7 @@ describe("compare field rules", () => {
     const result = compare({
       gift: parsed("€100M"),
       fortune: parsed("240B"),
-      netWorth: parsed("85K"),
+      unit: parsed("85K"),
     });
 
     expect(expectIncomplete(result).errors.gift).toContain("US dollars");
@@ -74,7 +74,7 @@ describe("compare field rules", () => {
       const result = compare({
         gift: parsed("100M"),
         fortune: parsed("240B"),
-        netWorth: parsed(netWorth),
+        unit: parsed(netWorth),
       });
       expect(result).toEqual({
         kind: "net-worth-zero",
@@ -85,25 +85,57 @@ describe("compare field rules", () => {
   });
 
   it("does not show the zero-net-worth message while another field is missing or invalid", () => {
-    expect(compare({ gift: parsed(""), fortune: parsed("240B"), netWorth: parsed("0") })).toEqual({
+    expect(compare({ gift: parsed(""), fortune: parsed("240B"), unit: parsed("0") })).toEqual({
       kind: "incomplete",
       errors: {},
     });
-    expect(
-      compare({ gift: parsed("100M"), fortune: parsed("abc"), netWorth: parsed("0") }),
-    ).toEqual({
+    expect(compare({ gift: parsed("100M"), fortune: parsed("abc"), unit: parsed("0") })).toEqual({
       kind: "incomplete",
       errors: { fortune: expect.any(String) },
     });
   });
 
   it("keeps empty fields message-free and incomplete", () => {
-    expect(compare({ gift: parsed(""), fortune: parsed("240B"), netWorth: parsed("85K") })).toEqual(
-      {
-        kind: "incomplete",
-        errors: {},
-      },
-    );
+    expect(compare({ gift: parsed(""), fortune: parsed("240B"), unit: parsed("85K") })).toEqual({
+      kind: "incomplete",
+      errors: {},
+    });
+  });
+});
+
+describe("compare in income mode", () => {
+  it("measures against a year of income and keeps the mode on the result", () => {
+    const result = compare({
+      gift: parsed("100M"),
+      fortune: parsed("240B"),
+      unit: parsed("60K"),
+      mode: "income",
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.mode).toBe("income");
+    expect(result.equivalent).toBe(25);
+    expect(result.giftMultiple).toBeCloseTo(1_666.667, 3);
+    expect(result.dotValue).toBe(600_000);
+  });
+
+  it("shows a field error for a yearly income of zero or less", () => {
+    for (const income of ["0", "-12K"]) {
+      const result = compare({
+        gift: parsed("100M"),
+        fortune: parsed("240B"),
+        unit: parsed(income),
+        mode: "income",
+      });
+      expect(expectIncomplete(result).errors).toEqual({ unit: fieldMessages.incomePositive });
+    }
+  });
+
+  it("gives a result for a -12K net worth once switched to income", () => {
+    const inputs = { gift: parsed("100M"), fortune: parsed("240B") };
+    expect(compare({ ...inputs, unit: parsed("-12K") }).kind).toBe("net-worth-zero");
+    expect(compare({ ...inputs, unit: parsed("60K"), mode: "income" }).kind).toBe("result");
   });
 });
 
@@ -112,7 +144,7 @@ describe("compare results and dot plan", () => {
     const result = compare({
       gift: parsed("100M"),
       fortune: parsed("240B"),
-      netWorth: parsed("85K"),
+      unit: parsed("85K"),
     });
 
     expect(result.kind).toBe("result");
@@ -135,7 +167,7 @@ describe("compare results and dot plan", () => {
     const result = compare({
       gift: parsed("10M"),
       fortune: parsed("200B"),
-      netWorth: parsed("150K"),
+      unit: parsed("150K"),
     });
 
     expect(result.kind).toBe("result");
@@ -149,7 +181,7 @@ describe("compare results and dot plan", () => {
     const result = compare({
       gift: parsed("250"),
       fortune: parsed("5,000"),
-      netWorth: parsed("1,000"),
+      unit: parsed("1,000"),
     });
 
     expect(result.kind).toBe("result");
@@ -166,7 +198,7 @@ describe("compare results and dot plan", () => {
     const result = compare({
       gift: parsed("1"),
       fortune: parsed("20,000,001"),
-      netWorth: parsed("1"),
+      unit: parsed("1"),
     });
 
     expect(result.kind).toBe("result");
@@ -181,14 +213,15 @@ describe("compare results and dot plan", () => {
     const result = compare({
       gift: parsed("1,700"),
       fortune: parsed("400,000"),
-      netWorth: parsed("1,000,000"),
+      unit: parsed("1,000,000"),
     });
 
     expect(result).toEqual({
       kind: "small-fortune",
+      mode: "net-worth",
       gift: 1_700,
       fortune: 400_000,
-      netWorth: 1_000_000,
+      unit: 1_000_000,
       share: 0.00425,
       equivalent: 4_250,
       giftMultiple: 0.0017,

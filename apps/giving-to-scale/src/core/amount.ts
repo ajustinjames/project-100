@@ -3,11 +3,38 @@ export type AmountParseResult =
   | { kind: "ok"; value: number }
   | { kind: "invalid"; message: string };
 
+export const CURRENCIES = ["USD", "CAD", "AUD", "EUR", "GBP", "INR", "JPY"] as const;
+export type Currency = (typeof CURRENCIES)[number];
+
+interface CurrencyDetails {
+  /** The symbol a reader might type before an amount. */
+  symbol: string;
+  /** Lower-case name used inside sentences: "This page is set to euros." */
+  name: string;
+  /** The smallest amount shown without "less than": a cent, or one yen. */
+  smallestUnit: number;
+}
+
+export const currencyDetails: Record<Currency, CurrencyDetails> = {
+  USD: { symbol: "$", name: "US dollars", smallestUnit: 0.01 },
+  CAD: { symbol: "$", name: "Canadian dollars", smallestUnit: 0.01 },
+  AUD: { symbol: "$", name: "Australian dollars", smallestUnit: 0.01 },
+  EUR: { symbol: "€", name: "euros", smallestUnit: 0.01 },
+  GBP: { symbol: "£", name: "British pounds", smallestUnit: 0.01 },
+  INR: { symbol: "₹", name: "Indian rupees", smallestUnit: 0.01 },
+  JPY: { symbol: "¥", name: "Japanese yen", smallestUnit: 1 },
+};
+
+export function isCurrency(value: string): value is Currency {
+  return (CURRENCIES as readonly string[]).includes(value);
+}
+
 export const amountMessages = {
   invalid: "Enter an amount like 100M or 2.4 billion.",
   decimal: "Use a point for decimals, like 1.5M.",
   tooLarge: "That's larger than this page can handle.",
-  currency: (symbol: string) => `This page uses US dollars. Remove the ${symbol}.`,
+  currency: (currency: Currency, symbol: string) =>
+    `This page is set to ${currencyDetails[currency].name}. Change the currency above, or remove the ${symbol}.`,
 } as const;
 
 const suffixMultipliers: Record<string, number> = {
@@ -35,16 +62,16 @@ const decimalInvalid = (): AmountParseResult => ({
   message: amountMessages.decimal,
 });
 
-/** Parse a shorthand amount in the page's currency. PR 1 is USD-only. */
-export function parseAmount(text: string, currency: "USD" = "USD"): AmountParseResult {
+/** Parse a shorthand amount in the page's currency. */
+export function parseAmount(text: string, currency: Currency = "USD"): AmountParseResult {
   let input = text.trim();
   if (input === "") return { kind: "empty" };
 
   input = input.replaceAll("−", "-");
   const leadingSymbol = currencySymbols.find((symbol) => input.startsWith(symbol));
   if (leadingSymbol !== undefined) {
-    if (leadingSymbol !== "$" || currency !== "USD") {
-      return { kind: "invalid", message: amountMessages.currency(leadingSymbol) };
+    if (leadingSymbol !== currencyDetails[currency].symbol) {
+      return { kind: "invalid", message: amountMessages.currency(currency, leadingSymbol) };
     }
     input = input.slice(1).trimStart();
   }
@@ -103,12 +130,16 @@ export function parseAmount(text: string, currency: "USD" = "USD"): AmountParseR
 
 const compactUnits = ["", "thousand", "million", "billion", "trillion", "quadrillion"] as const;
 
-function currencyFormatter(locale: string, maximumFractionDigits: number): Intl.NumberFormat {
+function currencyFormatter(
+  locale: string,
+  currency: Currency,
+  fractionDigits: number,
+): Intl.NumberFormat {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits,
+    currency,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   });
 }
 
@@ -149,29 +180,20 @@ function localizedDecimal(value: number, significantDigits: number, locale: stri
   return separator === undefined ? decimal : decimal.replace(".", separator);
 }
 
-/** Format a non-negative USD amount using the browser locale for separators. */
-export function formatAmount(value: number, currency: "USD" = "USD", locale = "en-US"): string {
+/** Format a non-negative amount using the browser locale for separators. */
+export function formatAmount(value: number, currency: Currency = "USD", locale = "en-US"): string {
   if (value < 0 || !Number.isFinite(value))
     throw new RangeError("formatAmount requires a finite non-negative amount");
-  if (value === 0) return currencyFormatter(locale, 0).format(0);
+  if (value === 0) return currencyFormatter(locale, currency, 0).format(0);
 
-  const formatter = currencyFormatter(locale, 2);
-  if (value < 0.01) return `less than ${formatter.format(0.01)}`;
-  if (value < 100) {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+  const { smallestUnit } = currencyDetails[currency];
+  // Yen have no minor unit, so small yen amounts are whole yen.
+  const smallFractionDigits = smallestUnit < 1 ? 2 : 0;
+  if (value < smallestUnit) {
+    return `less than ${currencyFormatter(locale, currency, smallFractionDigits).format(smallestUnit)}`;
   }
-  if (value < 1e6) {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
+  if (value < 100) return currencyFormatter(locale, currency, smallFractionDigits).format(value);
+  if (value < 1e6) return currencyFormatter(locale, currency, 0).format(value);
 
   let unitIndex = Math.floor(Math.log10(value) / 3);
   unitIndex = Math.min(unitIndex, compactUnits.length - 1);

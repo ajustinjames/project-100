@@ -41,7 +41,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -58,7 +59,6 @@ input {
 
 .technical-copy,
 .eyebrow,
-.currency-help,
 .answer-label,
 .field-sticky,
 .gift-block-title {
@@ -114,10 +114,11 @@ input {
 }
 
 .amount-part {
-  display: inline-grid;
-  grid-template-columns: auto auto;
+  display: inline-flex;
+  flex-wrap: wrap;
   align-items: baseline;
   column-gap: 0.38em;
+  max-width: 100%;
   margin: 0.15em 0.28em 0.15em 0;
   vertical-align: baseline;
 }
@@ -126,9 +127,11 @@ input {
   cursor: text;
 }
 
+/* Inputs widen to fit what's typed (fitInputWidth), up to the line. */
 .amount-part input {
   width: 6.5ch;
   min-width: 6.5ch;
+  max-width: 100%;
   min-height: 48px;
   padding: 0.25rem 0.45rem;
   border: 2px solid var(--ink);
@@ -154,7 +157,7 @@ input {
 }
 
 .field-error {
-  grid-column: 1 / -1;
+  flex-basis: 100%;
   min-height: 0;
   max-width: 22rem;
   color: var(--ink);
@@ -170,9 +173,45 @@ input {
   border-left: 2px solid var(--ink);
 }
 
-.currency-help {
+.form-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
   margin: 1rem 0 0;
   color: var(--muted);
+}
+
+.currency-control {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.currency-control hl-select {
+  min-height: 44px;
+}
+
+.currency-control select {
+  min-height: 42px;
+}
+
+.text-button {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+.text-button:hover {
+  text-decoration-thickness: 2px;
 }
 
 .answer-section {
@@ -207,6 +246,11 @@ input {
   margin: 0;
   font-size: clamp(1.2rem, 3vw, 1.65rem);
   line-height: 1.4;
+}
+
+.answer-switch {
+  margin-top: 0.75rem;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
 }
 
 .field-section {
@@ -341,6 +385,49 @@ input {
   line-height: 1.5;
 }
 
+.reverse-section {
+  max-width: 68rem;
+  margin: clamp(3.5rem, 8vw, 6rem) 0 0;
+  padding-top: 1.35rem;
+  border-top: 2px solid var(--ink);
+}
+
+.reverse-sentence {
+  margin: 0;
+  font-size: clamp(1.3rem, 3.4vw, 2.15rem);
+  font-weight: 470;
+  letter-spacing: -0.035em;
+  line-height: 1.8;
+}
+
+.reverse-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 740;
+}
+
+.share-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin: 1.75rem 0 0;
+}
+
+.share-section button {
+  min-height: 44px;
+}
+
+.share-note,
+.share-status {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.share-status:empty {
+  display: none;
+}
+
 .notes {
   max-width: 52rem;
   margin: clamp(3.5rem, 8vw, 6rem) 0 0;
@@ -386,7 +473,8 @@ input {
     margin-bottom: 2.4rem;
   }
 
-  .amount-sentence {
+  .amount-sentence,
+  .reverse-sentence {
     font-size: clamp(1.25rem, 6vw, 1.55rem);
     line-height: 1.85;
   }

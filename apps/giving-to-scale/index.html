@@ -14,28 +14,42 @@
         <p class="page-deck">See a gift as the same share of what you have.</p>
       </header>
 
-      <form id="amount-form" class="amount-form" novalidate aria-label="Enter the gift, fortune, and your net worth">
+      <form id="amount-form" class="amount-form" novalidate aria-label="Enter the gift, the fortune, and your own figure">
         <p class="amount-sentence">
           <span class="amount-part">
-            <label for="gift">A gift of <span class="visually-hidden">in US dollars</span></label>
-            <input id="gift" name="gift" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="100M" aria-describedby="currency-help gift-error" aria-invalid="false" />
+            <label for="gift">A gift of <span class="visually-hidden currency-name">in US dollars</span></label>
+            <input id="gift" name="gift" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="100M" aria-describedby="gift-error" aria-invalid="false" />
             <span class="field-error" id="gift-error"></span>
           </span>
           <span class="sentence-fragment">from</span>
           <span class="amount-part">
-            <label for="fortune">a fortune of <span class="visually-hidden">in US dollars</span></label>
-            <input id="fortune" name="fortune" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="240B" aria-describedby="currency-help fortune-error" aria-invalid="false" />
+            <label for="fortune">a fortune of <span class="visually-hidden currency-name">in US dollars</span></label>
+            <input id="fortune" name="fortune" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="240B" aria-describedby="fortune-error" aria-invalid="false" />
             <span class="field-error" id="fortune-error"></span>
-          </span>
-          <span class="sentence-fragment">.</span>
+          </span><span class="sentence-fragment">.</span>
           <span class="amount-part">
-            <label for="net-worth">My net worth is <span class="visually-hidden">in US dollars</span></label>
-            <input id="net-worth" name="net-worth" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="85K" aria-describedby="currency-help net-worth-error" aria-invalid="false" />
-            <span class="field-error" id="net-worth-error"></span>
-          </span>
-          <span class="sentence-fragment">.</span>
+            <label for="unit"><span id="unit-label-text">My net worth is</span> <span class="visually-hidden currency-name">in US dollars</span></label>
+            <input id="unit" name="unit" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="85K" aria-describedby="unit-error" aria-invalid="false" />
+            <span class="field-error" id="unit-error"></span>
+          </span><span class="sentence-fragment">.</span>
         </p>
-        <p class="currency-help technical-copy" id="currency-help">All amounts are in US dollars.</p>
+        <div class="form-controls technical-copy">
+          <span class="currency-control">
+            <label for="currency">All amounts are in</label>
+            <hl-select>
+              <select id="currency" name="currency">
+                <option value="USD" selected>US dollars (USD)</option>
+                <option value="CAD">Canadian dollars (CAD)</option>
+                <option value="AUD">Australian dollars (AUD)</option>
+                <option value="EUR">Euros (EUR)</option>
+                <option value="GBP">British pounds (GBP)</option>
+                <option value="INR">Indian rupees (INR)</option>
+                <option value="JPY">Japanese yen (JPY)</option>
+              </select>
+            </hl-select>
+          </span>
+          <button id="mode-switch" class="text-button" type="button">Compare with yearly income instead</button>
+        </div>
       </form>
 
       <section id="answer" class="answer-section" aria-live="polite" aria-atomic="true" hidden>
@@ -43,14 +57,33 @@
         <p id="answer-amount" class="answer-amount"></p>
         <p id="answer-summary" class="answer-summary"></p>
         <p id="answer-message" class="answer-message"></p>
+        <button id="answer-switch" class="text-button answer-switch" type="button" hidden>Compare with your yearly income instead</button>
       </section>
 
       <section id="field-section" class="field-section" aria-label="Fortune and gift shown at scale" hidden></section>
 
+      <section id="reverse" class="reverse-section" aria-label="Your gift at their scale" hidden>
+        <p class="reverse-sentence">
+          <span class="amount-part">
+            <label for="reverse-gift">If I gave <span class="visually-hidden currency-name">in US dollars</span></label>
+            <input id="reverse-gift" name="reverse-gift" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="50" aria-describedby="reverse-gift-error" aria-invalid="false" />
+            <span class="field-error" id="reverse-gift-error"></span>
+          </span><span class="sentence-fragment">,</span>
+          <span id="reverse-tail" class="sentence-fragment">the same share of their fortune would be</span>
+          <output id="reverse-amount" class="reverse-amount" for="reverse-gift" aria-live="polite">…</output><span class="sentence-fragment">.</span>
+        </p>
+      </section>
+
       <aside class="notes" aria-label="Notes">
         <p>Fortunes are estimates, and mostly not cash. Pledges may be paid over years. These results use the figures you entered.</p>
-        <p>Nothing you enter is saved or sent. Your figures stay on this page.</p>
+        <p>Nothing you enter is saved. Your own figure stays on this page; a share link carries only the gift, the fortune, and the currency.</p>
       </aside>
+
+      <section id="share" class="share-section" aria-label="Share" hidden>
+        <hl-btn><button id="share-button" type="button">Share this gift</button></hl-btn>
+        <p id="share-note" class="share-note technical-copy" hidden>Gifts this small can't be shared as a link.</p>
+        <p id="share-status" class="share-status technical-copy" role="status"></p>
+      </section>
     </main>
     <!-- p100:footer -->
   </body>
