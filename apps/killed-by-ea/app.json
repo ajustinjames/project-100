@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": null,
+  "id": 5,
   "slug": "killed-by-ea",
   "name": "Killed by EA",
-  "status": "candidate",
+  "status": "labs",
   "description": "A dated, sourced archive of what Electronic Arts closed, merged, cancelled, or retired: studios, games' online services, cancelled games, and ended products, searchable on one timeline up to a stated cutoff.",
   "problem": "The record of EA's closures is split across EA's three alphabetical shutdown pages (which mix in EA Play catalog removals and cover no studios or cancellations), Wikipedia tables without closure years, and years of one-off news posts, so there is no single dated timeline to search or cite.",
   "category": "games",
@@ -13,10 +13,12 @@
     "archived": null
   },
   "design": {
-    "system": null
+    "system": "hardline"
   },
   "dependencies": [],
-  "sharedPackages": [],
+  "sharedPackages": [
+    "@project-100/web"
+  ],
   "privacy": "none",
   "analytics": "standard",
   "monetization": {
