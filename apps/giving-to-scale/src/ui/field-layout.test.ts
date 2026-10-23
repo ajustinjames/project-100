@@ -7,6 +7,7 @@ import {
   GIFT_BLOCK_MAX_CSS_HEIGHT,
   LANDMARK_EDGE_CLEARANCE,
   LANDMARK_MIN_SPACING,
+  MAX_LANDMARKS,
   planDotBands,
   planLandmarks,
   roundStepAtLeast,
@@ -214,9 +215,10 @@ describe("roundStepAtLeast", () => {
     expect(roundStepAtLeast(1.7e9)).toBe(2e9);
   });
 
-  it("rejects a minimum that is not positive", () => {
+  it("rejects a minimum that is not positive, or too small to round", () => {
     expect(() => roundStepAtLeast(0)).toThrow(RangeError);
     expect(() => roundStepAtLeast(Number.NaN)).toThrow(RangeError);
+    expect(() => roundStepAtLeast(1e-323)).toThrow(RangeError);
   });
 });
 
@@ -243,6 +245,26 @@ describe("planLandmarks", () => {
         }
       }
     }
+  });
+
+  it("puts each line below the row where its amount is reached, never above", () => {
+    // $9.96 dots, 100 to a row: $100,000 is reached 40% into row 101, so the line goes after it.
+    const columns = 100;
+    const dotValue = 9.96;
+    const landmarks = planLandmarks(columns, dotValue, 1_000_000 / dotValue);
+    expect(landmarks[0]).toEqual({ amount: 100_000, top: 101 * DOT_PITCH });
+    for (const landmark of landmarks) {
+      const amountAbove = (landmark.top / DOT_PITCH) * columns * dotValue;
+      expect(amountAbove).toBeGreaterThanOrEqual(landmark.amount);
+      expect(amountAbove - columns * dotValue).toBeLessThan(landmark.amount);
+    }
+  });
+
+  it("spreads landmarks out on a very narrow field to stay within the limit", () => {
+    // 10 columns at the 2,000,000-dot cap: a field 600,000 px tall.
+    const landmarks = planLandmarks(10, 1, 2_000_000);
+    expect(landmarks.length).toBeLessThanOrEqual(MAX_LANDMARKS);
+    expect(landmarks.length).toBeGreaterThan(MAX_LANDMARKS / 3);
   });
 
   it("draws none on a field shorter than one step", () => {

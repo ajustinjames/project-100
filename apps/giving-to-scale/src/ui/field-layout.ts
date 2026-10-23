@@ -152,15 +152,18 @@ export function planDotBands(columns: number, giftDots: number, fortuneDots: num
  * identical dots looks still while it scrolls, so they show that it is moving, and how far.
  * The step is the smallest 1, 2, or 5 times a power of ten that keeps them at least
  * LANDMARK_MIN_SPACING apart, so they fall 300-750 px apart: one to three on screen at a time.
+ * A very narrow field (heavy zoom) is very tall, so there they spread out to stay within
+ * MAX_LANDMARKS.
  */
 export const LANDMARK_MIN_SPACING = 300;
+export const MAX_LANDMARKS = 200;
 /** No landmark this close to the field's top or bottom edge, where its label would be cut off. */
 export const LANDMARK_EDGE_CLEARANCE = 24;
 
 export interface Landmark {
   /** The amount of the fortune above the line. */
   amount: number;
-  /** The line's position from the top of the field, in CSS pixels, at a row boundary. */
+  /** The line's position from the top of the field, in CSS pixels: the first row boundary with at least `amount` above it. */
   top: number;
 }
 
@@ -168,26 +171,33 @@ export interface Landmark {
 export function roundStepAtLeast(minimum: number): number {
   assertPositiveFinite(minimum, "Minimum step");
   const power = 10 ** Math.floor(Math.log10(minimum));
+  // Far below any amount the app uses, the power of ten can round to zero.
+  if (power <= 0) throw new RangeError("Minimum step is too small");
   for (const multiple of [1, 2, 5]) {
     if (multiple * power >= minimum) return multiple * power;
   }
   return 10 * power;
 }
 
-/** Place a landmark at each multiple of a round step, at the row boundary nearest that amount. */
+/** Place a landmark at each multiple of a round step, at the first row boundary at or after that amount. */
 export function planLandmarks(columns: number, dotValue: number, fortuneDots: number): Landmark[] {
   assertPositiveFinite(columns, "Columns");
   assertPositiveFinite(dotValue, "Dot value");
   assertPositiveFinite(fortuneDots, "Fortune dot count");
 
   // One row of dots is `columns * dotValue` of the fortune and DOT_PITCH pixels tall.
-  const step = roundStepAtLeast((LANDMARK_MIN_SPACING / DOT_PITCH) * columns * dotValue);
+  const totalHeight = Math.ceil(fortuneDots / columns) * DOT_PITCH;
+  const minSpacing = Math.max(LANDMARK_MIN_SPACING, totalHeight / MAX_LANDMARKS);
+  const step = roundStepAtLeast((minSpacing / DOT_PITCH) * columns * dotValue);
   const fortune = fortuneDots * dotValue;
-  const lastTop = Math.ceil(fortuneDots / columns) * DOT_PITCH - LANDMARK_EDGE_CLEARANCE;
+  const lastTop = totalHeight - LANDMARK_EDGE_CLEARANCE;
   const landmarks: Landmark[] = [];
   for (let index = 1; index * step < fortune; index += 1) {
     const amount = index * step;
-    const top = Math.round(amount / dotValue / columns) * DOT_PITCH;
+    // The line goes below the row where the amount is reached, never above it. The small
+    // allowance keeps an exact boundary, like $10,000 after 100 rows of $100, from moving a row.
+    const row = Math.ceil(amount / dotValue / columns - 1e-9);
+    const top = row * DOT_PITCH;
     if (top > lastTop) break;
     if (top >= LANDMARK_EDGE_CLEARANCE) landmarks.push({ amount, top });
   }
