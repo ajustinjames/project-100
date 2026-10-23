@@ -56,8 +56,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/web
       vite:
-        specifier: ^8.3.1
-        version: 8.3.1(@types/node@24.13.6)
+        specifier: ^8.3.4
+        version: 8.3.4(@types/node@24.13.6)
 
   apps/score-strips:
     dependencies:
