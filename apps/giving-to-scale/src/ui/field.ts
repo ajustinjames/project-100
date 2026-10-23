@@ -1,12 +1,13 @@
 import { type Currency, formatAmount, formatDotCount, formatMultiple } from "../core/amount.ts";
 import type { CompareResult, Mode } from "../core/compare.ts";
-import type { DotBand, DotColor, DotSegment, FieldLayout } from "./field-layout.ts";
+import type { DotBand, DotColor, DotSegment, FieldLayout, Landmark } from "./field-layout.ts";
 import {
   calculateFieldLayout,
   calculateGiftBlock,
   DOT_PITCH,
   DOT_SIZE,
   planDotBands,
+  planLandmarks,
 } from "./field-layout.ts";
 import { startWalk } from "./walk.ts";
 
@@ -112,6 +113,28 @@ function renderBands(container: HTMLElement, bands: DotBand[], columns: number):
   );
 }
 
+/** Rule a line across the field at each landmark, labelled with the amount above it. */
+function renderLandmarks(
+  container: HTMLElement,
+  landmarks: Landmark[],
+  format: FormatContext,
+): void {
+  container.replaceChildren(
+    ...landmarks.map((landmark) => {
+      const line = createElement("span", "field-landmark");
+      line.style.top = `${landmark.top}px`;
+      line.append(
+        createElement(
+          "span",
+          "field-landmark-label",
+          formatAmount(landmark.amount, format.currency, format.locale),
+        ),
+      );
+      return line;
+    }),
+  );
+}
+
 /** Render the key and true-scale dot field. Returns a cleanup function for its observers and listeners. */
 export function renderField(
   root: HTMLElement,
@@ -170,7 +193,9 @@ export function renderField(
   field.tabIndex = 0;
   const fieldDots = createElement("div", "dot-field-dots");
   fieldDots.setAttribute("aria-hidden", "true");
-  field.append(fieldDots);
+  const fieldLandmarks = createElement("div", "dot-field-landmarks");
+  fieldLandmarks.setAttribute("aria-hidden", "true");
+  field.append(fieldDots, fieldLandmarks);
   const fortuneTitle = createElement("div", "field-title-row");
   const walkButton = createElement(
     "button",
@@ -270,6 +295,11 @@ export function renderField(
       fieldDots,
       planDotBands(layout.columns, result.giftDots, result.fortuneDots),
       layout.columns,
+    );
+    renderLandmarks(
+      fieldLandmarks,
+      planLandmarks(layout.columns, result.dotValue, result.fortuneDots),
+      format,
     );
 
     const block = calculateGiftBlock(result.giftDots, layout.columns);

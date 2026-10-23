@@ -146,3 +146,50 @@ export function planDotBands(columns: number, giftDots: number, fortuneDots: num
   }
   return bands;
 }
+
+/**
+ * Landmarks are ruled lines across the field at round amounts ("$10B", "$20B", ...). A field of
+ * identical dots looks still while it scrolls, so they show that it is moving, and how far.
+ * The step is the smallest 1, 2, or 5 times a power of ten that keeps them at least
+ * LANDMARK_MIN_SPACING apart, so they fall 300-750 px apart: one to three on screen at a time.
+ */
+export const LANDMARK_MIN_SPACING = 300;
+/** No landmark this close to the field's top or bottom edge, where its label would be cut off. */
+export const LANDMARK_EDGE_CLEARANCE = 24;
+
+export interface Landmark {
+  /** The amount of the fortune above the line. */
+  amount: number;
+  /** The line's position from the top of the field, in CSS pixels, at a row boundary. */
+  top: number;
+}
+
+/** The smallest 1, 2, or 5 times a power of ten that is at least `minimum`. */
+export function roundStepAtLeast(minimum: number): number {
+  assertPositiveFinite(minimum, "Minimum step");
+  const power = 10 ** Math.floor(Math.log10(minimum));
+  for (const multiple of [1, 2, 5]) {
+    if (multiple * power >= minimum) return multiple * power;
+  }
+  return 10 * power;
+}
+
+/** Place a landmark at each multiple of a round step, at the row boundary nearest that amount. */
+export function planLandmarks(columns: number, dotValue: number, fortuneDots: number): Landmark[] {
+  assertPositiveFinite(columns, "Columns");
+  assertPositiveFinite(dotValue, "Dot value");
+  assertPositiveFinite(fortuneDots, "Fortune dot count");
+
+  // One row of dots is `columns * dotValue` of the fortune and DOT_PITCH pixels tall.
+  const step = roundStepAtLeast((LANDMARK_MIN_SPACING / DOT_PITCH) * columns * dotValue);
+  const fortune = fortuneDots * dotValue;
+  const lastTop = Math.ceil(fortuneDots / columns) * DOT_PITCH - LANDMARK_EDGE_CLEARANCE;
+  const landmarks: Landmark[] = [];
+  for (let index = 1; index * step < fortune; index += 1) {
+    const amount = index * step;
+    const top = Math.round(amount / dotValue / columns) * DOT_PITCH;
+    if (top > lastTop) break;
+    if (top >= LANDMARK_EDGE_CLEARANCE) landmarks.push({ amount, top });
+  }
+  return landmarks;
+}
