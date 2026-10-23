@@ -260,6 +260,21 @@ describe("planLandmarks", () => {
     }
   });
 
+  it("keeps a line below its amount when rounding lands just short of a row boundary", () => {
+    // Review round 2: with $9,999,999,999.99 dots, $100 trillion works out to 100.0000000001
+    // rows, which the allowance alone rounds to 100 rows: $100 short of it.
+    const columns = 100;
+    const dotValue = 9_999_999_999.99;
+    const landmarks = planLandmarks(columns, dotValue, 2_000_000);
+    const hundredTrillion = landmarks.find((landmark) => landmark.amount === 1e14);
+    expect(hundredTrillion?.top).toBe(101 * DOT_PITCH);
+    for (const landmark of landmarks) {
+      expect((landmark.top / DOT_PITCH) * columns * dotValue).toBeGreaterThanOrEqual(
+        landmark.amount,
+      );
+    }
+  });
+
   it("spreads landmarks out on a very narrow field to stay within the limit", () => {
     // 10 columns at the 2,000,000-dot cap: a field 600,000 px tall.
     const landmarks = planLandmarks(10, 1, 2_000_000);

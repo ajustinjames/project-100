@@ -195,8 +195,10 @@ export function planLandmarks(columns: number, dotValue: number, fortuneDots: nu
   for (let index = 1; index * step < fortune; index += 1) {
     const amount = index * step;
     // The line goes below the row where the amount is reached, never above it. The small
-    // allowance keeps an exact boundary, like $10,000 after 100 rows of $100, from moving a row.
-    const row = Math.ceil(amount / dotValue / columns - 1e-9);
+    // allowance keeps an exact boundary, like $10,000 after 100 rows of $100, from moving a row;
+    // the check after it moves the line down if rounding left it short of the amount.
+    let row = Math.ceil(amount / dotValue / columns - 1e-9);
+    if (row * columns * dotValue < amount) row += 1;
     const top = row * DOT_PITCH;
     if (top > lastTop) break;
     if (top >= LANDMARK_EDGE_CLEARANCE) landmarks.push({ amount, top });
