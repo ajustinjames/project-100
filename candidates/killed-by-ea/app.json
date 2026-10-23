@@ -22,6 +22,12 @@
   "monetization": {
     "eligible": false
   },
-  "approvals": [],
+  "approvals": [
+    {
+      "kind": "sensitive-subject",
+      "date": "2026-10-23",
+      "ref": "https://github.com/ajustinjames/project-100/issues/53#issuecomment-6364422843"
+    }
+  ],
   "rejection": null
 }
