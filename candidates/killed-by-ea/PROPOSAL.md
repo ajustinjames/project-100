@@ -76,25 +76,25 @@ Also: no ads and no third-party scripts beyond the project's standard analytics,
 - Not for search traffic, ads, novelty alone, or use of AI: yes.
 - No ongoing human curation or moderation: yes, after the revision. The archive is complete and correct as of its stated cutoff, and it says so. It makes no claims about current status or upcoming events, so it doesn't go wrong when EA announces more. A later dated edition is optional, never needed for the page to stay correct. Remaining upkeep is source links breaking, which the archived copies cover.
 - Runs within baseline budget: yes, a static page.
-- No sensitive subject: **close to one.** Every entry is a factual claim about a named company, under a critical title. That's close to misinformation-sensitive, so I'm escalating.
+- No sensitive subject: yes. I first escalated it as close to misinformation-sensitive, since every entry is a factual claim about a named company under a critical title. The owner ruled on 2026-10-23 that it is not a sensitive subject ([#53](https://github.com/ajustinjames/project-100/issues/53#issuecomment-6364532293)): game and studio closures are low-stakes, sourced facts, not health, money, law, safety, or politics.
 - No accounts / personal data / UGC / external API (or approval requested): yes.
 
 ## Risks
 
 - **Accuracy about a real company.** Mitigations: a source and an archived copy on every entry, neutral wording ("closed", "merged", "online services retired"), "killed" used only in the title as the genre's convention, and a corrections link.
 - **Classification errors.** Telling a server retirement apart from a catalog removal, or a closure from a merger, is the hard part, and errors here are factual errors. The schema requires a status, and the build brief should gate the prototype on a hand-checked sample.
-- **The name.** "Killed by EA" uses EA's name critically. It's descriptive use, as with Killed by Google, and there are no logos. The owner should confirm it with the sensitive-subject approval.
+- **The name.** "Killed by EA" uses EA's name critically. It's descriptive use, as with Killed by Google, and there are no logos. The owner kept the name (2026-10-23).
 - **A frozen archive ages.** Players may expect it to be current. The cutoff is shown at the top, and the page points them to EA's lists for current status.
 - **Dataset effort.** Sources disagree on some dates (Bullfrog, Westwood). Where they do, the entry gives the best-supported date and says the sources differ.
 
 ## Open questions
 
-- Keep the name "Killed by EA", or use a more neutral one such as "EA Graveyard"? Proposed: keep it, and the owner confirms it with the approval.
+- Keep the name "Killed by EA", or use a more neutral one such as "EA Graveyard"? Settled: the owner kept "Killed by EA" (2026-10-23).
 - Cutoff date: settled after the re-score as 22 October 2026, fixed before the dataset is assembled.
 
 ## Escalations needed
 
-- `sensitive-subject`: every entry is a factual claim about a named company, under a critical title. Requested in [#53](https://github.com/ajustinjames/project-100/issues/53).
+None. A `sensitive-subject` request ([#53](https://github.com/ajustinjames/project-100/issues/53)) was withdrawn after the owner ruled it is not a sensitive subject ([ruling](https://github.com/ajustinjames/project-100/issues/53#issuecomment-6364532293)).
 
 ## Critique
 
@@ -135,3 +135,5 @@ The Critic also found Games That Weren't, which is now in the table. These respo
 2026-10-22: Selected for Labs because it scored 13/20 after the revise round, the Critic explicitly accepted that the revision resolves the Critical finding, and it is the only eligible candidate (no benched candidates are waiting). The critique shaped it from a live tracker into a fixed archive with stated inclusion and date rules.
 
 2026-10-22: Blocked: awaiting sensitive-subject ([#53](https://github.com/ajustinjames/project-100/issues/53))
+
+2026-10-23: Selected for Labs because the owner ruled it is not a sensitive subject ([#53](https://github.com/ajustinjames/project-100/issues/53#issuecomment-6364532293)), so no approval is needed and the block is lifted. The 2026-10-22 reason stands: 13/20 after the revise round, the Critical finding accepted as resolved by the Critic, and no other eligible candidate.
