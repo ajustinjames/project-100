@@ -428,6 +428,37 @@ select {
   outline-offset: 3px;
 }
 
+/* Landmarks: rules across the field at round amounts, so it visibly moves as it scrolls. */
+.dot-field-landmarks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.field-landmark {
+  position: absolute;
+  right: 0;
+  left: 0;
+  margin-top: -1px;
+  border-top: 1px solid var(--ink);
+}
+
+.field-landmark-label {
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
 .field-closing-line {
   margin: 1.2rem 0 0;
   padding: 1rem 0 0;

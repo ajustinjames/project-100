@@ -5,7 +5,12 @@ import {
   DOT_PITCH,
   type DotBand,
   GIFT_BLOCK_MAX_CSS_HEIGHT,
+  LANDMARK_EDGE_CLEARANCE,
+  LANDMARK_MIN_SPACING,
+  MAX_LANDMARKS,
   planDotBands,
+  planLandmarks,
+  roundStepAtLeast,
 } from "./field-layout.ts";
 
 /** Count the dots a plan draws, by colour, to check that nothing is lost or doubled. */
@@ -195,5 +200,109 @@ describe("calculateGiftBlock", () => {
     const tallestRows = GIFT_BLOCK_MAX_CSS_HEIGHT / DOT_PITCH;
     expect(calculateGiftBlock(100 * tallestRows, 100)).not.toBeNull();
     expect(calculateGiftBlock(100 * tallestRows + 1, 100)).toBeNull();
+  });
+});
+
+describe("roundStepAtLeast", () => {
+  it("picks the smallest 1, 2, or 5 times a power of ten at or above the minimum", () => {
+    expect(roundStepAtLeast(1)).toBe(1);
+    expect(roundStepAtLeast(1.1)).toBe(2);
+    expect(roundStepAtLeast(2)).toBe(2);
+    expect(roundStepAtLeast(3)).toBe(5);
+    expect(roundStepAtLeast(5.01)).toBe(10);
+    expect(roundStepAtLeast(340)).toBe(500);
+    expect(roundStepAtLeast(0.03)).toBe(0.05);
+    expect(roundStepAtLeast(1.7e9)).toBe(2e9);
+  });
+
+  it("rejects a minimum that is not positive, or too small to round", () => {
+    expect(() => roundStepAtLeast(0)).toThrow(RangeError);
+    expect(() => roundStepAtLeast(Number.NaN)).toThrow(RangeError);
+    expect(() => roundStepAtLeast(1e-323)).toThrow(RangeError);
+  });
+});
+
+describe("planLandmarks", () => {
+  it("places a landmark every round step, at the row where that amount is reached", () => {
+    // 100 columns of $1 dots: a row is $100 and 3 px, so 300 px is $10,000.
+    const landmarks = planLandmarks(100, 1, 100_000);
+    expect(landmarks.map((landmark) => landmark.amount)).toEqual([
+      10_000, 20_000, 30_000, 40_000, 50_000, 60_000, 70_000, 80_000, 90_000,
+    ]);
+    expect(landmarks[0]?.top).toBe(300);
+    expect(landmarks[8]?.top).toBe(2700);
+  });
+
+  it("keeps landmarks 300 to 750 px apart at any width and dot value", () => {
+    for (const columns of [100, 133, 250, 400]) {
+      for (const dotValue of [1, 215_900, 2_159_000, 0.37]) {
+        const landmarks = planLandmarks(columns, dotValue, 2_000_000);
+        expect(landmarks.length).toBeGreaterThan(1);
+        for (let index = 1; index < landmarks.length; index += 1) {
+          const gap = (landmarks[index]?.top ?? 0) - (landmarks[index - 1]?.top ?? 0);
+          expect(gap).toBeGreaterThanOrEqual(LANDMARK_MIN_SPACING - DOT_PITCH);
+          expect(gap).toBeLessThanOrEqual(2.5 * LANDMARK_MIN_SPACING + DOT_PITCH);
+        }
+      }
+    }
+  });
+
+  it("puts each line below the row where its amount is reached, never above", () => {
+    // $9.96 dots, 100 to a row: $100,000 is reached 40% into row 101, so the line goes after it.
+    const columns = 100;
+    const dotValue = 9.96;
+    const landmarks = planLandmarks(columns, dotValue, 1_000_000 / dotValue);
+    expect(landmarks[0]).toEqual({ amount: 100_000, top: 101 * DOT_PITCH });
+    for (const landmark of landmarks) {
+      const amountAbove = (landmark.top / DOT_PITCH) * columns * dotValue;
+      expect(amountAbove).toBeGreaterThanOrEqual(landmark.amount);
+      expect(amountAbove - columns * dotValue).toBeLessThan(landmark.amount);
+    }
+  });
+
+  it("keeps a line below its amount when rounding lands just short of a row boundary", () => {
+    // Review round 2: with $9,999,999,999.99 dots, $100 trillion works out to 100.0000000001
+    // rows, which the allowance alone rounds to 100 rows: $100 short of it.
+    const columns = 100;
+    const dotValue = 9_999_999_999.99;
+    const landmarks = planLandmarks(columns, dotValue, 2_000_000);
+    const hundredTrillion = landmarks.find((landmark) => landmark.amount === 1e14);
+    expect(hundredTrillion?.top).toBe(101 * DOT_PITCH);
+    for (const landmark of landmarks) {
+      expect((landmark.top / DOT_PITCH) * columns * dotValue).toBeGreaterThanOrEqual(
+        landmark.amount,
+      );
+    }
+  });
+
+  it("spreads landmarks out on a very narrow field to stay within the limit", () => {
+    // 10 columns at the 2,000,000-dot cap: a field 600,000 px tall.
+    const landmarks = planLandmarks(10, 1, 2_000_000);
+    expect(landmarks.length).toBeLessThanOrEqual(MAX_LANDMARKS);
+    expect(landmarks.length).toBeGreaterThan(MAX_LANDMARKS / 3);
+  });
+
+  it("draws none on a field shorter than one step", () => {
+    expect(planLandmarks(100, 1, 5_000)).toEqual([]);
+  });
+
+  it("leaves out a landmark too close to the field's end for its label", () => {
+    // The field is 1,005 rows (3,015 px); $100,000 would sit at 3,000 px, 15 px from the end.
+    const landmarks = planLandmarks(100, 1, 100_500);
+    expect(landmarks.at(-1)?.amount).toBe(90_000);
+    expect(landmarks.every((landmark) => landmark.top <= 3_015 - LANDMARK_EDGE_CLEARANCE)).toBe(
+      true,
+    );
+  });
+
+  it("never draws a landmark at or past the fortune itself", () => {
+    const landmarks = planLandmarks(100, 1, 100_000);
+    expect(landmarks.every((landmark) => landmark.amount < 100_000)).toBe(true);
+  });
+
+  it("rejects invalid inputs", () => {
+    expect(() => planLandmarks(0, 1, 100)).toThrow(RangeError);
+    expect(() => planLandmarks(100, 0, 100)).toThrow(RangeError);
+    expect(() => planLandmarks(100, 1, Number.POSITIVE_INFINITY)).toThrow(RangeError);
   });
 });
