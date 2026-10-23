@@ -117,13 +117,14 @@ select {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: baseline;
-  column-gap: 0.38em;
   max-width: 100%;
   margin: 0.15em 0.28em 0.15em 0;
   vertical-align: baseline;
 }
 
+/* The space sits on the label, not as a column gap, so the error row adds no width. */
 .amount-part label {
+  margin-right: 0.38em;
   cursor: text;
 }
 
@@ -156,8 +157,11 @@ select {
   opacity: 1;
 }
 
+/* Its own row under the label and input. contain: inline-size stops the message
+   widening the sentence part; it wraps to the part's width instead. */
 .field-error {
   flex-basis: 100%;
+  contain: inline-size;
   min-height: 0;
   max-width: 22rem;
   color: var(--ink);
@@ -167,8 +171,10 @@ select {
   line-height: 1.3;
 }
 
+/* The negative margin cancels the bar's padding and border, which would still add width. */
 .field-error:not(:empty) {
   margin-top: 0.55rem;
+  margin-right: calc(-0.6rem - 2px);
   padding-left: 0.6rem;
   border-left: 2px solid var(--ink);
 }
@@ -587,8 +593,11 @@ select {
   }
 
   .amount-part {
-    column-gap: 0.3em;
-    margin-right: 0.15em;
+    margin-right: 0.4em;
+  }
+
+  .amount-part label {
+    margin-right: 0.3em;
   }
 
   .amount-part input {
