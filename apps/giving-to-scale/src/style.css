@@ -593,8 +593,11 @@ select {
   }
 
   .amount-part {
-    column-gap: 0.3em;
-    margin-right: 0.15em;
+    margin-right: 0.4em;
+  }
+
+  .amount-part label {
+    margin-right: 0.3em;
   }
 
   .amount-part input {
