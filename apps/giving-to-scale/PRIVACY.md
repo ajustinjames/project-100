@@ -17,7 +17,7 @@ Nowhere. Nothing you enter is saved. Your own figure stays on this page in memor
 - Requests for the app's own static files.
 - On live deployments: the project-wide Cloudflare Web Analytics beacon (no cookies, no cross-site tracking). See docs/PRIVACY_AND_DATA.md.
 - Only if the user presses "Share this gift": a link is handed to the device's share sheet, or copied to the clipboard. The link carries the gift, the fortune, and the currency in the URL fragment (`#v=1&gift=…&fortune=…&cur=…`), never the user's own figure or the "If I gave" amount. Browsers don't send the fragment in requests. Opening the page never writes to the fragment.
-- Before launch, the live Cloudflare beacon's payload on a shared link must be captured, and this file must state whether it includes the fragment. Even if it did, the fragment holds no personal data.
+- The analytics beacon does not send the fragment. Checked on 2026-10-23 with Cloudflare's current beacon script (`static.cloudflareinsights.com/beacon.min.js`, version 2026.10.1), injected into a local build the way the live build adds it and opened from a share link in Chromium, WebKit, and Firefox; its reports were intercepted before they left the machine. The page address it reports is the path without the fragment (`location` and `path`), and no field carries the gift, the fortune, or the user's figure. The fragment holds no personal data either way.
 
 ## Third parties
 
