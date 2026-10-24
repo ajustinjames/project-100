@@ -3,13 +3,13 @@
   "id": 4,
   "slug": "giving-to-scale",
   "name": "Giving to Scale",
-  "status": "labs",
+  "status": "live",
   "description": "Type a gift, a fortune, and your net worth to see the same share in your money and the fortune drawn to scale.",
   "problem": "News of a billionaire's donation gives a dollar figure that is hard to judge; seeing it as a share of their fortune, applied to your own money, means doing the division by hand, and the size of a fortune is hard to picture at all.",
   "category": "money",
   "dates": {
     "created": "2026-10-22",
-    "launched": null,
+    "launched": "2026-10-24",
     "archived": null
   },
   "design": {
@@ -32,6 +32,11 @@
       "kind": "sensitive-subject",
       "date": "2026-10-22",
       "ref": "https://github.com/ajustinjames/project-100/issues/47#issuecomment-6339780374"
+    },
+    {
+      "kind": "launch",
+      "date": "2026-10-24",
+      "ref": "https://github.com/ajustinjames/project-100/issues/66#issuecomment-6378419423"
     }
   ],
   "rejection": null
