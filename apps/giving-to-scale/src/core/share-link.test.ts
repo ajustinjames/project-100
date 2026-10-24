@@ -28,6 +28,13 @@ describe("encodeShareFragment", () => {
     expect(encodeShareFragment(0.4, 1.256, "EUR")).toBeNull();
     expect(encodeShareFragment(12.345_6, 99.999, "GBP")).toBeNull();
   });
+
+  it("returns null when a gift just under the fortune would round to all of it (review round 2)", () => {
+    expect(encodeShareFragment(9999.999, 10_000, "USD")).toBeNull();
+    expect(encodeShareFragment(10_000, 10_000, "USD")).toBe(
+      "#v=1&gift=10000&fortune=10000&cur=USD",
+    );
+  });
 });
 
 describe("decodeShareFragment", () => {

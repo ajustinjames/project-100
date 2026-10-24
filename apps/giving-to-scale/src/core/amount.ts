@@ -53,6 +53,8 @@ const suffixMultipliers: Record<string, number> = {
 };
 
 const currencySymbols = ["$", "€", "£", "₹", "¥"] as const;
+/** Far longer than any real amount ("$1,000,000,000,000,000.00" is 25), so a paste can't stall parsing. */
+const MAX_INPUT_LENGTH = 64;
 const spaceSeparators = /[ \u00a0\u2009]/;
 const generalInvalid = (): AmountParseResult => ({
   kind: "invalid",
@@ -67,6 +69,7 @@ const decimalInvalid = (): AmountParseResult => ({
 export function parseAmount(text: string, currency: Currency = "USD"): AmountParseResult {
   let input = text.trim();
   if (input === "") return { kind: "empty" };
+  if (input.length > MAX_INPUT_LENGTH) return generalInvalid();
 
   input = input.replaceAll("−", "-");
   const leadingSymbol = currencySymbols.find((symbol) => input.startsWith(symbol));
@@ -78,7 +81,9 @@ export function parseAmount(text: string, currency: Currency = "USD"): AmountPar
   }
 
   let multiplier = 1;
-  const suffixMatch = input.match(/\s*(thousand|million|billion|trillion|mn|bn|tn|k|m|b|t)$/i);
+  // No leading \s* here: on a long run of spaces it backtracks badly, and trimEnd below
+  // removes the space before a suffix anyway.
+  const suffixMatch = input.match(/(thousand|million|billion|trillion|mn|bn|tn|k|m|b|t)$/i);
   if (suffixMatch !== null) {
     const suffix = suffixMatch[1];
     const suffixMultiplier =
@@ -128,6 +133,7 @@ export function parseAmount(text: string, currency: Currency = "USD"): AmountPar
   if (Math.abs(value) > 1e15) return { kind: "invalid", message: amountMessages.tooLarge };
   // Below the currency's smallest unit (a cent, or one yen), shares and dot counts can overflow
   // or round to zero, so these amounts are refused instead of giving a false answer.
+  // MAX_INPUT_LENGTH keeps every accepted amount far above where Number() would underflow to 0.
   if (value !== 0 && Math.abs(value) < currencyDetails[currency].smallestUnit) {
     return { kind: "invalid", message: amountMessages.tooSmall };
   }

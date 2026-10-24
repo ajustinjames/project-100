@@ -33,8 +33,9 @@ const MAX_SHARE_CHANGE = 1e-6;
 /**
  * Build the fragment for a gift and fortune, rounded to two decimal places.
  * Returns null when rounding would change the share by more than one part in a million
- * (a gift of $0.005 against $0.014, say), or the gift rounds to zero: such links would
- * show a different comparison, so they can't be shared.
+ * (a gift of $0.005 against $0.014, say), would make a partial gift equal the fortune, or
+ * the gift rounds to zero: such links would show a different comparison, so they can't be
+ * shared.
  */
 export function encodeShareFragment(
   gift: number,
@@ -48,6 +49,8 @@ export function encodeShareFragment(
   }
   const share = gift / fortune;
   if (Math.abs(roundedGift / roundedFortune - share) > share * MAX_SHARE_CHANGE) return null;
+  // A gift just under the fortune must not round to the whole fortune.
+  if (gift < fortune && roundedGift === roundedFortune) return null;
   return `#v=1&gift=${amountText(roundedGift)}&fortune=${amountText(roundedFortune)}&cur=${currency}`;
 }
 

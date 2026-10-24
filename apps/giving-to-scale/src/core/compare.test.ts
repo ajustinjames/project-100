@@ -193,7 +193,7 @@ describe("compare results and dot plan", () => {
 
   it("refuses a figure too small to compare instead of giving infinite multiples", () => {
     const result = expectIncomplete(
-      compare({ gift: parsed("1"), fortune: parsed("100"), unit: parsed(`0.${"0".repeat(309)}1`) }),
+      compare({ gift: parsed("1"), fortune: parsed("100"), unit: parsed(`0.${"0".repeat(60)}1`) }),
     );
     expect(result.errors.unit).toBeDefined();
   });
