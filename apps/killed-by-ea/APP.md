@@ -4,7 +4,7 @@
 
 ## Problem
 
-Electronic Arts has closed or merged a long line of studios, cancelled announced games, ended products, and retired the online services of hundreds of games. The record is split up: EA's own shutdown lists cover online services only, on three alphabetical pages with no search or year view and with EA Play catalog removals mixed in; studio closures are in Wikipedia's acquisitions table (many without a closure year) and listicles; cancellations are in one-off news. There is no single dated timeline to answer "what did EA close in 2013?" or to cite in a discussion. Full evidence in [PROPOSAL.md](PROPOSAL.md#problem).
+Electronic Arts has cancelled games in development, closed or merged a long line of studios it acquired or founded, and ended projects such as Playfish's social games. The record is split up: studio closures are in Wikipedia's acquisitions table (many without a closure year), listicles, and EA Graveyard (studios only); cancellations are in one-off news and in Games That Weren't, which has no publisher view. There is no single dated timeline to answer "what did EA close in 2013?" or to cite in a discussion. Full evidence in [PROPOSAL.md](PROPOSAL.md#problem).
 
 ## Audience
 
@@ -15,15 +15,15 @@ People who follow games history (enthusiasts, preservationists, writers) and pla
 **In scope:**
 
 - A fixed archive up to **22 October 2026**, stated at the top. Events after the cutoff are left out.
-- Four kinds of entry: *studio* (closed, or merged, shown separately), *online service* (a game's online play or services ended on a platform; partial changes labelled *feature closure*), *cancelled* (an announced game), and *product* (a service or product EA ended).
-- Each entry: name, kind, dates as the sources give them, age at the end where there's a meaningful start, one neutral past-tense sentence, platforms where relevant, and at least one source link plus a Wayback Machine copy.
-- One timeline, newest first, with search, filters for kind, year or decade, and platform, kept in the URL so a view can be shared.
+- Three kinds of entry: *game* (cancelled in development, announced or credibly reported), *studio* (closed, or merged, shown separately), and *project* (a product, service, or initiative EA ended, such as a platform or a game label).
+- Each entry: name, kind, dates as the sources give them, age at the end where there's a meaningful start, one neutral past-tense sentence, the studio involved where relevant, and at least one source link plus a Wayback Machine copy.
+- One timeline, newest first, with search, filters for kind and year or decade, kept in the URL so a view can be shared.
 - Summary counts by kind and year, with unknown dates counted separately.
 
 **Explicitly out of scope:**
 
-- Current status, upcoming shutdowns, countdowns, or "is it still up?" claims. The page points players to EA's own lists for that.
-- EA Play and other catalog removals, and demo or store removals.
+- **Server and online-service shutdowns** of released games (owner direction, 2026-10-23). EA's own shutdown lists cover those, and the page links to them.
+- Current status, upcoming events, countdowns, or "is it still up?" claims.
 - Logos, box art, screenshots, or any EA or studio marks; kinds get text symbols.
 - Public submissions; corrections go through GitHub issues.
 - Runtime APIs, storage, accounts.
@@ -32,17 +32,19 @@ People who follow games history (enthusiasts, preservationists, writers) and pla
 
 Full comparison in [PROPOSAL.md](PROPOSAL.md#existing-alternatives). In short:
 
-- **EA's shutdown lists** ([A–H](https://www.ea.com/legal/service-updates/a-h), [I–Q](https://www.ea.com/legal/service-updates/i-q), [R–Z](https://www.ea.com/legal/service-updates/r-z)): authoritative for servers, but alphabetical only, with catalog removals mixed in, and no studios or cancellations.
-- **EA Graveyard / Game Studio Graveyard** ([wiredlain.com](https://wiredlain.com/)): the strongest for studios; studios only.
-- **Shelf-Life**, the **EA server lifespan spreadsheet**, **Games That Weren't**, and **Wikipedia's acquisitions list**: each covers one slice.
+- **EA Graveyard / Game Studio Graveyard** ([wiredlain.com](https://wiredlain.com/)): the strongest for studios; studios only, and now mixed with other publishers' studios.
+- **Games That Weren't** ([gamesthatwerent.com](https://www.gamesthatwerent.com/cancelled-games/)): the strongest for cancellations; no publisher view, so EA's can't be listed together.
+- **Wikipedia's acquisitions list**: thorough, but a table of acquisitions, not a timeline, with many closure years missing.
+- **EA's shutdown lists** ([A–H](https://www.ea.com/legal/service-updates/a-h), [I–Q](https://www.ea.com/legal/service-updates/i-q), [R–Z](https://www.ea.com/legal/service-updates/r-z)): server shutdowns only, which this app leaves out.
 - **Huskynarr's Killed by EA**: the same idea, abandoned since 2022.
 
 ## Product decisions
 
-- 2026-10-23: Entered Labs as app #5. Owner-sourced idea, recorded as an exception to idea ownership. Selected at 13/20 after one revise round ([candidate PR #51](https://github.com/ajustinjames/project-100/pull/51), [round 1](https://github.com/ajustinjames/project-100/pull/51#issuecomment-6341348400), [round 2](https://github.com/ajustinjames/project-100/pull/51#issuecomment-6353144957)) because no verified alternative puts studios, server retirements, cancellations, and products on one dated, sourced, searchable timeline, and EA's own server lists can't be read by year.
+- 2026-10-23: Entered Labs as app #5. Owner-sourced idea, recorded as an exception to idea ownership. Selected at 13/20 after one revise round ([candidate PR #51](https://github.com/ajustinjames/project-100/pull/51), [round 1](https://github.com/ajustinjames/project-100/pull/51#issuecomment-6341348400), [round 2](https://github.com/ajustinjames/project-100/pull/51#issuecomment-6353144957)) because no verified alternative puts EA's closed studios, cancelled games, and ended projects on one dated, sourced, searchable timeline.
 - 2026-10-23: Not a sensitive subject, by owner ruling ([#53](https://github.com/ajustinjames/project-100/issues/53#issuecomment-6364532293)); no approval needed. The name stays "Killed by EA".
 - 2026-10-22: A fixed archive, not a live tracker: no current-status or upcoming claims, so it needs no ongoing curation (critique round 1, Critical finding, accepted as resolved in round 2).
-- 2026-10-22: Untested hypothesis, decided on the prototype: that one timeline across kinds is worth using over EA's lists and EA Graveyard. If the working prototype doesn't show that, discard it.
+- 2026-10-23: Server and online-service shutdowns are out of scope, by owner direction: the app is about games killed in development, studios, and projects. This drops the proposal's *online service* kind, EA's shutdown pages as a data source, and the build brief's feasibility gate on classifying them (which had failed; see [#62](https://github.com/ajustinjames/project-100/issues/62)). The critique's round-2 advantage claim 2 (EA's server list made searchable by year) no longer applies; claim 1 (one timeline across kinds) stands, narrowed to three kinds.
+- 2026-10-22: Untested hypothesis, decided on the prototype: that one timeline across kinds is worth using over EA Graveyard and Games That Weren't. If the working prototype doesn't show that, discard it.
 
 ## Architecture
 
@@ -67,7 +69,8 @@ None.
 ## Tradeoffs and known limitations
 
 - The archive ages after its cutoff; that's stated at the top, and a later dated edition is optional.
-- Classification (server retirement vs catalog removal, closure vs merger) is the main source of error; the prototype is gated on a hand-checked sample.
+- Classification (closure vs merger vs rename, cancelled vs on hold) is the main source of error; every entry is checked against its sources at the Checkpoint.
+- Without server shutdowns the archive is small (roughly 60 to 100 entries), so it lives or dies on completeness and sourcing rather than volume.
 - Where sources disagree on a date, the entry gives the best-supported one and says the sources differ.
 
 ## Launch packet
