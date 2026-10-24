@@ -50,6 +50,7 @@ Full comparison in [PROPOSAL.md](PROPOSAL.md#existing-alternatives). In short:
 
 ## Product decisions
 
+- 2026-10-24: Launched. The owner approved the launch packet (#66) after the Opus final review and two rounds of Astra's adversarial review. Monetization stays off: there is no approved ad setup.
 - 2026-10-22: Entered Labs as app #4. Owner-sourced idea, recorded as an exception to idea ownership. Selected at 14/20 after one revise round ([candidate PR #46](https://github.com/ajustinjames/project-100/pull/46), [round 1](https://github.com/ajustinjames/project-100/pull/46#issuecomment-6339588372), [round 2](https://github.com/ajustinjames/project-100/pull/46#issuecomment-6339658011)) because no tool verified in research both draws a gift at its true scale and gives an income illustration for any gift, and the owner wants a well-designed version that shows the scale of the difference.
 - 2026-10-22: `sensitive-subject` approved by the owner ([#47](https://github.com/ajustinjames/project-100/issues/47#issuecomment-6339780374), recorded in [#48](https://github.com/ajustinjames/project-100/pull/48)). Scope of the approval: user-entered figures only, no donor list, factual wording with no judgement or advice.
 - 2026-10-22: Net worth is the main comparison; income is a labelled illustration, never called an equal sacrifice (critique round 1, High finding).
@@ -96,4 +97,4 @@ The app uses the required ajj-design (`hardline`) tokens and components. `@fonts
 
 ## Launch packet
 
-<!-- Filled in before requesting launch approval. See docs/APP_ACCEPTANCE.md#launch-packet. -->
+[Issue #66](https://github.com/ajustinjames/project-100/issues/66), approved by the owner on 2026-10-24 ([approval](https://github.com/ajustinjames/project-100/issues/66#issuecomment-6378419423)). Launched at `/giving-to-scale/`.
