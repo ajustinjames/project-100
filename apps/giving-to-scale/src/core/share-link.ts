@@ -27,9 +27,14 @@ function amountText(value: number): string {
   return fixed;
 }
 
+/** How far rounding may move the share before a link would show a different comparison. */
+const MAX_SHARE_CHANGE = 1e-6;
+
 /**
  * Build the fragment for a gift and fortune, rounded to two decimal places.
- * Returns null when the gift rounds to zero: such gifts can't be shared.
+ * Returns null when rounding would change the share by more than one part in a million
+ * (a gift of $0.005 against $0.014, say), or the gift rounds to zero: such links would
+ * show a different comparison, so they can't be shared.
  */
 export function encodeShareFragment(
   gift: number,
@@ -41,6 +46,8 @@ export function encodeShareFragment(
   if (!(roundedGift > 0) || !(roundedFortune >= roundedGift) || roundedFortune > MAX_AMOUNT) {
     return null;
   }
+  const share = gift / fortune;
+  if (Math.abs(roundedGift / roundedFortune - share) > share * MAX_SHARE_CHANGE) return null;
   return `#v=1&gift=${amountText(roundedGift)}&fortune=${amountText(roundedFortune)}&cur=${currency}`;
 }
 

@@ -82,7 +82,7 @@ function dotsElement(color: DotColor, count: number, rows = 1): HTMLElement {
 }
 
 function partialDotElement(segment: Extract<DotSegment, { kind: "partial" }>): HTMLElement {
-  const cell = createElement("span", "dot-cell");
+  const cell = createElement("span", segment.gift > 0 ? "dot-cell dot-cell-gift" : "dot-cell");
   for (const [color, fill] of [
     ["gift", segment.gift],
     ["fortune", segment.fortune],

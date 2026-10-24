@@ -177,6 +177,27 @@ describe("compare results and dot plan", () => {
     expect(result.dotScale).toBe(1);
   });
 
+  it("keeps one dot per net worth when floating point lands a hair over the cap (pre-launch review)", () => {
+    // 170,000,020,000 / 85,000.01 is exactly 2,000,000, but comes out slightly more in floating point.
+    const result = compare({
+      gift: parsed("100M"),
+      fortune: parsed("170000020000"),
+      unit: parsed("85000.01"),
+    });
+
+    expect(result.kind).toBe("result");
+    if (result.kind !== "result") return;
+    expect(result.dotScale).toBe(1);
+    expect(result.fortuneDots).toBeCloseTo(2_000_000, 6);
+  });
+
+  it("refuses a figure too small to compare instead of giving infinite multiples", () => {
+    const result = expectIncomplete(
+      compare({ gift: parsed("1"), fortune: parsed("100"), unit: parsed(`0.${"0".repeat(309)}1`) }),
+    );
+    expect(result.errors.unit).toBeDefined();
+  });
+
   it("uses one dot per net worth below the cap and tracks a partial gift dot", () => {
     const result = compare({
       gift: parsed("250"),

@@ -7,6 +7,8 @@ export interface ShareControls {
   button: HTMLButtonElement;
   note: HTMLElement;
   status: HTMLElement;
+  /** Bring the view up to date with the inputs, which may have changed within the debounce. */
+  refresh: () => void;
 }
 
 export interface ShareView {
@@ -32,11 +34,13 @@ async function copyLink(status: HTMLElement, url: string): Promise<void> {
 }
 
 export function createShareView(controls: ShareControls): ShareView {
-  const { section, button, note, status } = controls;
+  const { section, button, note, status, refresh } = controls;
   let fragment: string | null = null;
 
   button.addEventListener("click", async () => {
-    if (fragment === null) return;
+    // A click can come within the input debounce, so share what the inputs say now.
+    refresh();
+    if (fragment === null || section.hidden) return;
     const url = `${window.location.origin}${window.location.pathname}${fragment}`;
     if (typeof navigator.share === "function") {
       try {

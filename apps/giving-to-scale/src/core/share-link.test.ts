@@ -11,15 +11,22 @@ describe("encodeShareFragment", () => {
     );
   });
 
-  it("rounds the gift and fortune to two decimal places", () => {
-    expect(encodeShareFragment(0.4, 1.256, "EUR")).toBe("#v=1&gift=0.4&fortune=1.26&cur=EUR");
-    expect(encodeShareFragment(12.345_6, 99.999, "GBP")).toBe(
-      "#v=1&gift=12.35&fortune=100&cur=GBP",
+  it("rounds the gift and fortune to two decimal places when the share stays the same", () => {
+    expect(encodeShareFragment(0.4, 1.25, "EUR")).toBe("#v=1&gift=0.4&fortune=1.25&cur=EUR");
+    expect(encodeShareFragment(1_000_000.004, 240_000_000_000.006, "GBP")).toBe(
+      "#v=1&gift=1000000&fortune=240000000000.01&cur=GBP",
     );
   });
 
   it("returns null when the gift rounds to zero", () => {
     expect(encodeShareFragment(0.004, 240e9, "USD")).toBeNull();
+  });
+
+  it("returns null when rounding would change the share (pre-launch review)", () => {
+    // $0.005 of $0.014 is about 36%; rounded to cents it would be 100%.
+    expect(encodeShareFragment(0.005, 0.014, "USD")).toBeNull();
+    expect(encodeShareFragment(0.4, 1.256, "EUR")).toBeNull();
+    expect(encodeShareFragment(12.345_6, 99.999, "GBP")).toBeNull();
   });
 });
 
