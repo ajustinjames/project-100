@@ -15,14 +15,20 @@
       "summary": "EA closed Westwood Studios in Las Vegas while consolidating its studios into EA Los Angeles.",
       "sources": [
         {
+          "url": "https://www.gamespot.com/articles/ea-consolidates-studios-closes-westwood/1100-2909852/",
+          "archive": "https://web.archive.org/web/20260217161225/https://www.gamespot.com/articles/ea-consolidates-studios-closes-westwood/1100-2909852/",
+          "title": "EA consolidates studios, closes Westwood",
+          "publisher": "GameSpot"
+        },
+        {
           "url": "https://multiplayer.it/notizie/il-caso-westwood-cosa-e-successo-veramente.html",
           "archive": "https://web.archive.org/web/20261024020744/https://multiplayer.it/notizie/il-caso-westwood-cosa-e-successo-veramente.html",
           "title": "Il caso Westwood: cosa è successo veramente",
           "publisher": "Multiplayer.it"
         }
       ],
-      "check": "Multiplayer.it, 30 Jan 2003: EA's consolidation meant \"la chiusura totale di Westwood Studios (Las Vegas)\".",
-      "note": "EA announced the consolidation in January 2003; the studio finished closing later that spring."
+      "check": "GameSpot, 30 Jan 2003: \"significant layoffs at Westwood's Las Vegas studio\" and \"the studio's final closure on March 31\"; Multiplayer.it, 30 Jan 2003: \"la chiusura totale di Westwood Studios (Las Vegas)\".",
+      "note": "GameSpot reported on 30 January 2003 that the studio would close on 31 March 2003; no source found confirms the final day, so only the year is given."
     },
     {
       "id": "pandemic-studios",
@@ -44,6 +50,33 @@
         }
       ],
       "check": "SoCalTech, 18 Nov 2009: \"Electronics Arts is shutting down Los Angeles-based Pandemic Studios\"; around 200 laid off."
+    },
+    {
+      "id": "playfish",
+      "name": "Playfish",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2013",
+        "precision": "year"
+      },
+      "summary": "EA wound down Playfish, the London maker of The Sims Social and Pet Society, after layoffs and the end of its Facebook games.",
+      "sources": [
+        {
+          "url": "https://mcvuk.com/development-news/redundancies-hit-ea-playfish/",
+          "archive": "https://web.archive.org/web/20261024022834/https://mcvuk.com/development-news/redundancies-hit-ea-playfish/",
+          "title": "Redundancies hit EA Playfish",
+          "publisher": "MCV/DEVELOP"
+        },
+        {
+          "url": "https://kotaku.com/the-one-thing-ea-has-always-been-good-at-is-killing-video-game-studios-2000748391",
+          "archive": "https://web.archive.org/web/20261024022803/https://kotaku.com/the-one-thing-ea-has-always-been-good-at-is-killing-video-game-studios-2000748391",
+          "title": "The One Thing EA Has Always Been Good At Is Killing Video Game Studios",
+          "publisher": "Kotaku"
+        }
+      ],
+      "check": "MCV/DEVELOP, 16 Apr 2013: layoffs at Playfish and EA ending The Sims Social, SimCity Social and Pet Society; Kotaku, 21 Oct 2026: \"Playfish – Purchased in 2009. Closed in 2013.\"",
+      "note": "EA did not announce a closure. In April 2013 Playfish's co-founder said it had been split across other EA studios in 2012 and had not closed completely."
     },
     {
       "id": "danger-close-games",
@@ -232,16 +265,23 @@
         "value": "2025-04-17",
         "precision": "day"
       },
-      "summary": "EA shut down its Origin PC client and store, replaced by the EA app.",
+      "summary": "EA shut down its Origin PC client and store, which the EA app replaced.",
       "sources": [
         {
           "url": "https://www.gamedeveloper.com/pc/ea-will-shut-down-origin-later-this-year",
           "archive": "https://web.archive.org/web/20250810024908/https://www.gamedeveloper.com/pc/ea-will-shut-down-origin-later-this-year",
           "title": "EA will shut down Origin later this year",
           "publisher": "Game Developer"
+        },
+        {
+          "url": "https://help.ea.com/en/help/ea/ea-app/update-operating-system-for-ea-app/",
+          "archive": "https://web.archive.org/web/20250501063628/https://help.ea.com/en/help/ea/ea-app/update-operating-system-for-ea-app/",
+          "title": "Update your operating system for the EA app",
+          "publisher": "EA Help"
         }
       ],
-      "check": "Game Developer, 21 Jan 2025: \"EA will shut down its Origin storefront on April 17, 2025\"; Origin \"had already been supplanted by the EA app\"."
+      "check": "EA Help, archived 17 Apr 2025: \"On April 17, 2025, Origin will shut down\"; the same page archived 1 May 2025: \"Origin has shut down.\"",
+      "note": "The day is the date EA set in advance; EA's help page confirmed the shutdown had happened by 1 May 2025."
     },
     {
       "id": "black-panther",
@@ -325,6 +365,33 @@
         }
       ],
       "check": "EA, 21 Oct 2026: a small team at BioWare was \"working on early-development for Mass Effect\"; EA decided \"not to move forward with this development\"."
+    },
+    {
+      "id": "kult-of-speed",
+      "name": "Kult of Speed",
+      "kind": "game",
+      "status": "cancelled",
+      "reported": true,
+      "end": {
+        "precision": "unknown"
+      },
+      "summary": "Kult of Speed, an Electronic Arts Warhammer motorcycle racer for Amiga and PC due in June 1994, was reportedly cancelled and never released.",
+      "sources": [
+        {
+          "url": "https://www.gamesthatwerent.com/2025/01/cult-of-speed/",
+          "archive": "https://web.archive.org/web/20260607021544/https://www.gamesthatwerent.com/2025/01/cult-of-speed/",
+          "title": "Cult of Speed (Amiga, SEGA Mega Drive, PC)",
+          "publisher": "Games That Weren't"
+        },
+        {
+          "url": "https://www.timeextension.com/news/2025/04/new-details-emerge-for-cancelled-warhammer-racing-game-kult-of-speed",
+          "archive": "https://web.archive.org/web/20250422064537/https://www.timeextension.com/news/2025/04/new-details-emerge-for-cancelled-warhammer-racing-game-kult-of-speed",
+          "title": "New Details Emerge For Cancelled Warhammer Racing Game 'Kult Of Speed'",
+          "publisher": "Time Extension"
+        }
+      ],
+      "check": "Games That Weren't: started October 1993, \"due for release in June 1994\", \"why was it canned\"; Time Extension, 21 Apr 2025: \"Planned for release by Electronic Arts\", \"it was never released\".",
+      "note": "No source found dates the cancellation or gives a reason. Also known as Cult of Speed."
     }
   ]
 }

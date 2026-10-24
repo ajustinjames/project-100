@@ -210,6 +210,8 @@ function populateYearSelect(): void {
 
 populateYearSelect();
 updateControls();
+// Rewrite the URL so values the page ignored (an unknown year, say) don't stay in the address bar.
+updateUrl();
 render();
 
 searchInput.addEventListener("input", () => {
