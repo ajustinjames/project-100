@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "cutoff": "2026-10-22",
+  "entries": [
+    {
+      "id": "westwood-studios",
+      "name": "Westwood Studios",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2003",
+        "precision": "year"
+      },
+      "series": "Command & Conquer",
+      "summary": "EA closed Westwood Studios in Las Vegas while consolidating its studios into EA Los Angeles.",
+      "sources": [
+        {
+          "url": "https://multiplayer.it/notizie/il-caso-westwood-cosa-e-successo-veramente.html",
+          "archive": "https://web.archive.org/web/20261024020744/https://multiplayer.it/notizie/il-caso-westwood-cosa-e-successo-veramente.html",
+          "title": "Il caso Westwood: cosa è successo veramente",
+          "publisher": "Multiplayer.it"
+        }
+      ],
+      "check": "Multiplayer.it, 30 Jan 2003: EA's consolidation meant \"la chiusura totale di Westwood Studios (Las Vegas)\".",
+      "note": "EA announced the consolidation in January 2003; the studio finished closing later that spring."
+    },
+    {
+      "id": "pandemic-studios",
+      "name": "Pandemic Studios",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2009-11",
+        "precision": "month"
+      },
+      "series": "Mercenaries",
+      "summary": "EA shut down Pandemic Studios in Los Angeles, laying off around 200 people and moving the rest to EA Los Angeles.",
+      "sources": [
+        {
+          "url": "https://www.socaltech.com/ea_shutters_pandemic_studios/s-0025322.html",
+          "archive": "https://web.archive.org/web/20140831134811/https://www.socaltech.com/ea_shutters_pandemic_studios/s-0025322.html",
+          "title": "EA Shutters Pandemic Studios",
+          "publisher": "SoCalTech"
+        }
+      ],
+      "check": "SoCalTech, 18 Nov 2009: \"Electronics Arts is shutting down Los Angeles-based Pandemic Studios\"; around 200 laid off."
+    },
+    {
+      "id": "danger-close-games",
+      "name": "Danger Close Games",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2013-06",
+        "precision": "month"
+      },
+      "series": "Medal of Honor",
+      "summary": "EA disbanded Danger Close, the Medal of Honor studio; its staff left or moved to DICE and other EA teams.",
+      "sources": [
+        {
+          "url": "https://mcvuk.com/business-news/publishing/ea-confirms-danger-close-team-disbanded/",
+          "archive": "https://web.archive.org/web/20261024020710/https://mcvuk.com/business-news/publishing/ea-confirms-danger-close-team-disbanded/",
+          "title": "EA confirms Danger Close team disbanded",
+          "publisher": "MCV/Develop"
+        }
+      ],
+      "check": "MCV, 14 Jun 2013, quoting Patrick Söderlund: \"Danger Close as it was doesn't exist anymore.\"",
+      "note": "Many staff moved to DICE LA, but EA described the studio as disbanded, not merged."
+    },
+    {
+      "id": "mythic-entertainment",
+      "name": "Mythic Entertainment",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2014-05-29",
+        "precision": "day"
+      },
+      "summary": "EA closed Mythic Entertainment, the Warhammer Online studio, in Fairfax, Virginia.",
+      "sources": [
+        {
+          "url": "https://www.gameinformer.com/b/news/archive/2014/05/29/ea-shutters-warhammer-online-developer-mythic.aspx",
+          "archive": "https://web.archive.org/web/20260114160037/https://www.gameinformer.com/b/news/archive/2014/05/29/ea-shutters-warhammer-online-developer-mythic.aspx",
+          "title": "EA Shutters Warhammer Online Developer Mythic",
+          "publisher": "Game Informer"
+        }
+      ],
+      "check": "Game Informer, 29 May 2014, quoting EA: \"We are closing the EA Mythic location in Fairfax, Virginia.\""
+    },
+    {
+      "id": "maxis-emeryville",
+      "name": "Maxis Emeryville",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2015-03-04",
+        "precision": "day"
+      },
+      "series": "SimCity",
+      "summary": "EA closed Maxis's Emeryville studio and moved Maxis development to its other studios.",
+      "sources": [
+        {
+          "url": "https://thenextweb.com/news/ea-is-shutting-down-maxis-emeryville-the-studio-that-brought-you-simcity-and-the-sims",
+          "archive": "https://web.archive.org/web/20240206014027/https://thenextweb.com/news/ea-is-shutting-down-maxis-emeryville-the-studio-that-brought-you-simcity-and-the-sims",
+          "title": "EA is shutting down Maxis Emeryville, the studio that brought you SimCity and The Sims",
+          "publisher": "The Next Web"
+        }
+      ],
+      "check": "The Next Web, 4 Mar 2015: \"EA today suddenly closed Maxis' Emeryville office.\""
+    },
+    {
+      "id": "visceral-games",
+      "name": "Visceral Games",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2017-10-17",
+        "precision": "day"
+      },
+      "summary": "EA closed Visceral Games, the Dead Space studio, and moved its Star Wars game to another EA team.",
+      "sources": [
+        {
+          "url": "https://www.ea.com/amp/news/an-update-on-the-visceral-star-wars-project",
+          "archive": "https://web.archive.org/web/20260724050049/https://www.ea.com/amp/news/an-update-on-the-visceral-star-wars-project",
+          "title": "An update on the Visceral Star Wars project",
+          "publisher": "Electronic Arts"
+        },
+        {
+          "url": "https://www.avclub.com/ea-closes-visceral-games",
+          "archive": "https://web.archive.org/web/20261024020617/https://www.avclub.com/ea-closes-visceral-games",
+          "title": "EA closes Dead Space studio Visceral Games",
+          "publisher": "The A.V. Club"
+        }
+      ],
+      "check": "EA (Patrick Söderlund): \"Our Visceral studio will be ramping down and closing\"; the A.V. Club dates it 17 Oct 2017."
+    },
+    {
+      "id": "codemasters-cheshire",
+      "name": "Codemasters Cheshire",
+      "kind": "studio",
+      "status": "merged",
+      "mergedInto": "Criterion Games",
+      "end": {
+        "value": "2022-05-12",
+        "precision": "day"
+      },
+      "summary": "EA merged Codemasters Cheshire, its DiRT team, into Criterion Games to work on Need for Speed.",
+      "sources": [
+        {
+          "url": "https://www.videogameschronicle.com/news/dirt-team-codemasters-cheshire-merged-with-need-for-speed-studio-criterion/",
+          "archive": "https://web.archive.org/web/20260211160041/https://www.videogameschronicle.com/news/dirt-team-codemasters-cheshire-merged-with-need-for-speed-studio-criterion/",
+          "title": "Dirt team Codemasters Cheshire merged with Need for Speed studio Criterion",
+          "publisher": "Video Games Chronicle"
+        }
+      ],
+      "check": "VGC, 12 May 2022: the Cheshire team \"has been integrated into\" Criterion Games; \"No redundancies have been made as a result of the move.\""
+    },
+    {
+      "id": "titanfall-legends",
+      "name": "Titanfall Legends",
+      "kind": "game",
+      "status": "cancelled",
+      "reported": true,
+      "end": {
+        "value": "2023-02",
+        "precision": "month"
+      },
+      "studio": "Respawn Entertainment",
+      "series": "Titanfall",
+      "summary": "EA and Respawn reportedly cancelled Titanfall Legends, a single-player game set in the Apex Legends and Titanfall universe.",
+      "sources": [
+        {
+          "url": "https://mp1st.com/news/report-ea-cancels-unannounced-single-player-titanfall-game-titled-titanfall-legends",
+          "archive": "https://web.archive.org/web/20230331055820/https://mp1st.com/news/report-ea-cancels-unannounced-single-player-titanfall-game-titled-titanfall-legends",
+          "title": "Report: EA Cancels Unannounced Single-Player Titanfall Game Titled \"Titanfall Legends\"",
+          "publisher": "MP1st"
+        }
+      ],
+      "check": "MP1st, 1 Feb 2023, citing Jason Schreier (Bloomberg) and three people familiar with the matter; EA did not announce it.",
+      "note": "Dated by the report; the cancellation itself was not announced."
+    },
+    {
+      "id": "respawn-star-wars-fps",
+      "name": "Star Wars FPS (Respawn)",
+      "kind": "game",
+      "status": "cancelled",
+      "end": {
+        "value": "2024-02-28",
+        "precision": "day"
+      },
+      "studio": "Respawn Entertainment",
+      "series": "Star Wars",
+      "summary": "EA stopped early development of Respawn's Star Wars first-person action game.",
+      "sources": [
+        {
+          "url": "https://www.ea.com/amp/news/a-note-from-laura-miele",
+          "archive": "https://web.archive.org/web/20250714214611/https://www.ea.com/amp/news/a-note-from-laura-miele",
+          "title": "A note from Laura Miele",
+          "publisher": "Electronic Arts"
+        }
+      ],
+      "check": "EA, 28 Feb 2024: \"we have decided to pivot away from early development on a Star Wars FPS Action game\"."
+    },
+    {
+      "id": "ridgeline-games",
+      "name": "Ridgeline Games",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2024-02-28",
+        "precision": "day"
+      },
+      "series": "Battlefield",
+      "summary": "EA wound down Ridgeline Games as a standalone Battlefield studio in Seattle; some of its team moved to Ripple Effect.",
+      "sources": [
+        {
+          "url": "https://www.ea.com/amp/news/a-note-from-laura-miele",
+          "archive": "https://web.archive.org/web/20250714214611/https://www.ea.com/amp/news/a-note-from-laura-miele",
+          "title": "A note from Laura Miele",
+          "publisher": "Electronic Arts"
+        }
+      ],
+      "check": "EA, 28 Feb 2024: \"we'll be winding down Ridgeline as a standalone studio in Seattle\", with some team members moving to Ripple Effect.",
+      "note": "Only some of the team moved, so this is a closure, not a merger."
+    },
+    {
+      "id": "origin-client",
+      "name": "Origin",
+      "kind": "project",
+      "status": "ended",
+      "end": {
+        "value": "2025-04-17",
+        "precision": "day"
+      },
+      "summary": "EA shut down its Origin PC client and store, replaced by the EA app.",
+      "sources": [
+        {
+          "url": "https://www.gamedeveloper.com/pc/ea-will-shut-down-origin-later-this-year",
+          "archive": "https://web.archive.org/web/20250810024908/https://www.gamedeveloper.com/pc/ea-will-shut-down-origin-later-this-year",
+          "title": "EA will shut down Origin later this year",
+          "publisher": "Game Developer"
+        }
+      ],
+      "check": "Game Developer, 21 Jan 2025: \"EA will shut down its Origin storefront on April 17, 2025\"; Origin \"had already been supplanted by the EA app\"."
+    },
+    {
+      "id": "black-panther",
+      "name": "Black Panther",
+      "kind": "game",
+      "status": "cancelled",
+      "end": {
+        "value": "2025-05",
+        "precision": "month"
+      },
+      "studio": "Cliffhanger Games",
+      "summary": "EA cancelled Black Panther, the game Cliffhanger Games was developing.",
+      "sources": [
+        {
+          "url": "https://www.videogameschronicle.com/news/ea-has-cancelled-its-black-panther-game-and-closed-its-studio-cliffhanger-games/",
+          "archive": "https://web.archive.org/web/20251209103828/https://www.videogameschronicle.com/news/ea-has-cancelled-its-black-panther-game-and-closed-its-studio-cliffhanger-games/",
+          "title": "EA has cancelled its Black Panther game and closed its studio Cliffhanger Games",
+          "publisher": "Video Games Chronicle"
+        }
+      ],
+      "check": "VGC, 28 May 2025: \"Electronic Arts has cancelled its Black Panther game and closed down the studio that was working on it.\""
+    },
+    {
+      "id": "cliffhanger-games",
+      "name": "Cliffhanger Games",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2025-05",
+        "precision": "month"
+      },
+      "summary": "EA closed Cliffhanger Games, the studio making its Black Panther game.",
+      "sources": [
+        {
+          "url": "https://www.videogameschronicle.com/news/ea-has-cancelled-its-black-panther-game-and-closed-its-studio-cliffhanger-games/",
+          "archive": "https://web.archive.org/web/20251209103828/https://www.videogameschronicle.com/news/ea-has-cancelled-its-black-panther-game-and-closed-its-studio-cliffhanger-games/",
+          "title": "EA has cancelled its Black Panther game and closed its studio Cliffhanger Games",
+          "publisher": "Video Games Chronicle"
+        }
+      ],
+      "check": "VGC, 28 May 2025: EA \"has shut down Cliffhanger Games\", per IGN and an internal email from Laura Miele seen by VGC."
+    },
+    {
+      "id": "bioware",
+      "name": "BioWare",
+      "kind": "studio",
+      "status": "closed",
+      "end": {
+        "value": "2026-10-21",
+        "precision": "day"
+      },
+      "summary": "EA closed BioWare and its Edmonton workspace after deciding not to continue early development of a new Mass Effect.",
+      "sources": [
+        {
+          "url": "https://www.ea.com/news/building-eas-next-chapter",
+          "archive": "https://web.archive.org/web/20261024020517/https://www.ea.com/news/building-eas-next-chapter",
+          "title": "Building EA's Next Chapter",
+          "publisher": "Electronic Arts"
+        }
+      ],
+      "check": "EA, 21 Oct 2026: \"We've made the decision not to move forward with this development, which means we're closing the studio and our Edmonton workspace.\""
+    },
+    {
+      "id": "mass-effect-bioware-early-development",
+      "name": "Mass Effect (early development at BioWare)",
+      "kind": "game",
+      "status": "cancelled",
+      "end": {
+        "value": "2026-10-21",
+        "precision": "day"
+      },
+      "studio": "BioWare",
+      "series": "Mass Effect",
+      "summary": "EA stopped a small BioWare team's early development of a new Mass Effect game.",
+      "sources": [
+        {
+          "url": "https://www.ea.com/news/building-eas-next-chapter",
+          "archive": "https://web.archive.org/web/20261024020517/https://www.ea.com/news/building-eas-next-chapter",
+          "title": "Building EA's Next Chapter",
+          "publisher": "Electronic Arts"
+        }
+      ],
+      "check": "EA, 21 Oct 2026: a small team at BioWare was \"working on early-development for Mass Effect\"; EA decided \"not to move forward with this development\"."
+    }
+  ]
+}
