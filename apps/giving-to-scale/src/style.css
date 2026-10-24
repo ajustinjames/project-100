@@ -571,8 +571,15 @@ select {
     background-color: CanvasText;
   }
 
-  .dot-part-gift {
+  /* A partial gift dot: its share is a background-coloured sliver on a text-coloured cell. */
+  .dot-cell-gift {
+    height: 3px;
     background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .dot-part-gift {
+    background: Canvas;
   }
 
   .field-key-dot {

@@ -50,6 +50,7 @@ const shareView = createShareView({
   button: requireElement<HTMLButtonElement>("#share-button"),
   note: requireElement<HTMLElement>("#share-note"),
   status: requireElement<HTMLElement>("#share-status"),
+  refresh: () => render(),
 });
 
 const locale = navigator.language || "en-US";
@@ -211,13 +212,21 @@ function setCurrency(nextCurrency: Currency): void {
   }
 }
 
-/** Fill the gift, fortune, and currency from a share link; anything invalid is ignored. */
+/**
+ * Fill the gift, fortune, and currency from a share link; anything invalid is ignored.
+ * The reader's own figures and the "If I gave" amount are cleared, so a link opened in a tab
+ * already in use never applies them to a new comparison, possibly in another currency.
+ */
 function openShareLink(): boolean {
   const shared = decodeShareFragment(window.location.hash);
   if (shared === null) return false;
   setCurrency(shared.currency);
   giftInput.value = amountInputText(shared.gift);
   fortuneInput.value = amountInputText(shared.fortune);
+  unitValues["net-worth"] = "";
+  unitValues.income = "";
+  unitInput.value = "";
+  reverseInput.value = "";
   for (const input of textInputs) fitInputWidth(input);
   openedFromLink = true;
   render();

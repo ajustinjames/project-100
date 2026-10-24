@@ -33,6 +33,7 @@ export const amountMessages = {
   invalid: "Enter an amount like 100M or 2.4 billion.",
   decimal: "Use a point for decimals, like 1.5M.",
   tooLarge: "That's larger than this page can handle.",
+  tooSmall: "That's smaller than this page can handle.",
   currency: (currency: Currency, symbol: string) =>
     `This page is set to ${currencyDetails[currency].name}. Change the currency above, or remove the ${symbol}.`,
 } as const;
@@ -52,6 +53,8 @@ const suffixMultipliers: Record<string, number> = {
 };
 
 const currencySymbols = ["$", "€", "£", "₹", "¥"] as const;
+/** Far longer than any real amount ("$1,000,000,000,000,000.00" is 25), so a paste can't stall parsing. */
+const MAX_INPUT_LENGTH = 64;
 const spaceSeparators = /[ \u00a0\u2009]/;
 const generalInvalid = (): AmountParseResult => ({
   kind: "invalid",
@@ -66,6 +69,7 @@ const decimalInvalid = (): AmountParseResult => ({
 export function parseAmount(text: string, currency: Currency = "USD"): AmountParseResult {
   let input = text.trim();
   if (input === "") return { kind: "empty" };
+  if (input.length > MAX_INPUT_LENGTH) return generalInvalid();
 
   input = input.replaceAll("−", "-");
   const leadingSymbol = currencySymbols.find((symbol) => input.startsWith(symbol));
@@ -77,7 +81,9 @@ export function parseAmount(text: string, currency: Currency = "USD"): AmountPar
   }
 
   let multiplier = 1;
-  const suffixMatch = input.match(/\s*(thousand|million|billion|trillion|mn|bn|tn|k|m|b|t)$/i);
+  // No leading \s* here: on a long run of spaces it backtracks badly, and trimEnd below
+  // removes the space before a suffix anyway.
+  const suffixMatch = input.match(/(thousand|million|billion|trillion|mn|bn|tn|k|m|b|t)$/i);
   if (suffixMatch !== null) {
     const suffix = suffixMatch[1];
     const suffixMultiplier =
@@ -125,6 +131,12 @@ export function parseAmount(text: string, currency: Currency = "USD"): AmountPar
 
   if (!Number.isFinite(value)) return { kind: "invalid", message: amountMessages.tooLarge };
   if (Math.abs(value) > 1e15) return { kind: "invalid", message: amountMessages.tooLarge };
+  // Below the currency's smallest unit (a cent, or one yen), shares and dot counts can overflow
+  // or round to zero, so these amounts are refused instead of giving a false answer.
+  // MAX_INPUT_LENGTH keeps every accepted amount far above where Number() would underflow to 0.
+  if (value !== 0 && Math.abs(value) < currencyDetails[currency].smallestUnit) {
+    return { kind: "invalid", message: amountMessages.tooSmall };
+  }
   return { kind: "ok", value };
 }
 
@@ -213,6 +225,15 @@ export function formatAmount(value: number, currency: Currency = "USD", locale =
 export function formatPercent(share: number, locale = "en-US"): string {
   const percent = share * 100;
   if (percent === 0) return "less than 0.01%";
+  if (share < 1) {
+    // Two significant digits would round 99.9% up to 100%, which says the whole fortune.
+    // Add digits until a partial share reads as less than 100.
+    for (let digits = 2; digits <= 15; digits += 1) {
+      const text = expandScientificNotation(percent, digits);
+      if (Number(text) < 100) return `${localizedDecimal(percent, digits, locale)}%`;
+    }
+    return "less than 100%";
+  }
   return `${localizedDecimal(percent, 2, locale)}%`;
 }
 

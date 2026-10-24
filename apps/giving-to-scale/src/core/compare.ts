@@ -109,7 +109,9 @@ function createDotPlan({ mode, gift, fortune, unit }: ComparisonValues): Compare
 
   let dotValue = unit;
   let dotScale = 1;
-  while (fortune / dotValue > MAX_DRAWN_DOTS) {
+  // The small allowance stops floating-point error, like 170,000,020,000 / 85,000.01 coming out
+  // a hair over 2,000,000, from scaling the dots up tenfold for a field that fits the cap.
+  while (fortune / dotValue > MAX_DRAWN_DOTS * (1 + 1e-9)) {
     dotValue *= 10;
     dotScale *= 10;
   }

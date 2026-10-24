@@ -99,6 +99,38 @@ describe("parseAmount", () => {
     expect(parseAmount(input)).toEqual({ kind: "invalid", message: amountMessages.invalid });
   });
 
+  it("rejects amounts below the currency's smallest unit, but not zero (pre-launch review)", () => {
+    const tooSmall = { kind: "invalid", message: amountMessages.tooSmall };
+    expect(parseAmount("0.001")).toEqual(tooSmall);
+    expect(parseAmount("-0.004")).toEqual(tooSmall);
+    expect(parseAmount(`0.${"0".repeat(60)}1`)).toEqual(tooSmall);
+    expect(parseAmount("0.5", "JPY")).toEqual(tooSmall);
+    expect(parseAmount("0")).toEqual({ kind: "ok", value: 0 });
+    expect(parseAmount("0.01")).toEqual({ kind: "ok", value: 0.01 });
+    expect(parseAmount("1", "JPY")).toEqual({ kind: "ok", value: 1 });
+    // Amounts small enough to overflow a share or underflow to 0 (review rounds 1 and 2) need
+    // hundreds of digits, which the length limit refuses before parsing.
+    for (const zeros of [309, 324]) {
+      expect(parseAmount(`0.${"0".repeat(zeros)}1`)).toEqual({
+        kind: "invalid",
+        message: amountMessages.invalid,
+      });
+    }
+    expect(parseAmount("0.000")).toEqual({ kind: "ok", value: 0 });
+  });
+
+  it("refuses very long input quickly instead of stalling (review round 2)", () => {
+    const started = performance.now();
+    expect(parseAmount(`1${" ".repeat(50_000)}x`)).toEqual({
+      kind: "invalid",
+      message: amountMessages.invalid,
+    });
+    expect(parseAmount(`1${" ".repeat(60)}x`).kind).toBe("invalid");
+    expect(performance.now() - started).toBeLessThan(50);
+    expect(parseAmount("1,000,000,000,000,000.00")).toEqual({ kind: "ok", value: 1e15 });
+    expect(parseAmount("100   million")).toEqual({ kind: "ok", value: 1e8 });
+  });
+
   it("rejects values above the page limit after applying a suffix", () => {
     expect(parseAmount("1001 trillion")).toEqual({
       kind: "invalid",
@@ -161,6 +193,10 @@ describe("percentage and multiple formatting", () => {
     [0.00005, "0.005%"],
     [0.1234, "12%"],
     [1, "100%"],
+    [0.999, "99.9%"],
+    [0.995, "99.5%"],
+    [0.99999, "99.999%"],
+    [0.9999999999999999, "less than 100%"],
     [1e-25, "0.00000000000000000000001%"],
   ])("formats share %s as %s", (share, expected) => {
     expect(formatPercent(share, "en-US")).toBe(expected);
