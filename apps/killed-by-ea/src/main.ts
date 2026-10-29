@@ -36,6 +36,8 @@ const clearButton = requireElement<HTMLButtonElement>("#clear-filters");
 const containsUnknownDate = entries.some((entry) => entry.end.precision === "unknown");
 const knownYears = [...yearsIn(entries), ...(containsUnknownDate ? ["unknown"] : [])];
 const today = localIsoDay(new Date());
+// Read before the first URL rewrite, which drops an entry hash the filters hide.
+const linkedEntryId = decodeURIComponent(window.location.hash.slice(1));
 let state: QueryState = parseUrlState(window.location.search, knownYears);
 // The kind select shows one kind or all of them, so any other mix from an old link means all.
 if (state.kinds.length !== 1) state = { ...state, kinds: [...ALL_KINDS] };
@@ -84,7 +86,12 @@ function createEntryLink(target: Entry): HTMLAnchorElement {
 }
 
 function updateUrl(): void {
-  const url = `${window.location.pathname}${serializeUrlState(state)}${window.location.hash}`;
+  // Drop an entry hash once the filters hide that entry, so the URL reproduces what's shown.
+  const hashId = decodeURIComponent(window.location.hash.slice(1));
+  const hidesEntry =
+    entries.some((entry) => entry.id === hashId) && document.getElementById(hashId) === null;
+  const hash = hidesEntry ? "" : window.location.hash;
+  const url = `${window.location.pathname}${serializeUrlState(state)}${hash}`;
   window.history.replaceState(null, "", url);
 }
 
@@ -210,8 +217,8 @@ function render(): void {
 function applyState(nextState: QueryState, writeUrl = true): void {
   state = nextState;
   updateControls();
-  if (writeUrl) updateUrl();
   render();
+  if (writeUrl) updateUrl();
 }
 
 function populateYearSelect(): void {
@@ -229,9 +236,9 @@ function populateYearSelect(): void {
 
 populateYearSelect();
 updateControls();
+render();
 // Rewrite the URL so values the page ignored (an unknown year, say) don't stay in the address bar.
 updateUrl();
-render();
 
 searchInput.addEventListener("input", () => {
   applyState({ ...state, q: searchInput.value });
@@ -272,12 +279,15 @@ timeline.addEventListener("click", (event) => {
   const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-entry]");
   const id = link?.dataset.entry;
   if (link === null || id === undefined) return;
+  // A modified click opens a new tab or window as usual; the hash handling on load does the rest.
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    return;
   event.preventDefault();
   jumpTo(id);
 });
 
 // A link opened in a new tab, or shared, arrives with the entry in the hash and maybe a filter that hides it.
-jumpTo(decodeURIComponent(window.location.hash.slice(1)));
+jumpTo(linkedEntryId);
 
 clearButton.addEventListener("click", () => {
   applyState(defaultQueryState());
