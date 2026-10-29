@@ -7,11 +7,67 @@
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <main>
-      <h1>Killed by EA</h1>
-      <p>Replace this page with the application.</p>
-      <!-- ajj-design components are visual shells: slot a native control inside them. -->
-      <hl-btn variant="primary"><button type="button">ajj-design is wired up</button></hl-btn>
+    <main class="page-shell">
+      <header class="page-header">
+        <p class="eyebrow">A sourced archive</p>
+        <h1>Killed by EA</h1>
+        <p class="page-deck">Games Electronic Arts cancelled, studios it closed, and projects it ended, up to 22 October 2026.</p>
+        <p class="header-links">
+          <a href="#how-entries-are-chosen">How entries are chosen</a>
+          <span aria-hidden="true">·</span>
+          <span
+            >Looking for server shutdowns? See EA's lists:
+            <a href="https://www.ea.com/legal/service-updates/a-h">A–H</a>,
+            <a href="https://www.ea.com/legal/service-updates/i-q">I–Q</a>,
+            <a href="https://www.ea.com/legal/service-updates/r-z">R–Z</a>.</span
+          >
+        </p>
+      </header>
+
+      <section class="controls" aria-label="Search and filter entries">
+        <div class="search-control">
+          <label for="search">Search names, series, or studios</label>
+          <input id="search" name="q" type="search" autocomplete="off" spellcheck="false" />
+        </div>
+        <fieldset class="kind-control">
+          <legend>Show kinds</legend>
+          <div class="kind-toggles">
+            <hl-btn><button type="button" data-kind="game" aria-pressed="true">Games <span class="kind-count">0</span></button></hl-btn>
+            <hl-btn><button type="button" data-kind="studio" aria-pressed="true">Studios <span class="kind-count">0</span></button></hl-btn>
+            <hl-btn><button type="button" data-kind="project" aria-pressed="true">Projects <span class="kind-count">0</span></button></hl-btn>
+          </div>
+        </fieldset>
+        <div class="year-control">
+          <label for="year-filter">Year</label>
+          <hl-select>
+            <select id="year-filter" name="year">
+              <option value="">All years</option>
+            </select>
+          </hl-select>
+        </div>
+      </section>
+
+      <p id="result-count" class="result-count" aria-live="polite" aria-atomic="true">Loading entries</p>
+      <section id="timeline" class="timeline" aria-label="Entries by year"></section>
+      <section id="empty-state" class="empty-state" aria-labelledby="empty-title" hidden>
+        <h2 id="empty-title">No entries match</h2>
+        <p>Clear the search and filters to see the full archive.</p>
+        <hl-btn variant="primary"><button id="clear-filters" type="button">Clear filters</button></hl-btn>
+      </section>
+
+      <section id="how-entries-are-chosen" class="rules-section" aria-labelledby="rules-title">
+        <p class="eyebrow">Scope and sources</p>
+        <h2 id="rules-title">How entries are chosen</h2>
+        <p>This archive covers supported events through 22 October 2026. Each entry links to a source and an archived copy.</p>
+        <ul>
+          <li>A game appears only when evidence shows that the specific project ended during development. A cancellation known from reporting is labelled “reported cancelled”. A move or redesign alone does not count.</li>
+          <li>A studio is marked merged when its team and work continued under a named operating successor. A studio that ceased and whose staff were laid off or scattered is marked closed. A rename alone does not count.</li>
+          <li>A project is a named, standalone product, platform, label, or initiative that ended. Rebrands, store removals, and server or online-service shutdowns of released games are outside this archive.</li>
+          <li>Dates keep the precision given by the source. Uncertain dates carry a note, and a date without a known year is grouped under “Date unknown”.</li>
+          <li>Summaries use neutral wording and describe past events. Entries make no current-status claims.</li>
+        </ul>
+        <p class="correction-link">Spotted an error or a missing entry? <a href="https://github.com/ajustinjames/project-100/issues/new?title=Correction%20to%20Killed%20by%20EA">Open a correction</a>.</p>
+      </section>
     </main>
     <!-- p100:footer -->
   </body>
