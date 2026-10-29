@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   comparePartialDates,
   formatAge,
+  formatAgo,
   formatPartialDate,
   isPartialDateAfter,
   parsePartialDate,
@@ -81,5 +82,33 @@ describe("partial dates", () => {
     ).toBe("About 3 years");
     expect(formatAge(undefined, { value: "2025-05", precision: "month" })).toBeUndefined();
     expect(formatAge({ precision: "unknown" }, { precision: "unknown" })).toBeUndefined();
+  });
+});
+
+describe("formatAgo", () => {
+  const today = "2026-10-29";
+
+  it("counts days, then whole months, then whole years for exact dates", () => {
+    expect(formatAgo({ value: "2026-10-29", precision: "day" }, today)).toBe("today");
+    expect(formatAgo({ value: "2026-10-28", precision: "day" }, today)).toBe("yesterday");
+    expect(formatAgo({ value: "2026-10-21", precision: "day" }, today)).toBe("8 days ago");
+    expect(formatAgo({ value: "2026-09-30", precision: "day" }, today)).toBe("29 days ago");
+    expect(formatAgo({ value: "2026-09-29", precision: "day" }, today)).toBe("1 month ago");
+    expect(formatAgo({ value: "2025-10-30", precision: "day" }, today)).toBe("11 months ago");
+    expect(formatAgo({ value: "2025-10-29", precision: "day" }, today)).toBe("1 year ago");
+    expect(formatAgo({ value: "2017-10-17", precision: "day" }, today)).toBe("9 years ago");
+  });
+
+  it("stays approximate for month and year dates", () => {
+    expect(formatAgo({ value: "2026-10", precision: "month" }, today)).toBe("this month");
+    expect(formatAgo({ value: "2026-09", precision: "month" }, today)).toBe("about a month ago");
+    expect(formatAgo({ value: "2025-05", precision: "month" }, today)).toBe("about a year ago");
+    expect(formatAgo({ value: "2013-06", precision: "month" }, today)).toBe("about 13 years ago");
+    expect(formatAgo({ value: "2026", precision: "year" }, today)).toBe("this year");
+    expect(formatAgo({ value: "2003", precision: "year" }, today)).toBe("about 23 years ago");
+  });
+
+  it("has nothing to say about an unknown date", () => {
+    expect(formatAgo({ precision: "unknown" }, today)).toBeUndefined();
   });
 });

@@ -145,3 +145,50 @@ export function formatAge(start: PartialDate | undefined, end: PartialDate): str
   const fullYears = yearDifference - (hasReachedAnniversary ? 0 : 1);
   return `${fullYears} ${fullYears === 1 ? "year" : "years"}`;
 }
+
+function plural(count: number, unit: string): string {
+  return `${count} ${unit}${count === 1 ? "" : "s"}`;
+}
+
+/** Days from one ISO day to another, counted on the calendar so time zones can't shift it. */
+function daysBetween(fromDay: string, toDay: string): number {
+  return Math.round(
+    (Date.parse(`${toDay}T00:00:00Z`) - Date.parse(`${fromDay}T00:00:00Z`)) / 86_400_000,
+  );
+}
+
+/**
+ * Says how long ago a date was, as of `today` (an ISO day), to no finer a unit than the date's
+ * precision: "8 days ago", "about 17 months ago", "about 23 years ago".
+ */
+export function formatAgo(date: PartialDate, today: string): string | undefined {
+  const parts = dateParts(date);
+  const now = dateParts({ value: today, precision: "day" });
+  if (parts === null || now === null || now.month === undefined || now.day === undefined) {
+    return undefined;
+  }
+
+  if (date.precision === "year") {
+    const years = now.year - parts.year;
+    if (years <= 0) return "this year";
+    return `about ${years === 1 ? "a year" : plural(years, "year")} ago`;
+  }
+
+  const monthsApart = (now.year - parts.year) * 12 + now.month - (parts.month ?? 1);
+  if (date.precision === "month") {
+    if (monthsApart <= 0) return "this month";
+    if (monthsApart < 12)
+      return `about ${monthsApart === 1 ? "a month" : plural(monthsApart, "month")} ago`;
+    const years = Math.floor(monthsApart / 12);
+    return `about ${years === 1 ? "a year" : plural(years, "year")} ago`;
+  }
+
+  if (date.precision !== "day") return undefined;
+  const days = daysBetween(date.value, today);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  const fullMonths = monthsApart - (now.day < (parts.day ?? 1) ? 1 : 0);
+  if (fullMonths < 1) return `${plural(days, "day")} ago`;
+  if (fullMonths < 12) return `${plural(fullMonths, "month")} ago`;
+  return `${plural(Math.floor(fullMonths / 12), "year")} ago`;
+}

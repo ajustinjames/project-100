@@ -25,19 +25,22 @@
       </header>
 
       <section class="controls" aria-label="Search and filter entries">
-        <div class="search-control">
-          <label for="search">Search names, series, or studios</label>
-          <input id="search" name="q" type="search" autocomplete="off" spellcheck="false" />
+        <div class="control control-search">
+          <label for="search">Search</label>
+          <input id="search" name="q" type="search" placeholder="Names, series, or studios" autocomplete="off" spellcheck="false" />
         </div>
-        <fieldset class="kind-control">
-          <legend>Show kinds</legend>
-          <div class="kind-toggles">
-            <hl-btn><button type="button" data-kind="game" aria-pressed="true">Games <span class="kind-count">0</span></button></hl-btn>
-            <hl-btn><button type="button" data-kind="studio" aria-pressed="true">Studios <span class="kind-count">0</span></button></hl-btn>
-            <hl-btn><button type="button" data-kind="project" aria-pressed="true">Projects <span class="kind-count">0</span></button></hl-btn>
-          </div>
-        </fieldset>
-        <div class="year-control">
+        <div class="control">
+          <label for="kind-filter">Kind</label>
+          <hl-select>
+            <select id="kind-filter" name="kind">
+              <option value="">All kinds</option>
+              <option value="game">Games</option>
+              <option value="studio">Studios</option>
+              <option value="project">Projects</option>
+            </select>
+          </hl-select>
+        </div>
+        <div class="control">
           <label for="year-filter">Year</label>
           <hl-select>
             <select id="year-filter" name="year">
