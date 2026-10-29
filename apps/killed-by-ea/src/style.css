@@ -214,10 +214,16 @@ a:hover {
   outline: none;
 }
 
-.entry:focus-visible,
 .entry:target,
 .entry.is-target {
   background: var(--paper-raised);
+}
+
+/* After a jump, the entry keeps a clear ink outline until focus leaves it. */
+.entry:focus-visible,
+.entry.is-target:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
 }
 
 .kind-game {

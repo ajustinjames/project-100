@@ -179,7 +179,8 @@ export function formatAgo(date: PartialDate, today: string): string | undefined 
     if (monthsApart <= 0) return "this month";
     if (monthsApart < 12)
       return `about ${monthsApart === 1 ? "a month" : plural(monthsApart, "month")} ago`;
-    const years = Math.floor(monthsApart / 12);
+    // Rounded, not floored: the month alone can't say which side of an anniversary it fell.
+    const years = Math.round(monthsApart / 12);
     return `about ${years === 1 ? "a year" : plural(years, "year")} ago`;
   }
 

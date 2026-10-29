@@ -333,7 +333,7 @@
         "value": "2026-10-21",
         "precision": "day"
       },
-      "summary": "EA closed BioWare and its Edmonton workspace after deciding not to continue early development of a new Mass Effect.",
+      "summary": "EA announced it was closing BioWare and its Edmonton workspace after deciding not to continue early development of a new Mass Effect.",
       "sources": [
         {
           "url": "https://www.ea.com/news/building-eas-next-chapter",
@@ -342,7 +342,8 @@
           "publisher": "Electronic Arts"
         }
       ],
-      "check": "EA, 21 Oct 2026: \"We've made the decision not to move forward with this development, which means we're closing the studio and our Edmonton workspace.\""
+      "check": "EA, 21 Oct 2026: \"We've made the decision not to move forward with this development, which means we're closing the studio and our Edmonton workspace.\"",
+      "note": "The date is EA's announcement. EA said it was closing the studio; the cited source doesn't give the day the closure took effect."
     },
     {
       "id": "mass-effect-bioware-early-development",

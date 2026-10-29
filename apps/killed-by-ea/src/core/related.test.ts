@@ -40,33 +40,35 @@ describe("studio links", () => {
     expect(gamesOf(massEffect, entries)).toEqual([]);
   });
 
-  it("says when the studio closed, at the precision both dates share", () => {
-    expect(studioFatePhrase(massEffect, bioware)).toBe("closed the same day");
+  it("gives the archive's dates for both entries, at the precision they share", () => {
+    expect(studioFatePhrase(massEffect, bioware)).toBe(
+      "was closed too; both entries are dated 21 October 2026",
+    );
     const studio = entry({ id: "s", kind: "studio", status: "closed", end: month("2025-05") });
     expect(
       studioFatePhrase(
         entry({ id: "g", kind: "game", status: "cancelled", end: month("2025-05") }),
         studio,
       ),
-    ).toBe("closed the same month");
+    ).toBe("was closed too; both entries are dated May 2025");
     expect(
       studioFatePhrase(
         entry({ id: "g", kind: "game", status: "cancelled", end: day("2025-05-02") }),
         studio,
       ),
-    ).toBe("closed the same month");
+    ).toBe("was closed too; both entries are dated May 2025");
     expect(
       studioFatePhrase(
         entry({ id: "g", kind: "game", status: "cancelled", end: day("2023-01-05") }),
         studio,
       ),
-    ).toBe("closed in May 2025");
+    ).toBe("was closed too; its entry is dated May 2025");
     expect(
       studioFatePhrase(
         entry({ id: "g", kind: "game", status: "cancelled", end: { precision: "unknown" } }),
         bioware,
       ),
-    ).toBe("closed on 21 October 2026");
+    ).toBe("was closed too; its entry is dated 21 October 2026");
   });
 
   it("names the studio a merged studio joined", () => {
@@ -83,6 +85,8 @@ describe("studio links", () => {
       status: "cancelled",
       end: { value: "2022", precision: "year" },
     });
-    expect(studioFatePhrase(game, merged)).toBe("was merged into Criterion Games the same year");
+    expect(studioFatePhrase(game, merged)).toBe(
+      "was merged into Criterion Games; both entries are dated 2022",
+    );
   });
 });

@@ -22,15 +22,21 @@ export function gamesOf(studio: Entry, entries: Entry[]): Entry[] {
   return entries.filter((entry) => entry.kind === "game" && entry.studio === studio.name);
 }
 
-/** "closed the same day", "was merged into Criterion Games in May 2022", and so on. */
+/**
+ * "was closed too; both entries are dated May 2025". It says only how the archive dates the two
+ * entries, since a source may date a closure by its announcement rather than its completion.
+ */
 export function studioFatePhrase(game: Entry, studio: Entry): string {
   const verb =
     studio.status === "merged"
       ? `was merged into ${studio.mergedInto ?? "another studio"}`
-      : "closed";
+      : "was closed too";
+  if (studio.end.precision === "unknown") return `${verb}; its date is unknown`;
   const period = sharedPeriod(game.end, studio.end);
-  if (period !== undefined) return `${verb} the same ${period}`;
-  if (studio.end.precision === "unknown") return `${verb} on a date unknown`;
-  const when = formatPartialDate(studio.end);
-  return `${verb} ${studio.end.precision === "day" ? "on" : "in"} ${when}`;
+  if (period === undefined) return `${verb}; its entry is dated ${formatPartialDate(studio.end)}`;
+  const shared =
+    period === "day"
+      ? studio.end
+      : { value: studio.end.value.slice(0, period === "month" ? 7 : 4), precision: period };
+  return `${verb}; both entries are dated ${formatPartialDate(shared)}`;
 }

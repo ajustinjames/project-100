@@ -104,6 +104,10 @@ describe("formatAgo", () => {
     expect(formatAgo({ value: "2026-09", precision: "month" }, today)).toBe("about a month ago");
     expect(formatAgo({ value: "2025-05", precision: "month" }, today)).toBe("about a year ago");
     expect(formatAgo({ value: "2013-06", precision: "month" }, today)).toBe("about 13 years ago");
+    expect(formatAgo({ value: "2024-11", precision: "month" }, today)).toBe("about 2 years ago");
+    expect(formatAgo({ value: "2025-01", precision: "month" }, "2026-12-31")).toBe(
+      "about 2 years ago",
+    );
     expect(formatAgo({ value: "2026", precision: "year" }, today)).toBe("this year");
     expect(formatAgo({ value: "2003", precision: "year" }, today)).toBe("about 23 years ago");
   });
