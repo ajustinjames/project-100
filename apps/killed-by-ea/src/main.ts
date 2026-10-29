@@ -36,8 +36,9 @@ const clearButton = requireElement<HTMLButtonElement>("#clear-filters");
 const containsUnknownDate = entries.some((entry) => entry.end.precision === "unknown");
 const knownYears = [...yearsIn(entries), ...(containsUnknownDate ? ["unknown"] : [])];
 const today = localIsoDay(new Date());
-// Read before the first URL rewrite, which drops an entry hash the filters hide.
-const linkedEntryId = decodeURIComponent(window.location.hash.slice(1));
+// Read before the first URL rewrite, which drops an entry hash the filters hide. Entry ids are
+// kebab-case ASCII, so the hash is compared as is: decoding a malformed one (`#%`) would throw.
+const linkedEntryId = window.location.hash.slice(1);
 let state: QueryState = parseUrlState(window.location.search, knownYears);
 // The kind select shows one kind or all of them, so any other mix from an old link means all.
 if (state.kinds.length !== 1) state = { ...state, kinds: [...ALL_KINDS] };
@@ -87,7 +88,7 @@ function createEntryLink(target: Entry): HTMLAnchorElement {
 
 function updateUrl(): void {
   // Drop an entry hash once the filters hide that entry, so the URL reproduces what's shown.
-  const hashId = decodeURIComponent(window.location.hash.slice(1));
+  const hashId = window.location.hash.slice(1);
   const hidesEntry =
     entries.some((entry) => entry.id === hashId) && document.getElementById(hashId) === null;
   const hash = hidesEntry ? "" : window.location.hash;
