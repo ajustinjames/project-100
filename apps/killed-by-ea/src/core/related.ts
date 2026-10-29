@@ -23,20 +23,30 @@ export function gamesOf(studio: Entry, entries: Entry[]): Entry[] {
 }
 
 /**
- * "was closed too; both entries are dated May 2025". It says only how the archive dates the two
+ * The text before and after the studio's name in a game's studio line, such as "Its studio, " and
+ * ", was closed too; both entries are dated May 2025.". It says only how the archive dates the two
  * entries, since a source may date a closure by its announcement rather than its completion.
  */
-export function studioFatePhrase(game: Entry, studio: Entry): string {
+export function studioFateParts(game: Entry, studio: Entry): [string, string] {
+  let dates: string;
+  const period = sharedPeriod(game.end, studio.end);
+  if (studio.end.precision === "unknown") {
+    dates = "its date is unknown";
+  } else if (period === undefined) {
+    dates = `its entry is dated ${formatPartialDate(studio.end)}`;
+  } else {
+    const shared: PartialDate =
+      period === "day"
+        ? studio.end
+        : { value: studio.end.value.slice(0, period === "month" ? 7 : 4), precision: period };
+    dates = `both entries are dated ${formatPartialDate(shared)}`;
+  }
+
+  if (studio.announced === true)
+    return ["EA also announced the closure of its studio, ", `; ${dates}.`];
   const verb =
     studio.status === "merged"
       ? `was merged into ${studio.mergedInto ?? "another studio"}`
       : "was closed too";
-  if (studio.end.precision === "unknown") return `${verb}; its date is unknown`;
-  const period = sharedPeriod(game.end, studio.end);
-  if (period === undefined) return `${verb}; its entry is dated ${formatPartialDate(studio.end)}`;
-  const shared =
-    period === "day"
-      ? studio.end
-      : { value: studio.end.value.slice(0, period === "month" ? 7 : 4), precision: period };
-  return `${verb}; both entries are dated ${formatPartialDate(shared)}`;
+  return ["Its studio, ", `, ${verb}; ${dates}.`];
 }

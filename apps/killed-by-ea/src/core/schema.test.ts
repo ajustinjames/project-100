@@ -48,6 +48,19 @@ describe("validate", () => {
     expect(validate(makeArchive([entry]))).toContain("entries[0].name is required.");
   });
 
+  it("allows announced only on a closed studio or ended project, with a note", () => {
+    const studio = makeEntry({ kind: "studio", status: "closed", announced: true });
+    expect(
+      validate(makeArchive([{ ...studio, note: "Only the announcement is sourced." }])),
+    ).toEqual([]);
+    expect(validate(makeArchive([studio]))).toContain(
+      "entries[0].note is required when a closure is only announced.",
+    );
+    expect(validate(makeArchive([makeEntry({ announced: true, note: "A note." })]))).toContain(
+      "entries[0].announced is only for a closed studio or an ended project.",
+    );
+  });
+
   it("rejects an unknown kind", () => {
     expect(validate(makeArchive([{ ...makeEntry(), kind: "company" }]))).toContain(
       "entries[0].kind is unknown.",

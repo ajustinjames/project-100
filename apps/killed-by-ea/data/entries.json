@@ -329,6 +329,7 @@
       "name": "BioWare",
       "kind": "studio",
       "status": "closed",
+      "announced": true,
       "end": {
         "value": "2026-10-21",
         "precision": "day"

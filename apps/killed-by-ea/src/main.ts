@@ -15,7 +15,7 @@ import {
   serializeUrlState,
   yearsIn,
 } from "./core/query.ts";
-import { gamesOf, studioFatePhrase, studioOf } from "./core/related.ts";
+import { gamesOf, studioFateParts, studioOf } from "./core/related.ts";
 import { type ArchiveData, type Entry, type Kind, validate } from "./core/schema.ts";
 
 const validationErrors = validate(archive);
@@ -98,6 +98,8 @@ function statusText(entry: Entry): string {
   if (entry.reported === true) return "Reported cancelled";
   if (entry.status === "merged") return "Merged";
   if (entry.status === "cancelled") return "Cancelled";
+  if (entry.announced === true)
+    return entry.status === "closed" ? "Closure announced" : "Shutdown announced";
   if (entry.status === "closed") return "Closed";
   return "Ended";
 }
@@ -110,7 +112,8 @@ function appendStudioLine(card: HTMLElement, game: Entry): void {
     return;
   }
   const line = createElement("p", "entry-related");
-  line.append("Its studio, ", createEntryLink(studio), `, ${studioFatePhrase(game, studio)}.`);
+  const [before, after] = studioFateParts(game, studio);
+  line.append(before, createEntryLink(studio), after);
   card.append(line);
 }
 
@@ -246,12 +249,9 @@ yearSelect.addEventListener("change", () => {
   applyState({ ...state, year: yearSelect.value });
 });
 
-// A link to another entry clears the filters first when they hide it.
-timeline.addEventListener("click", (event) => {
-  const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-entry]");
-  const id = link?.dataset.entry;
-  if (link === null || id === undefined) return;
-  event.preventDefault();
+/** Shows one entry: clears the filters if they hide it, then scrolls to it and focuses it. */
+function jumpTo(id: string): void {
+  if (!entries.some((entry) => entry.id === id)) return;
   if (document.getElementById(id) === null) applyState(defaultQueryState());
   const target = document.getElementById(id);
   if (target === null) return;
@@ -260,12 +260,24 @@ timeline.addEventListener("click", (event) => {
     "",
     `${window.location.pathname}${serializeUrlState(state)}#${id}`,
   );
-  for (const marked of timeline.querySelectorAll(".is-target"))
+  for (const marked of timeline.querySelectorAll(".is-target")) {
     marked.classList.remove("is-target");
+  }
   target.classList.add("is-target");
   target.scrollIntoView({ block: "start" });
   target.focus({ preventScroll: true });
+}
+
+timeline.addEventListener("click", (event) => {
+  const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-entry]");
+  const id = link?.dataset.entry;
+  if (link === null || id === undefined) return;
+  event.preventDefault();
+  jumpTo(id);
 });
+
+// A link opened in a new tab, or shared, arrives with the entry in the hash and maybe a filter that hides it.
+jumpTo(decodeURIComponent(window.location.hash.slice(1)));
 
 clearButton.addEventListener("click", () => {
   applyState(defaultQueryState());
