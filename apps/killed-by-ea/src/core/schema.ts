@@ -31,6 +31,8 @@ export interface Entry {
   series?: string;
   mergedInto?: string;
   reported?: boolean;
+  /** The source announces a closure or shutdown but doesn't show that it took effect. */
+  announced?: boolean;
   sources: Source[];
   note?: string;
   check: string;
@@ -208,6 +210,16 @@ function validateEntry(value: unknown, index: number, errors: string[], ids: Set
   }
   if (value.reported !== undefined && typeof value.reported !== "boolean") {
     errors.push(`${path}.reported must be a boolean when provided.`);
+  }
+  if (value.announced !== undefined) {
+    if (typeof value.announced !== "boolean") {
+      errors.push(`${path}.announced must be a boolean when provided.`);
+    } else if (value.announced && value.status !== "closed" && value.status !== "ended") {
+      errors.push(`${path}.announced is only for a closed studio or an ended project.`);
+    }
+    if (value.announced === true && !getNonEmptyString(value.note)) {
+      errors.push(`${path}.note is required when a closure is only announced.`);
+    }
   }
 
   if (!Object.hasOwn(value, "sources")) {
