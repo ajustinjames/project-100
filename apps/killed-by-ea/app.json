@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": 5,
+  "slug": "killed-by-ea",
+  "name": "Killed by EA",
+  "status": "labs",
+  "description": "A dated, sourced archive of what Electronic Arts killed: games cancelled in development, studios closed or merged, and projects it ended, on one searchable timeline up to a stated cutoff.",
+  "problem": "The record of what EA killed is split across Wikipedia's acquisitions table (many closures without a year), a studios-only graveyard site, a cancelled-games archive with no publisher view, and years of one-off news posts, so there is no single dated timeline of EA's cancelled games, closed studios, and ended projects to search or cite.",
+  "category": "games",
+  "dates": {
+    "created": "2026-10-22",
+    "launched": null,
+    "archived": null
+  },
+  "design": {
+    "system": "hardline"
+  },
+  "dependencies": [],
+  "sharedPackages": [
+    "@project-100/web"
+  ],
+  "privacy": "none",
+  "analytics": "standard",
+  "monetization": {
+    "eligible": false
+  },
+  "approvals": [],
+  "rejection": null
+}
